@@ -1,2 +1,3 @@
-# orp-frontend-prototype
-Repository for the Open Regulation Platform (ORP) project to demo displaying data returned by the DBT Public Data Gateway
+# Open Regulation Platform (ORP) - Application Prototype
+
+This repository will be used to consume searchable and filterable regulatory data returned by the DBT Public Data Gateway.
