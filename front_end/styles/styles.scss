@@ -1,0 +1,4 @@
+$govuk-assets-path: "govuk-frontend/dist/govuk/assets/";
+$govuk-page-width: 960px;
+@import "govuk-frontend/dist/govuk/all";
+@import "./header.scss";
