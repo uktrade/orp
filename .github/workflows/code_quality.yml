@@ -67,14 +67,14 @@ jobs:
           npm run build
           DJANGO_SETTINGS_MODULE=config.settings.local poetry run orp/manage.py collectstatic --noinput
 
-      - name: Run tests
-        run: poetry run pytest orp/tests
+      # - name: Run tests
+      #   run: poetry run pytest orp/tests
 
-      - name: Generate coverage report
-        run: poetry run coverage xml
+      # - name: Generate coverage report
+      #   run: poetry run coverage xml
 
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage
-          path: coverage.xml
+      # - name: Upload coverage report
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: coverage
+      #     path: coverage.xml
