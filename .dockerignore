@@ -1,0 +1,17 @@
+.git
+.github
+.gitignore
+.idea
+.vscode
+.mypy_cache
+.pre-commit-config.yaml
+CODEOWNERS
+LICENSE
+Makefile
+README.md
+__pycache__
+adr
+docs
+paas_entrypoint.sh
+Procfile
+.copilot/

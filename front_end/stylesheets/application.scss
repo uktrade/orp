@@ -1,0 +1,17 @@
+@function frontend-font-url($filename){
+@return url("../../node_modules/govuk-frontend/dist/govuk/assets/fonts/" + $filename);
+}
+
+@function frontend-image-url($filename){
+@return url("../../node_modules/govuk-frontend/dist/govuk/assets/images/" + $filename);
+}
+
+$govuk-font-url-function: frontend-font-url;
+$govuk-image-url-function: frontend-image-url;
+
+@import "../../node_modules/govuk-frontend/dist/govuk/all";
+
+// Custom style sheets
+@import "./search.scss";
+@import "./inset_text.scss";
+@import "./report.scss";

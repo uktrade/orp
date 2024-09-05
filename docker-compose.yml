@@ -1,0 +1,40 @@
+# ORP docker-compose configuration.
+volumes:
+  postgres_data:
+    driver: local
+services:
+  # db:
+  #   image: postgres:16.2
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   environment:
+  #     - POSTGRES_DB=orp
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #   ports:
+  #     - "5432:5432"
+  #   healthcheck:
+  #     test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 3
+  #   networks:
+  #     - proxynet
+  web:
+    build:
+      context: .
+      dockerfile: local_deployment/Dockerfile
+    env_file:
+      - local.env
+    ports:
+      - "8081:8080"
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
+    volumes:
+      - .:/orp
+    networks:
+      - proxynet
+networks:
+  proxynet:
+    name: orp_network

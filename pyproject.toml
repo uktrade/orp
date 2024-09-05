@@ -1,0 +1,89 @@
+[tool.poetry]
+name = "orp"
+version = "0.1.0"
+description = "Open Regulation Platform"
+authors = ["Greg Barnes <greg.barnes@digital.trade.gov.uk>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python-environ = "^0.4.54"
+python = "^3.12"
+django = "^4.2.15"
+django-log-formatter-asim = "0.0.4"
+dj-database-url = "^2.2.0"
+psycopg = {extras = ["c"], version = "^3.2.1"}
+whitenoise = {extras = ["brotli"], version = "^6.6.0"}
+django-webpack-loader = "^3.1.0"
+dbt-copilot-python = "^0.2.1"
+sentry-sdk = "^2.9.0"
+gunicorn = "^22.0.0"
+requests = "^2.32.3"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.7.1"
+black = "24.4.2"
+isort = "5.13.2"
+flake8 = "7.0.0"
+mypy = "1.10.0"
+detect-secrets = "^1.5.0"
+pandas = "^2.2.2"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.2.1"
+pytest-django = "^4.8.0"
+pytest-cov = "^5.0.0"
+pytest-mock = "^3.14.0"
+playwright = "^1.45.0"
+behave = "^1.2.6"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.local"
+xfail_strict=true
+addopts = """
+    -rsxXw
+    --reuse-db --ignore=data_migration
+    --cov=orp --cov-report=html --no-cov-on-fail
+"""
+
+markers = [
+    "slow: mark test as slow",
+]
+
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning",
+]
+
+[tool.coverage.run]
+omit = [
+    "orp/manage.py",
+    "orp/config/*sgi.py",
+    "orp/config/urls.py",
+    "orp/config/settings/*.py",
+    "orp/config/version.py",
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.bandit]
+exclude_dirs = ["orp/tests"]
+
+[tool.black]
+line-length = 79
+
+[tool.isort]
+profile = "black"
+sections = ["STDLIB", "THIRDPARTY", "DJANGO", "FIRSTPARTY", "LOCALFOLDER"]
+known_django = "django"
+known_first_party = ["config", "core", "search", "tests"]
+lines_between_types = 1
+
+[[tool.mypy.overrides]]
+module = ["*.migrations.*"]
+ignore_errors = true
+
+[tool.flake8]
+max-line-length = 79
+max-complexity = 10
