@@ -7,13 +7,41 @@ COLOUR_GREEN=\033[32;01m
 COLOUR_YELLOW=\033[33;01m
 COLOUR_RED=\033[31;01m
 
-.PHONY: help build first-use up down start stop clean logs test bdd shell shell-local lint black isort
+.PHONY: help database drop-database build collectstatic admin first-use up down start stop clean logs test bdd shell shell-local lint black isort
 help: # List commands and their descriptions
 	@grep -E '^[a-zA-Z0-9_-]+: # .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ": # "; printf "\n\033[93;01m%-30s %-30s\033[0m\n\n", "Command", "Description"}; {split($$1,a,":"); printf "\033[96m%-30s\033[0m \033[92m%s\033[0m\n", a[1], $$2}'
+
+database: # Create a postgres database for the project
+	@echo "$(COLOUR_GREEN)Initialising database...$(COLOUR_NONE)"
+	docker compose up --force-recreate --remove-orphans -d db
+	docker compose exec db createdb -h localhost -U postgres -T template0 orp
+	docker compose stop db
+	@echo "$(COLOUR_GREEN)Done$(COLOUR_NONE)"
+
+drop-database: # Delete project's postgres database
+	@echo "$(COLOUR_RED)Drop database orp$(COLOUR_NONE)"
+	@read -p "Are you sure? " -n 1 -r; \
+		if [[ $$REPLY =~ ^[Yy] ]]; \
+		then \
+		  	echo ""; \
+			echo "$(COLOUR_RED)Dropping database orp$(COLOUR_NONE)"; \
+			docker compose up --force-recreate --remove-orphans -d db; \
+			docker compose exec db dropdb -h localhost -U postgres orp; \
+			docker compose stop db; \
+			echo "$(COLOUR_GREEN)Done$(COLOUR_NONE)"; \
+		else \
+			echo "\n$(COLOUR_GREEN)Cancelled$(COLOUR_NONE)"; \
+		fi
 
 build: # Build docker containers for local execution
 	docker build --no-cache -f local_deployment/Dockerfile -t local_deployment .
 	docker compose build
+
+collectstatic: # Run Django collectstatic
+	docker compose run --rm web poetry run python orp/manage.py collectstatic --noinput
+
+admin: # Create a superuser
+	docker compose exec web poetry run python orp/manage.py createsuperuser --username admin --email admin@localhost
 
 first-use: # Initialise for local execution
 	@echo "$(COLOUR_GREEN)Preparing for first use$(COLOUR_NONE)"
@@ -24,6 +52,7 @@ first-use: # Initialise for local execution
 	@echo "$(COLOUR_GREEN)Starting...$(COLOUR_NONE)"
 	$(MAKE) up
 	@echo "$(COLOUR_GREEN)Initialising web service...$(COLOUR_NONE)"
+	$(MAKE) admin
 	$(MAKE) stop
 	@echo "$(COLOUR_GREEN)$(APPLICATION_NAME) is ready for use$(COLOUR_NONE)";
 	@echo "$(COLOUR_GREEN)Start services with 'make start'$(COLOUR_NONE)"
