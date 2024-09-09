@@ -1,19 +1,20 @@
 """orp URL configuration."""
 
+import orp_search.views as orp_views
+
 from django.conf import settings
 from django.contrib import admin
 from django.urls import path
 
 import core.views as core_views
-import orp_search.views as orp_views
 
 urlpatterns = [
     # path("", core_views.home, name="home"),
-    
-    # Uncomment the above line and comment out the two lines below to switch to the app
+    # Uncomment the above line and comment out
+    # the two lines below to switch to the app
+    # home page.
     path("", core_views.hello_world, name="hello_world"),
     path("home/", core_views.home, name="home"),
-
     path("healthcheck/", core_views.health_check, name="healthcheck"),
     path(
         "accessibility-statement/",
@@ -32,7 +33,7 @@ urlpatterns = [
         core_views.hide_cookie_banner,
         name="hide-cookie-banner",
     ),
-    path("search/", orp_views.search, name="search")
+    path("search/", orp_views.search, name="search"),
 ]
 
 if settings.DJANGO_ADMIN:

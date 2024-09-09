@@ -1,7 +1,4 @@
-import logging
 from typing import Any
-
-from django.db.models import Count
 
 from core.dbt_data_api import DbtDataApi
 

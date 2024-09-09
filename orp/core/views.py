@@ -20,6 +20,7 @@ def hello_world(request: HttpRequest) -> HttpResponse:
     """
     return HttpResponse("Hello, world!")
 
+
 @require_http_methods(["GET"])
 def home(request: HttpRequest) -> HttpResponse:
     """Home.
@@ -31,9 +32,7 @@ def home(request: HttpRequest) -> HttpResponse:
         return HttpResponse(
             content="Redirecting to GOV.UK",
             status=302,
-            headers={
-                "Location": "https://www.gov.uk/check-when-businesses-pay-invoices"  # noqa: E501
-            },
+            headers={"Location": "https://www.gov.uk"},
         )
     context = {
         "service_name": f"{settings.SERVICE_NAME} - Development",

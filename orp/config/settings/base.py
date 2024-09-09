@@ -244,9 +244,10 @@ CONTACT_EMAIL: str = "paymentpracticesreporting@businessandtrade.gov.uk"
 ANALYTICS_CONSENT_NAME: str = "analytics_consent"
 
 # DBT Data API
-DBT_DATA_API_URL = env(
-    "DBT_DATA_API_URL", default="https://data.api.trade.gov.uk/v1/datasets/market-barriers/versions/v1.0.10/data?format=json"
-)
+# DBT_DATA_API_URL = env(
+#     "DBT_DATA_API_URL",
+#     default="https://data.api.trade.gov.uk/v1/datasets/market-barriers/versions/v1.0.10/data?format=json",  # noqa: E501
+# )
 
 # Pagination
 RESULTS_PER_PAGE = 10

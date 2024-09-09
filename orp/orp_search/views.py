@@ -1,8 +1,4 @@
-import logging
-import csv
-
 from django.conf import settings
-from django.core.paginator import InvalidPage, Paginator
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
@@ -10,8 +6,6 @@ from django.views.decorators.http import require_http_methods
 from core.forms import RegulationSearchForm
 
 from .search import search_data_api
-
-import requests  # type: ignore
 
 
 @require_http_methods(["GET"])
