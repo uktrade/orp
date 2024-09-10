@@ -5,7 +5,7 @@ from django.views.decorators.http import require_http_methods
 
 from core.forms import RegulationSearchForm
 
-from .search import search_data_api
+# from .search import search_data_api
 
 
 @require_http_methods(["GET"])
@@ -32,10 +32,10 @@ def search(request: HttpRequest) -> HttpResponse:
     }
     form = RegulationSearchForm(request.GET or None)
     context["form"] = form
-    if form.is_valid() and "query" in request.GET:
-        search_query = form.cleaned_data["query"]
-        search_data = search_data_api(search_query)
-        context["results"] = search_data["results"]
-        context["request_exception"] = search_data["request_exception"]
-        context["truncated"] = search_data["truncated"]
+    # if form.is_valid() and "query" in request.GET:
+    # search_query = form.cleaned_data["query"]
+    # search_data = search_data_api(search_query)
+    # context["results"] = search_data["results"]
+    # context["request_exception"] = search_data["request_exception"]
+    # context["truncated"] = search_data["truncated"]
     return render(request, template_name="orp.html", context=context)

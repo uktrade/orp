@@ -3,7 +3,7 @@ const BundleTracker = require("webpack-bundle-tracker");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
-mode: process.env.ENV == "production" ? "production" : "development",
+  mode: process.env.ENV == "production" ? "production" : "development",
   context: __dirname,
   entry: {
     main: [
@@ -17,14 +17,14 @@ mode: process.env.ENV == "production" ? "production" : "development",
     // Where the compiled assets will be accessed through Django
     // (they are picked up by `collectstatic`)
     publicPath: "/static/webpack_bundles/",
-    filename: "[name]-[hash].js",
+    filename: "[name]-[contenthash].js",
   },
 
   plugins: [
     new BundleTracker({ path: __dirname, filename: "webpack-stats.json" }),
     new MiniCssExtractPlugin({
-      filename: "[name]-[hash].css",
-      chunkFilename: "[id]-[hash].css",
+      filename: "[name]-[contenthash].css",
+      chunkFilename: "[id]-[contenthash].css",
     }),
   ],
 
