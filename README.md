@@ -1,4 +1,4 @@
-# orp
+# Open Regulation Platform (ORP)
 
 ## Introduction
 
@@ -7,7 +7,7 @@ The Open Regulation Platform (ORP) will provide a searchable and filterable list
 ## Getting Started
 
 The quickest way top get started is to use the `docker-compose` configuration
-to run the application in a containerised environment.
+to run the application and required `PostgreSQL` in a containerised environment.
 Most of the actions required to run and manage the application are encapsulated
 in the `Makefile`. First, in a working directory run:
 
@@ -20,6 +20,14 @@ An example file is provided in the repository. Create one like this:
     $ cp local.env.example local.env
 
 This should work out of the box.
+
+Create the initial database:
+
+    $ make database
+
+> The `make database` command will create a `PostgreSQL` database. If you have
+> an existing database and want to start from scratch, use `make drop-databse`
+> to delete an existing database first.
 
 Prepare the application for first use:
 
@@ -55,6 +63,12 @@ On Mac you can run the following command to install `libpq`:
 - [`Python 3.12.*`](https://www.python.org/downloads/). Don't be tempted to use
   an earlier or later version of Python. Use Poetry to manage your Python version
   and dependencies.
+- [`PostgreSQL`](https://www.postgresql.org/). Optionally you can install and
+  configure `PostgreSQL` on your local machine. However, be advised it's much
+  easier to use the `db` service provisioned by the `docker-compose`
+  configuration which is exposed on `localhost:5432`. Additionally, client
+  applications like `psql` and `pg_dump` are installed using the `libpq`
+  installation [prerequisite](#prerequisites) step above.
 - [`Docker Desktop`](https://docs.docker.com/get-docker/). A recent version
   (e.g. `4.30.0` or above) is recommended, which includes all the key components
   you'll require including `engine`, `build` and `compose`.
