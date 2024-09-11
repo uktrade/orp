@@ -1,0 +1,80 @@
+name: Code Quality Checks
+
+on: [push]
+
+jobs:
+  lint:
+    name: Run lint checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Install dependencies
+        run: |
+          pip install poetry
+          poetry install --only dev
+
+      - name: black
+        run: poetry run pre-commit run black --all-files
+
+      - name: isort
+        run: poetry run pre-commit run isort --all-files
+
+      - name: flake8
+        run: poetry run pre-commit run flake8 --all-files
+
+      - name: detect-secrets
+        run: poetry run pre-commit run detect-secrets --all-files
+
+      - name: mypy
+        run: poetry run pre-commit run mypy --all-files
+
+      - name: bandit
+        run: poetry run pre-commit run bandit --all-files
+  test:
+    name: Run unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Install dependencies
+        run: |
+          pip install poetry
+          poetry install --without dev
+
+      - name: Build bundle
+        run: |
+          npm install
+          npm run build
+          DJANGO_SETTINGS_MODULE=config.settings.local poetry run orp/manage.py collectstatic --noinput
+
+      # - name: Run tests
+      #   run: poetry run pytest orp/tests
+
+      # - name: Generate coverage report
+      #   run: poetry run coverage xml
+
+      # - name: Upload coverage report
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: coverage
+      #     path: coverage.xml
