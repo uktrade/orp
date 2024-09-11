@@ -52,7 +52,7 @@ first-use: # Initialise for local execution
 	@echo "$(COLOUR_GREEN)Starting...$(COLOUR_NONE)"
 	$(MAKE) up
 	@echo "$(COLOUR_GREEN)Initialising web service...$(COLOUR_NONE)"
-	$(MAKE) admin
+# $(MAKE) admin
 	$(MAKE) stop
 	@echo "$(COLOUR_GREEN)$(APPLICATION_NAME) is ready for use$(COLOUR_NONE)";
 	@echo "$(COLOUR_GREEN)Start services with 'make start'$(COLOUR_NONE)"
