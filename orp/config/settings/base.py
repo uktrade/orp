@@ -243,14 +243,6 @@ ANALYTICS_CONSENT_NAME: str = "analytics_consent"
 #     default="https://data.api.trade.gov.uk/v1/datasets/market-barriers/versions/v1.0.10/data?format=json",  # noqa: E501
 # )
 
-# Pagination
-# RESULTS_PER_PAGE = 10
-
-# GOV Notify
-# GOV_NOTIFY_API_KEY = env.str("GOV_NOTIFY_API_KEY", default=None)
-# GOV_NOTIFY_TESTING_KEY = env.str("GOV_NOTIFY_TESTING_KEY", default=None)
-# DISABLE_NOTIFY_WHITELIST = env.bool("DISABLE_NOTIFY_WHITELIST", default=False)  # noqa: E501
-
 # HOSTNAME
 HOSTNAME_MAP = {
     "local": "http://localhost:8081",
@@ -258,4 +250,5 @@ HOSTNAME_MAP = {
     "staging": "https://staging.orp.uktrade.digital/",
     "prod": "https://orp.uktrade.digital/",
 }
+
 HOSTNAME = HOSTNAME_MAP.get(ENVIRONMENT.lower(), HOSTNAME_MAP["prod"])
