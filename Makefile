@@ -106,6 +106,12 @@ django-shell-local: # Run a Django shell (local django instance)
 		DJANGO_SETTINGS_MODULE=config.settings.local \
 		poetry run python orp/manage.py shell
 
+migrate: # Run Django migrate
+	docker compose run --rm web poetry run python orp/manage.py migrate --noinput
+
+migrations: # Run Django makemigrations
+	docker compose run --rm web poetry run python orp/manage.py makemigrations --noinput
+
 lint: # Run all linting
 	make black
 	make isort
