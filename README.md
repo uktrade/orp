@@ -41,7 +41,7 @@ Start the services:
 
 Navigate a browser to:
 
-    http://localhost:8081        # The serivce landing page
+    http://localhost:8081
 
 ## Local development environment
 While the `docker-compose` configuration is the quickest way to get started, it
