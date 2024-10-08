@@ -1,13 +1,3 @@
-.orp-max-height-250 {
-  max-height: 250px;
-  overflow: scroll;
-}
-
-.orp-space-between {
-  display: flex;
-  justify-content: space-between;
-}
-
 .orp-applied-filters-container {
   background-color: govuk-colour("light-grey");
   @include govuk-responsive-padding(2);

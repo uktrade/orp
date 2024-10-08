@@ -188,7 +188,7 @@
     </div>
 
     <div class="govuk-grid-column-two-thirds">
-      <div class="orp-space-between">
+      <div class="orp-flex orp-flex--space-between">
         <p class="govuk-body govuk-!-font-weight-bold">4,123 documents</p>
         <p class="govuk-body">
           <a href="#" class="govuk-link govuk-link--no-visited-state
@@ -213,13 +213,15 @@
       <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
       <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">
-          <label class="govuk-label" for="sort">
-            Sort by
-          </label>
-          <select class="govuk-select" id="sort" name="sort">
-            <option value="date">Recently updated</option>
-            <option value="sort">???</option>
-          </select>
+          <div class="orp-flex">
+            <label class="govuk-label govuk-!-margin-right-3 orp-!-no-text-wrap" for="sort">
+              Sort by
+            </label>
+            <select class="govuk-select" id="sort" name="sort">
+              <option value="date">Recently updated</option>
+              <option value="sort">???</option>
+            </select>
+          </div>
         </div>
       </div>
       <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
