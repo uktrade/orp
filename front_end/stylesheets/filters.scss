@@ -1,0 +1,55 @@
+.orp-max-height-250 {
+  max-height: 250px;
+  overflow: scroll;
+}
+
+.orp-space-between {
+  display: flex;
+  justify-content: space-between;
+}
+
+.orp-applied-filters-container {
+  background-color: govuk-colour("light-grey");
+  @include govuk-responsive-padding(2);
+
+  .orp-applied-filter-tag {
+    display: inline-flex;
+    line-height: 1;
+
+    a {
+      background-image: url("../images/icon-cross.svg");
+      background-repeat: no-repeat;
+      background-position: center left 7px;
+      background-size: 10px 10px;
+      border: 1px solid govuk-colour("dark-grey");
+      border-radius: 5px;
+      margin: govuk-spacing(1) govuk-spacing(1) govuk-spacing(1) 0;
+      // display: flex;
+      padding: govuk-spacing(1);
+      padding-left: govuk-spacing(5);
+      text-decoration: none;
+
+    }
+  }
+}
+
+.orp-publisher-search {
+  .orp-publisher-search__input {
+    position: relative;
+    background-image: url("../images/icon-search-black.svg");
+    background-repeat: no-repeat;
+    background-position: center right -2px;
+    padding-right: 35px;
+    // background-size: $icon-size $icon-size;
+
+    &::placeholder {
+      color: govuk-colour("dark-grey");
+    }
+
+    // If the user is in a dark forced colours mode, switch the search icon out
+    // for a light variant.
+    // @media (forced-colors: active) and (prefers-color-scheme: dark) {
+    //   background-image: _search-icon($colour: govuk-colour("white"));
+    // }
+  }
+}

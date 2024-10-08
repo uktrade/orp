@@ -231,7 +231,7 @@ LOGGING["loggers"]["django"]["handlers"] = ["asim"]
 # Service
 
 SERVICE_NAME: str = "Open Regulation Platform"
-SERVICE_NAME_SEARCH: str = "Search for regulatory provisions"
+SERVICE_NAME_SEARCH: str = "Open Regulation Platform"
 CONTACT_EMAIL: str = "paymentpracticesreporting@businessandtrade.gov.uk"
 
 # Cookies
