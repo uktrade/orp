@@ -39,3 +39,20 @@ class RegulationSearchForm(forms.Form):
             }
         ),
     )
+
+    document_type = forms.MultipleChoiceField(
+        required=False,
+        choices=[
+            ("employment-tribunal", "Legislation"),
+            ("MOD", "Guidance"),
+            ("DfT", "Statutory guidance"),
+        ],
+        widget=forms.CheckboxSelectMultiple(
+            attrs={
+                "class": "govuk-checkboxes__input",
+                "data-module": "govuk-checkboxes",
+            }
+        ),
+        label="Select document types",
+        help_text="You can select multiple document types.",
+    )
