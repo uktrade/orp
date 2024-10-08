@@ -8,7 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python-environ = "^0.4.54"
 python = "^3.12"
-django = "^4.2.15"
+django = "^4.2.16"
 django-log-formatter-asim = "0.0.4"
 dj-database-url = "^2.2.0"
 psycopg = {extras = ["c"], version = "^3.2.1"}
