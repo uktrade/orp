@@ -27,15 +27,15 @@ class RegulationSearchForm(forms.Form):
 
     query = forms.CharField(
         required=False,
-        label="Enter the sector, business activity or topic you want to find regulations for.",  # noqa: E501
-        help_text="For example, Construction, Health and Safety, or Food",
+        label="Search",
+        help_text="",
         widget=forms.TextInput(
             attrs={
                 "class": "govuk-input",
                 "id": "query",
                 "name": "query",
                 "type": "search",
-                "placeholder": "Search for regulations",
+                "placeholder": "",
             }
         ),
     )

@@ -10,18 +10,20 @@
   {% else %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-      <h1 class="govuk-heading-xl">Search for regulatory provisions</h1>
-      <form method="get" class="search-form">
-        <div class="govuk-form-group {% if form.query.errors %}govuk-form-group--error{% endif %} search-group">
-          <label class="govuk-label govuk-!-font-size-24 govuk-!-margin-bottom-7" for="{{ form.query.id_for_label }}">
-            {{ form.query.label }}
-          </label>
-          <div class="search-input-button">
-            {{ form.query }}
-            <button type="submit" class="search__button"></button>
-          </div>
-        </div>
-      </form>
+      <h1 class="govuk-heading-xl govuk-!-margin-bottom-4">Find laws and regulations for business</h1>
+      <p class="govuk-body-s govuk-!-margin-bottom-7">From: <a href="#"
+          class="govuk-link govuk-link--no-visited-state">Department for Business
+          and Trade</a></p>
+
+      <p class="govuk-body">
+      <p class="govuk-body">Find information to help UK businesses follow regulations.</p>
+      <p class="govuk-body">This finder includes UK legislation, guidance from regulators and government and industry
+        standards from the British Standards Institute.</p>
+      <p class="govuk-body">Search using keywords or use the filters to search by the publishing organisation, document
+        types or regulatory area.</p>
+      <p class="govuk-body govuk-!-margin-bottom-9">You can also use this dataset and its metadata as an application
+        programming interface
+        (API).</p>
 
       {% if truncated %}
       <div class="govuk-warning-text">
@@ -33,238 +35,232 @@
       {% endif %}
     </div>
   </div>
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-one-third">
-      <a href="#" class="govuk-link
-      ">Clear all filters</a>
-    </div>
-    <div class="govuk-grid-column-one-third">
-      <p class="govuk-body-m govuk-!-font-weight-bold">7,870 results</p>
-    </div>
-    <div class="govuk-grid-column-one-third">
-      <a href="#" class="govuk-link govuk-link--no-visited-state govuk-!-float-right">Download search results as CSV
-        file</a>
-    </div>
-  </div>
 
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-third">
       <form method="get" class="search-form">
-        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
-        <div class="govuk-form-group {% if form.company_number.errors %}govuk-form-group--error{% endif %}">
-          <div class="govuk-form-group">
-            <fieldset class="govuk-fieldset">
-              <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
-                <h2 class="govuk-fieldset__heading">
-                  Document type
-                </h2>
-              </legend>
-              <div id="document_type-hint" class="govuk-hint govuk-!-font-size-14">
-                1 selected
-              </div>
-              <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
-                <div class="govuk-checkboxes__item">
-                  <input class="govuk-checkboxes__input" id="document_type" name="document_type" type="checkbox"
-                    value="employment-tribunal">
-                  <label class="govuk-label govuk-checkboxes__label" for="document_type">
-                    Legislation
-                  </label>
-                </div>
-                <div class="govuk-checkboxes__item">
-                  <input class="govuk-checkboxes__input" id="document_type-2" name="document_type" type="checkbox"
-                    value="MOD">
-                  <label class="govuk-label govuk-checkboxes__label" for="document_type-2">
-                    Guidance
-                  </label>
-                </div>
-                <div class="govuk-checkboxes__item">
-                  <input class="govuk-checkboxes__input" id="document_type-3" name="document_type" type="checkbox"
-                    value="DfT">
-                  <label class="govuk-label govuk-checkboxes__label" for="document_type-3">
-                    Statutory guidance
-                  </label>
-                </div>
-              </div>
-            </fieldset>
+        <div class="govuk-form-group {% if form.query.errors %}govuk-form-group--error{% endif %} search-group">
+          <label class="govuk-label" for="{{ form.query.id_for_label }}">
+            {{ form.query.label }}
+          </label>
+          <div class="search-input-button">
+            {{ form.query }}
+            <button type="submit" class="search__button"></button>
           </div>
         </div>
         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
-        <div class="govuk-form-group">
-          <h2 class="govuk-heading-m">
-            Updated
-          </h2>
-          <fieldset class="govuk-fieldset" role="group" aria-describedby="updated-after-hint">
-            <legend class="govuk-fieldset__legend">
-              Updated after
+        <div class="govuk-form-group {% if form.document_type.errors %}govuk-form-group--error{% endif %}">
+          <fieldset class="govuk-fieldset">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+              <h2 class="govuk-fieldset__heading">
+                Document type
+              </h2>
             </legend>
-            <div id="updated-after-hint" class="govuk-hint">
-              For example, 27 3 2007
-            </div>
-            <div class="govuk-date-input" id="updated-after">
-              <div class="govuk-date-input__item">
-                <div class="govuk-form-group">
-                  <label class="govuk-label govuk-date-input__label" for="updated-after-day">
-                    Day
-                  </label>
-                  <input class="govuk-input govuk-date-input__input govuk-input--width-2" id="updated-after-day"
-                    name="updated-after-day" type="text" inputmode="numeric">
-                </div>
+            <!-- <div id="document_type-hint" class="govuk-hint govuk-!-font-size-14">
+                1 selected
+              </div> -->
+            <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="document_type" name="document_type" type="checkbox"
+                  value="employment-tribunal">
+                <label class="govuk-label govuk-checkboxes__label" for="document_type">
+                  Legislation
+                </label>
               </div>
-              <div class="govuk-date-input__item">
-                <div class="govuk-form-group">
-                  <label class="govuk-label govuk-date-input__label" for="updated-after-month">
-                    Month
-                  </label>
-                  <input class="govuk-input govuk-date-input__input govuk-input--width-2" id="updated-after-month"
-                    name="updated-after-month" type="text" inputmode="numeric">
-                </div>
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="document_type-2" name="document_type" type="checkbox"
+                  value="MOD">
+                <label class="govuk-label govuk-checkboxes__label" for="document_type-2">
+                  Guidance
+                </label>
               </div>
-              <div class="govuk-date-input__item">
-                <div class="govuk-form-group">
-                  <label class="govuk-label govuk-date-input__label" for="updated-after-year">
-                    Year
-                  </label>
-                  <input class="govuk-input govuk-date-input__input govuk-input--width-4" id="updated-after-year"
-                    name="updated-after-year" type="text" inputmode="numeric">
-                </div>
-              </div>
-            </div>
-          </fieldset>
-        </div>
-        <div class="govuk-form-group">
-          <fieldset class="govuk-fieldset" role="group" aria-describedby="updated-before-hint">
-            <legend class="govuk-fieldset__legend">
-              Updated before
-            </legend>
-            <div id="updated-before-hint" class="govuk-hint">
-              For example, 27 3 2007
-            </div>
-            <div class="govuk-date-input" id="updated-before">
-              <div class="govuk-date-input__item">
-                <div class="govuk-form-group">
-                  <label class="govuk-label govuk-date-input__label" for="updated-before-day">
-                    Day
-                  </label>
-                  <input class="govuk-input govuk-date-input__input govuk-input--width-2" id="updated-before-day"
-                    name="updated-before-day" type="text" inputmode="numeric">
-                </div>
-              </div>
-              <div class="govuk-date-input__item">
-                <div class="govuk-form-group">
-                  <label class="govuk-label govuk-date-input__label" for="updated-before-month">
-                    Month
-                  </label>
-                  <input class="govuk-input govuk-date-input__input govuk-input--width-2" id="updated-before-month"
-                    name="updated-before-month" type="text" inputmode="numeric">
-                </div>
-              </div>
-              <div class="govuk-date-input__item">
-                <div class="govuk-form-group">
-                  <label class="govuk-label govuk-date-input__label" for="updated-before-year">
-                    Year
-                  </label>
-                  <input class="govuk-input govuk-date-input__input govuk-input--width-4" id="updated-before-year"
-                    name="updated-before-year" type="text" inputmode="numeric">
-                </div>
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="document_type-3" name="document_type" type="checkbox"
+                  value="DfT">
+                <label class="govuk-label govuk-checkboxes__label" for="document_type-3">
+                  British Standards
+                </label>
               </div>
             </div>
           </fieldset>
         </div>
         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
-        <div class="govuk-form-group {% if form.company_number.errors %}govuk-form-group--error{% endif %}">
-          <div class="govuk-form-group">
-            <fieldset class="govuk-fieldset">
-              <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
-                <h2 class="govuk-fieldset__heading">
-                  Status
-                </h2>
-              </legend>
-              <div id="status-hint" class="govuk-hint govuk-!-font-size-14">
+        <div class="govuk-form-group {% if form.published_by.errors %}govuk-form-group--error{% endif %}">
+          <fieldset class="govuk-fieldset">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+              <h2 class="govuk-fieldset__heading">
+                Published by
+              </h2>
+            </legend>
+            <!-- <div id="status-hint" class="govuk-hint govuk-!-font-size-14">
                 1 selected
+              </div> -->
+            <div class="govuk-form-group {% if form.query.errors %}govuk-form-group--error{% endif %} search-group">
+              <label class="govuk-label govuk-visually-hidden" for="{{ form.query.id_for_label }}">
+                Search by publisher
+              </label>
+              <div class="search-input-button search-input-button--black orp-publisher-search">
+                <input class="govuk-input orp-publisher-search__input app-site-search__input--default"
+                  name="input-autocomplete" placeholder="Search" type="text" role="combobox">
               </div>
-              <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
-                <div class="govuk-checkboxes__item">
-                  <input class="govuk-checkboxes__input" id="status" name="status" type="checkbox"
-                    value="employment-tribunal">
-                  <label class="govuk-label govuk-checkboxes__label" for="status">
-                    Active
-                  </label>
-                </div>
-                <div class="govuk-checkboxes__item">
-                  <input class="govuk-checkboxes__input" id="status-2" name="status" type="checkbox" value="MOD">
-                  <label class="govuk-label govuk-checkboxes__label" for="status-2">
-                    Not active
-                  </label>
-                </div>
-                <div class="govuk-checkboxes__item">
-                  <input class="govuk-checkboxes__input" id="status-3" name="status" type="checkbox" value="DfT">
-                  <label class="govuk-label govuk-checkboxes__label" for="status-3">
-                    Superseded
-                  </label>
-                </div>
+            </div>
+            <div class="govuk-checkboxes govuk-checkboxes--small orp-max-height-250" data-module="govuk-checkboxes">
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="publisher" name="publisher" type="checkbox" value="hse">
+                <label class="govuk-label govuk-checkboxes__label" for="publisher">
+                  Health and Safety Executive
+                </label>
               </div>
-            </fieldset>
-          </div>
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="publisher-2" name="publisher" type="checkbox" value="caa">
+                <label class="govuk-label govuk-checkboxes__label" for="publisher-2">
+                  Civil Aviation Authority
+                </label>
+              </div>
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="publisher-3" name="publisher" type="checkbox" value="ea">
+                <label class="govuk-label govuk-checkboxes__label" for="publisher-3">
+                  Environment Agency
+
+                </label>
+              </div>
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="publisher-4" name="publisher" type="checkbox" value="defra">
+                <label class="govuk-label govuk-checkboxes__label" for="publisher-4">
+                  Defra
+                </label>
+              </div>
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="publisher-5" name="publisher" type="checkbox" value="ofgem">
+                <label class="govuk-label govuk-checkboxes__label" for="publisher-5">
+                  Office of Gas and Electricity Markets
+                </label>
+              </div>
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="publisher-6" name="publisher" type="checkbox" value="orr">
+                <label class="govuk-label govuk-checkboxes__label" for="publisher-6">
+                  Office of Rail and Road
+                </label>
+              </div>
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="publisher-7" name="publisher" type="checkbox" value="ne">
+                <label class="govuk-label govuk-checkboxes__label" for="publisher-7">
+                  Natural England
+                </label>
+              </div>
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="publisher-8" name="publisher" type="checkbox" value="hie">
+                <label class="govuk-label govuk-checkboxes__label" for="publisher-8">
+                  Historic England
+                </label>
+              </div>
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="publisher-9" name="publisher" type="checkbox" value="nh">
+                <label class="govuk-label govuk-checkboxes__label" for="publisher-9">
+                  National Highways
+                </label>
+              </div>
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="publisher-10" name="publisher" type="checkbox" value="hoe">
+                <label class="govuk-label govuk-checkboxes__label" for="publisher-10">
+                  Homes England
+                </label>
+              </div>
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="publisher-11" name="publisher" type="checkbox" value="dft">
+                <label class="govuk-label govuk-checkboxes__label" for="publisher-11">
+                  Department for Transport
+                </label>
+              </div>
+            </div>
+          </fieldset>
         </div>
         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
-        <details class="govuk-details">
-          <summary class="govuk-details__summary">
-            <span class="govuk-details__summary-text">
-              Regulators
-            </span>
-          </summary>
-          <div class="govuk-details__text">
-            Regulators filter here
-          </div>
-        </details>
+        <button class="govuk-button">
+          Filter results
+        </button>
         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
-        <details class="govuk-details">
-          <summary class="govuk-details__summary">
-            <span class="govuk-details__summary-text">
-              Topics
-            </span>
-          </summary>
-          <div class="govuk-details__text">
-            Topics filter here
-          </div>
-        </details>
-
-      </form>
-
-    </div>
-    <div class="govuk-grid-column-two-thirds">
-      <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
-      {% if results %}
-      <div class="govuk-summary-list">
-        <p class="govuk-body-m">
-          {{ results|length }} matches found.
+        <p class="govuk-body">
+          <a href="#" class="govuk-link govuk-link--no-visited-state govuk-!-float-right">Download search results as CSV
+            file</a>
         </p>
-        {% for result in results %}
-        <div class="govuk-summary-list__row--no-border">
-          <h2 class="govuk-heading-m">
-            <a href="/company/{{ result.company_number }}/reports" class="govuk-link">
-              {{result.title}}
-            </a>
-            ({{result.number_of_reports}} reports)
-          </h2>
-          <p class="govuk-body-m">
-            Company Number: {{ result.company_number }} <br> {{ result.address_snippet }}
-          </p>
-        </div>
-        {% endfor %}
+      </form>
+    </div>
+
+    <div class="govuk-grid-column-two-thirds">
+      <div class="orp-flex orp-flex--space-between">
+        <p class="govuk-body govuk-!-font-weight-bold">4,123 documents</p>
+        <p class="govuk-body">
+          <a href="#" class="govuk-link govuk-link--no-visited-state
+              ">Clear all filters</a>
+        </p>
       </div>
-      {% else %}
-      {% if form.is_bound %}
-      <p class="govuk-body-l govuk-!-font-weight-bold">
-        We didn't find any regulations for that search.
-      </p>
-      <p class="govuk-body-m">
-        Please try searching again using different search terms.
-      </p>
-      {% endif %}
-      {% endif %}
+      <ul class="orp-applied-filters-container">
+        <li class="orp-applied-filter-tag">
+          <a href="#delete">
+            <span class="govuk-visually-hidden">Remove filter:</span>
+            <span class="govuk-body-s">Legislation</span>
+          </a>
+        </li>
+        <li class="orp-applied-filter-tag">
+          <a href="#delete">
+            <span class="govuk-visually-hidden">Remove filter:</span>
+            <span class="govuk-body-s">Accreditation Service</span>
+          </a>
+        </li>
+      </ul>
+
+      <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <div class="orp-flex">
+            <label class="govuk-label govuk-!-margin-right-3 orp-!-no-text-wrap" for="sort">
+              Sort by
+            </label>
+            <select class="govuk-select" id="sort" name="sort">
+              <option value="date">Recently updated</option>
+              <option value="sort">???</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          {% if results %}
+          <div class="govuk-summary-list">
+            <p class="govuk-body-m">
+              {{ results|length }} matches found.
+            </p>
+            {% for result in results %}
+            <div class="govuk-summary-list__row--no-border">
+              <h2 class="govuk-heading-m">
+                <a href="/document/{{ result.document_id }}/details" class="govuk-link">
+                  {{result.title}}
+                </a>
+                {{result.published_date}}
+              </h2>
+              <p class="govuk-body-m">
+                Regulation: {{ result.document_type }} <br> {{ result.last_updated }}
+              </p>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          {% if form.is_bound %}
+          <p class="govuk-body-l govuk-!-font-weight-bold">
+            We didn't find any regulations for that search.
+          </p>
+          <p class="govuk-body-m">
+            Please try searching again using different search terms.
+          </p>
+          {% endif %}
+          {% endif %}
+        </div>
+      </div>
     </div>
   </div>
-  {% endif %}
+</div>
+{% endif %}
 </div>
 {% endblock %}

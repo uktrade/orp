@@ -1,0 +1,17 @@
+.orp-\!-no-text-wrap {
+  white-space: nowrap;
+}
+
+.orp-max-height-250 {
+  max-height: 250px;
+  overflow: scroll;
+}
+
+.orp-flex {
+  display: flex;
+  align-items: center;
+}
+
+.orp-flex--space-between {
+  justify-content: space-between;
+}
