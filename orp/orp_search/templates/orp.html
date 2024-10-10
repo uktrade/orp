@@ -48,7 +48,6 @@
             <button type="submit" class="search__button"></button>
           </div>
         </div>
-        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
         <div class="govuk-form-group {% if form.document_type.errors %}govuk-form-group--error{% endif %}">
           <fieldset class="govuk-fieldset">
             <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
@@ -189,8 +188,8 @@
 
     <div class="govuk-grid-column-two-thirds">
       <div class="orp-flex orp-flex--space-between">
-        <p class="govuk-body govuk-!-font-weight-bold">4,123 documents</p>
-        <p class="govuk-body">
+        <p class="govuk-body govuk-!-font-weight-bold govuk-!-margin-bottom-0">4,123 documents</p>
+        <p class="govuk-body govuk-!-margin-bottom-0">
           <a href="#" class="govuk-link govuk-link--no-visited-state
               ">Clear all filters</a>
         </p>
@@ -212,7 +211,7 @@
 
       <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
       <div class="govuk-grid-row">
-        <div class="govuk-grid-column-two-thirds">
+        <div class="govuk-grid-column-full">
           <div class="orp-flex">
             <label class="govuk-label govuk-!-margin-right-3 orp-!-no-text-wrap" for="sort">
               Sort by
@@ -226,7 +225,77 @@
       </div>
       <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
       <div class="govuk-grid-row">
-        <div class="govuk-grid-column-two-thirds">
+        <div class="govuk-grid-column-full">
+
+          <div class="govuk-summary-list orp-search-results">
+
+            <!-- first search result -->
+            <div class="govuk-summary-list__row--no-border">
+              <span class="govuk-caption-m">Guidance</span>
+              <h2 class="govuk-heading-m">
+                <a href="/document/{{ result.document_id }}/details" class="govuk-link  orp-link-text-decoration-none">
+                  Introduction to asbestos safety
+                </a>
+              </h2>
+              <p class="govuk-body-m">
+                Guidance on complying with the law on asbestos safety including detection, management, controls and
+                training.
+              </p>
+              <p class="govuk-body-s orp-secondary-text-colour govuk-!-margin-bottom-2">
+                Published by: Health and Safety Executive
+              </p>
+              <p class="govuk-body-s orp-secondary-text-colour">
+                Last updated: 24 January 2024
+              </p>
+              <ul class="govuk-list orp-topics-list">
+                <li class="govuk-body-s orp-secondary-text-colour">
+                  COSHH
+                </li>
+                <li class="govuk-body-s orp-secondary-text-colour">
+                  Substances hazardous to health
+                </li>
+                <li class="govuk-body-s orp-secondary-text-colour">
+                  Code of practice
+                </li>
+              </ul>
+            </div>
+            <!-- /first search result -->
+            <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+            <!-- second search result -->
+            <div class="govuk-summary-list__row--no-border">
+              <span class="govuk-caption-m">Guidance</span>
+              <h2 class="govuk-heading-m">
+                <a href="/document/{{ result.document_id }}/details" class="govuk-link orp-link-text-decoration-none">
+                  Waste and Mining Operations Installations Water Discharge and Groundwater Activities Medium
+                </a>
+              </h2>
+              <p class="govuk-body-m">
+                The Environment Agency consults the public on certain applications for: waste and mining waste
+                operations installations water discharge
+              </p>
+              <p class="govuk-body-s orp-secondary-text-colour govuk-!-margin-bottom-2">
+                Published by: Environment Agency
+              </p>
+              <p class="govuk-body-s orp-secondary-text-colour">
+                Last updated: 30 December 2023
+              </p>
+              <ul class="govuk-list orp-topics-list">
+                <li class="govuk-body-s orp-secondary-text-colour">
+                  Mining
+                </li>
+                <li class="govuk-body-s orp-secondary-text-colour">
+                  Groundwater
+                </li>
+                <li class="govuk-body-s orp-secondary-text-colour">
+                  Waste
+                </li>
+              </ul>
+            </div>
+            <!-- /second search result -->
+            <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+          </div>
+
           {% if results %}
           <div class="govuk-summary-list">
             <p class="govuk-body-m">
