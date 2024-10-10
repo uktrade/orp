@@ -1,5 +1,6 @@
 import logging
 
+import pandas as pd
 import requests  # type: ignore
 
 from jinja2 import Template
@@ -34,17 +35,42 @@ class PublicGateway:
         return " OR ".join([f"{field} LIKE '%{term}%'" for term in terms])
 
     def search(self, config: SearchDocumentConfig):
-        logger.info("searching for market barriers")
+        # List of search terms
+        title_search_terms = config.search_terms
+        summary_search_terms = config.search_terms
+
+        # If the dummy flag is set, return dummy data. Ideally, this will be
+        # removed from the final implementation
+        if config.dummy:
+            df = pd.read_csv("orp/orp_search/construction-data.csv")
+            server_terms_pattern = "|".join(title_search_terms)
+            document_types_pattern = "|".join(summary_search_terms)
+            logger.info("server_terms_pattern: %s", server_terms_pattern)
+            logger.info("document_types_pattern: %s", document_types_pattern)
+
+            # Filter the DataFrame based on the search terms
+            filtered_df = df[
+                (
+                    df["title"].str.contains(
+                        server_terms_pattern, case=False, na=False
+                    )
+                )
+                & (
+                    df["description"].str.contains(
+                        document_types_pattern, case=False, na=False
+                    )
+                )
+            ]
+            results = filtered_df.to_dict(orient="records")
+            logger.info("filtered data: %s", results)
+            return results
+
         # Base URL for the API
         # TODO: need to use aws parameter store to store the base url
         url = (
             "https://data.api.trade.gov.uk/v1/datasets/market-barriers"
             "/versions/v1.0.10/data"
         )
-
-        # List of search terms
-        title_search_terms = config.search_terms
-        summary_search_terms = config.search_terms
 
         # Build the WHERE clause
         # TODO: need to use aws parameter store to store the field names

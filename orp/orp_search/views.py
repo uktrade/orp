@@ -1,6 +1,4 @@
-import json
 import logging
-import re
 
 from orp_search.models import PublicGatewayCache
 from orp_search.public_gateway import PublicGateway, SearchDocumentConfig
@@ -13,36 +11,6 @@ from django.views.decorators.http import require_http_methods
 from core.forms import RegulationSearchForm
 
 logger = logging.getLogger(__name__)
-
-
-def clean_json_response(response):
-    # Ensure the response is a string
-    if isinstance(response, dict):
-        response = json.dumps(response)
-
-    # Clean the escape characters and fix JSON format
-    cleaned_response = response.replace('\\"', '"').replace("\\r\\n", "\n")
-
-    # Remove invalid control characters
-    # Regex to match and remove control characters except '\n' or '\t'
-    cleaned_response = re.sub(r"[\x00-\x1f\x7f-\x9f]", "", cleaned_response)
-
-    # Split concatenated JSON objects by looking for "} {"
-    json_objects = re.split(r"}\s*{", cleaned_response)
-
-    # Add missing braces to objects
-    json_objects = [
-        obj if obj.strip().startswith("{") else "{" + obj
-        for obj in json_objects
-    ]
-    json_objects = [
-        obj if obj.strip().endswith("}") else obj + "}" for obj in json_objects
-    ]
-
-    # Parse each JSON object
-    parsed_objects = [json.loads(obj) for obj in json_objects]
-
-    return parsed_objects
 
 
 @require_http_methods(["GET"])
@@ -86,31 +54,26 @@ def search(request: HttpRequest) -> HttpResponse:
     if not search_query:
         return render(request, template_name="orp.html", context=context)
 
-    search_query_json = json.dumps(search_query)
-    document_types_json = json.dumps(document_types)
-
-    logger.info("Search query (json): %s", search_query_json)
-    logger.info("Document types (json): %s", document_types_json)
+    logger.info("Search query: %s", search_query)
+    logger.info("Document types: %s", document_types)
 
     # Get the search results from the Data API using PublicGateway class
-    config = SearchDocumentConfig(search_query, document_types)
+    config = SearchDocumentConfig(search_query, document_types, dummy=True)
 
     # Check if the response is cached
     logger.info("checking for cached response")
     cached_response = PublicGatewayCache.get_cached_response(config)
     if cached_response:
         logger.info("using cached response")
-        search_results = json.loads(cached_response)
+        search_results = cached_response
     else:
         logger.info("fetching new response")
         public_gateway = PublicGateway()
         search_results = public_gateway.search(config)
-        search_results = clean_json_response(search_results)
 
         # Cache the response
-        logger.info("caching response")
-        PublicGatewayCache.cache_response(config, json.dumps(search_results))
+        PublicGatewayCache.cache_response(config, search_results)
 
     logger.info("search results json: %s", search_results)
-    context["search_results"] = search_results
+    context["results"] = search_results
     return render(request, template_name="orp.html", context=context)

@@ -4,7 +4,9 @@ logger = logging.getLogger(__name__)
 
 
 class SearchDocumentConfig:
-    def __init__(self, search_terms: str, document_types=None, timeout=None):
+    def __init__(
+        self, search_terms: str, document_types=None, timeout=None, dummy=False
+    ):
         """
         Initializes a new instance of the class.
 
@@ -17,6 +19,7 @@ class SearchDocumentConfig:
         self.search_terms = [term.strip() for term in search_terms.split(",")]
         self.document_types = document_types
         self.timeout = None if timeout is None else int(timeout)
+        self.dummy = dummy
 
     def validate(self):
         """
