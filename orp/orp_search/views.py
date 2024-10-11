@@ -52,9 +52,12 @@ def search(request: HttpRequest) -> HttpResponse:
 
     # If the search query is empty, return the form
     if not search_query:
-        return render(request, template_name="orp.html", context=context)
+        # Then we just get all results but only return a
+        # few based on limit, default is 10
+        logger.info("no search query provided")
+    else:
+        logger.info("search query: %s", search_query)
 
-    logger.info("Search query: %s", search_query)
     logger.info("Document types: %s", document_types)
 
     # Get the search results from the Data API using PublicGateway class
@@ -62,9 +65,10 @@ def search(request: HttpRequest) -> HttpResponse:
 
     # Check if the response is cached
     logger.info("checking for cached response")
+
     cached_response = PublicGatewayCache.get_cached_response(config)
     if cached_response:
-        logger.info("using cached response")
+        logger.info("reusing cached response")
         search_results = cached_response
     else:
         logger.info("fetching new response")
@@ -72,8 +76,49 @@ def search(request: HttpRequest) -> HttpResponse:
         search_results = public_gateway.search(config)
 
         # Cache the response
+        logger.info("caching response")
         PublicGatewayCache.cache_response(config, search_results)
 
-    logger.info("search results json: %s", search_results)
+        logger.info("using cached response")
+        search_results = PublicGatewayCache.get_cached_response(config)
+
+        logger.info("cached response results: %s", search_results)
+
+    # search_results contains too much information for the
+    # landing page (search) so we need to filter it and
+    # reduce the amount of information to be displayed
+    # on the landing page.
+
+    # For each item in search_results, we only need the following:
+    # - id
+    # - title
+    # - publisher
+    # - description (only keep the first 100 words)
+    # - date_issued
+    # - date_modified
+
+    # We can use a list comprehension to filter the search_results
+    # list and only keep the required information.
+
+    # We can use the following code to filter the search_results list:
+    search_results = [
+        {
+            "id": result["id"],
+            "title": result["title"],
+            "publisher": result["publisher"],
+            "description": (
+                result["description"][:100] + "..."
+                if len(result["description"]) > 100
+                else result["description"]
+            ),
+            "date_issued": result["date_issued"],
+            "date_modified": result["date_modified"],
+        }
+        for result in search_results
+    ]
+
     context["results"] = search_results
+    context["results_count"] = len(search_results)
+    logger.info("search results: %s", search_results)
+    logger.info("search results count: %s", len(search_results))
     return render(request, template_name="orp.html", context=context)
