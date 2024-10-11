@@ -113,6 +113,7 @@ def search(request: HttpRequest) -> HttpResponse:
             ),
             "date_issued": result["date_issued"],
             "date_modified": result["date_modified"],
+            "document_type": result["type"],
         }
         for result in search_results
     ]
