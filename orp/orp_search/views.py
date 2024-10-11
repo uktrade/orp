@@ -39,3 +39,15 @@ def search(request: HttpRequest) -> HttpResponse:
     # context["request_exception"] = search_data["request_exception"]
     # context["truncated"] = search_data["truncated"]
     return render(request, template_name="orp.html", context=context)
+
+
+@require_http_methods(["GET"])
+def details(request: HttpRequest) -> HttpResponse:
+    """Regulation details.
+
+    Returns regulation details page.
+    """
+    context = {
+        "service_name": settings.SERVICE_NAME,
+    }
+    return render(request, template_name="details.html", context=context)

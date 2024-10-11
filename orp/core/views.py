@@ -13,14 +13,6 @@ from .forms import CookiePageConsentForm
 from .healthcheck import application_service_health
 
 
-def hello_world(request: HttpRequest) -> HttpResponse:
-    """Hello world.
-
-    Returns a simple hello world message.
-    """
-    return HttpResponse("Hello, world!")
-
-
 @require_http_methods(["GET"])
 def home(request: HttpRequest) -> HttpResponse:
     """Home.
