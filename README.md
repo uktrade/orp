@@ -26,7 +26,7 @@ Create the initial database:
     $ make database
 
 > The `make database` command will create a `PostgreSQL` database. If you have
-> an existing database and want to start from scratch, use `make drop-databse`
+> an existing database and want to start from scratch, use `make drop-database`
 > to delete an existing database first.
 
 Prepare the application for first use:
@@ -98,3 +98,22 @@ With your Poetry shell active:
 > This will ensure that your code passes quality checks before you commit it.
 > Code quality checks are also performed when pushing your code to origin
 > but pre-commit hooks catch issues early and will improve Developer Experience.
+
+
+### Update database tables
+
+> To update local database tables, you need to set the `DATABASE_URL` environment variable. You can set it in the terminal or in the `.env` file.
+
+    <!-- pragma: allowlist secret --> $ export DATABASE_URL=postgres://postgres:postgres@localhost:5432/orp
+
+> If you want to migrate all apps then navigate /orp/orp and use the following command:
+
+    $ poetry run python manage.py migrate
+
+> If you want to migrate a single app then navigate /orp/orp and use the following command:
+
+    $ poetry run python manage.py migrate <app_name>
+
+
+
+poetry add boto3 awswrangler
