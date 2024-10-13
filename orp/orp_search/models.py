@@ -7,6 +7,7 @@ from datetime import timedelta
 from orp_search.config import SearchDocumentConfig
 
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -57,11 +58,23 @@ class PublicGatewayCache(models.Model):
         )
 
     @classmethod
-    def get_cached_response(cls, config):
+    def get_cached_response(cls, config: SearchDocumentConfig):
         # Look up the cached response for the given config
-        key = cls._config_to_key(config)
         try:
-            cache_entries = cls.objects.filter(search_terms__contains=key[0])
+            # Build the initial query
+            query = Q(search_terms__contains=config.search_terms)
+
+            # Add document_types condition if it's not empty
+            if config.document_types:
+                query &= Q(
+                    document_types__contains=json.dumps(
+                        config.document_types, sort_keys=False
+                    )
+                )
+
+            # Execute the query
+            cache_entries = cls.objects.filter(query)
+
             if not cache_entries:
                 logger.info("no cache entries found")
                 return None

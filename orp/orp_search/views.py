@@ -1,6 +1,5 @@
 import logging
 
-from orp_search.models import PublicGatewayCache
 from orp_search.public_gateway import PublicGateway, SearchDocumentConfig
 
 from django.conf import settings
@@ -24,14 +23,6 @@ def search(request: HttpRequest) -> HttpResponse:
     during the Data API search, the service problem page is displayed.
     """
 
-    # r = requests.get('https://swapi.dev/api/people/1/')
-    # if r.status_code == 200:
-    #     logger = logging.getLogger(__name__)
-    #     logger.info('Data fetched successfully', r.status_code)
-    #     return HttpResponse(r.text)
-
-    # return HttpResponse('Could not save data')
-
     context = {
         "service_name": settings.SERVICE_NAME_SEARCH,
     }
@@ -49,11 +40,11 @@ def search(request: HttpRequest) -> HttpResponse:
     # Get the search query and document types from the form
     search_query = form.cleaned_data.get("query")
     document_types = form.cleaned_data.get("document_type")
+    limit = form.cleaned_data.get("limit", 10)
+    offset = form.cleaned_data.get("page", 1)
 
     # If the search query is empty, return the form
     if not search_query:
-        # Then we just get all results but only return a
-        # few based on limit, default is 10
         logger.info("no search query provided")
     else:
         logger.info("search query: %s", search_query)
@@ -61,65 +52,64 @@ def search(request: HttpRequest) -> HttpResponse:
     logger.info("Document types: %s", document_types)
 
     # Get the search results from the Data API using PublicGateway class
-    config = SearchDocumentConfig(search_query, document_types, dummy=True)
+    config = SearchDocumentConfig(
+        search_query, document_types, dummy=True, limit=limit, offset=offset
+    )
 
     # Check if the response is cached
-    logger.info("checking for cached response")
-
-    cached_response = PublicGatewayCache.get_cached_response(config)
-    if cached_response:
-        logger.info("reusing cached response")
-        search_results = cached_response
-    else:
-        logger.info("fetching new response")
-        public_gateway = PublicGateway()
-        search_results = public_gateway.search(config)
-
-        # Cache the response
-        logger.info("caching response")
-        PublicGatewayCache.cache_response(config, search_results)
-
-        logger.info("using cached response")
-        search_results = PublicGatewayCache.get_cached_response(config)
-
-        logger.info("cached response results: %s", search_results)
+    public_gateway = PublicGateway()
+    search_results = public_gateway.search(config)
+    context["results_count_total"] = len(search_results)
 
     # search_results contains too much information for the
     # landing page (search) so we need to filter it and
     # reduce the amount of information to be displayed
     # on the landing page.
 
-    # For each item in search_results, we only need the following:
-    # - id
-    # - title
-    # - publisher
-    # - description (only keep the first 100 words)
-    # - date_issued
-    # - date_modified
+    if search_results:
+        paginated_search_results = public_gateway.paginate_results(
+            config, search_results
+        )
+        logger.info(
+            "paginated search results after paginate: %s",
+            paginated_search_results,
+        )
 
-    # We can use a list comprehension to filter the search_results
-    # list and only keep the required information.
+        # We can use the following code to filter the search_results list:
+        paginated_search_results = [
+            {
+                "id": result["id"],
+                "title": result["title"],
+                "publisher": result["publisher"],
+                "description": (
+                    result["description"][:100] + "..."
+                    if len(result["description"]) > 100
+                    else result["description"]
+                ),
+                "date_issued": result["date_issued"],
+                "date_modified": result["date_modified"],
+                "document_type": result["type"],
+                "regulatory_topics": " | ".join(
+                    result["regulatory_topics"].split("\n")
+                ),
+            }
+            for result in paginated_search_results
+        ]
+        context["results_count"] = len(paginated_search_results)
+    else:
+        paginated_search_results = []
 
-    # We can use the following code to filter the search_results list:
-    search_results = [
-        {
-            "id": result["id"],
-            "title": result["title"],
-            "publisher": result["publisher"],
-            "description": (
-                result["description"][:100] + "..."
-                if len(result["description"]) > 100
-                else result["description"]
-            ),
-            "date_issued": result["date_issued"],
-            "date_modified": result["date_modified"],
-            "document_type": result["type"],
-        }
-        for result in search_results
-    ]
+    context["results"] = paginated_search_results
+    context["results_count"] = len(paginated_search_results)
+    context["results_page_total"] = public_gateway.calculate_total_pages(
+        config, context["results_count_total"]
+    )
 
-    context["results"] = search_results
-    context["results_count"] = len(search_results)
-    logger.info("search results: %s", search_results)
-    logger.info("search results count: %s", len(search_results))
+    logger.info("search results: %s", context["results"])
+    logger.info("search results count: %s", context["results_count"])
+    logger.info(
+        "search results total count: %s", context["results_count_total"]
+    )
+    logger.info("search results page total: %s", context["results_page_total"])
+    logger.debug("paginated search results: %s", paginated_search_results)
     return render(request, template_name="orp.html", context=context)
