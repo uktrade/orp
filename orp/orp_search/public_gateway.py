@@ -104,9 +104,12 @@ class PublicGateway:
             # for publisher in filtered_df
             if config.publisher_terms is not None:
                 publisher_terms_pattern = "|".join(config.publisher_terms)
+                logger.info(
+                    "publisher_terms_pattern: %s", publisher_terms_pattern
+                )
                 filtered_df = filtered_df[
-                    filtered_df["publisher"].str.contains(
-                        publisher_terms_pattern, case=False, na=False
+                    filtered_df["publisher_id"].str.contains(
+                        publisher_terms_pattern, case=True, na=False
                     )
                 ]
 
