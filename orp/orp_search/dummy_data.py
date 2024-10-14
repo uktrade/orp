@@ -1,3 +1,10 @@
+from io import StringIO
+
+import pandas as pd
+
+# flake8: noqa
+
+construction_data_csv = """
 id,title,identifier,publisher,language,format,description,date_issued,date_modified,date_valid,audience,coverage,subject,type,license,regulatory_topics,status,date_uploaded_to_orp,has_format,is_format_of,has_version,is_version_of,references,is_referenced_by,has_part,is_part_of,is_replaced_by,replaces,related_legislation
 Nt6Ft0Dt,Introduction to asbestos safety,https://www.hse.gov.uk/asbestos/introduction/index.htm,Health and Safety Executive,eng,HTML,"The guidance summarises what you should do to comply with the law, including:
 
@@ -7268,3 +7275,14 @@ Planning authorities",GB,"42110
 Planning
 Transport",,,,,,,,,,,,,"https://www.legislation.gov.uk/ukpga/2008/29
 https://www.legislation.gov.uk/uksi/2013/1883/article/3/made"
+"""
+
+
+def get_construction_data_as_dataframe():
+    # Use StringIO to convert the CSV string into a file-like object
+    csv_file_like_object = StringIO(construction_data_csv)
+
+    # Read the data into a pandas DataFrame
+    df = pd.read_csv(csv_file_like_object)
+
+    return df

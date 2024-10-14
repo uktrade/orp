@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 @require_http_methods(["GET"])
-def document(request: HttpRequest) -> HttpResponse:
+def details(request: HttpRequest, id) -> HttpResponse:
     """Details view.
 
     Handles the GET request to fetch details based on the provided id.
@@ -23,36 +23,33 @@ def document(request: HttpRequest) -> HttpResponse:
         "service_name": settings.SERVICE_NAME_SEARCH,
     }
 
-    # Create a new instance of the RegulationSearchForm
-    form = RegulationSearchForm(request.GET or None)
-
     # Extract the id parameter from the request
-    document_id = form.cleaned_data.get("id")
+    document_id = id
+    logger.info("document id: %s", document_id)
     if not document_id:
         context["error"] = "no document id provided"
-        return render(
-            request, template_name="orp_details.html", context=context
-        )
+        return render(request, template_name="details.html", context=context)
 
     # Create a SearchDocumentConfig instance and set the id parameter
-    config = SearchDocumentConfig(search_terms="", id=document_id)
+    config = SearchDocumentConfig(search_terms="", dummy=True, id=document_id)
 
     # Use the PublicGateway class to fetch the details
     public_gateway = PublicGateway()
     try:
-        search_results = public_gateway.search(config)
-        logger.info("search results: %s", search_results)
-        search_results = search_results[0] if search_results else {}
-        context["results"] = search_results
-        return render(
-            request, template_name="orp_details.html", context=context
-        )
+        search_result = public_gateway.search(config)
+        logger.info("search result: %s", search_result)
+
+        if "regulatory_topics" in search_result:
+            search_result["regulatory_topics"] = search_result[
+                "regulatory_topics"
+            ].split("\n")
+
+        context["result"] = search_result
+        return render(request, template_name="details.html", context=context)
     except Exception as e:
-        logger.error("Error fetching details: %s", e)
+        logger.error("error fetching details: %s", e)
         context["error"] = f"error fetching details: {e}"
-        return render(
-            request, template_name="orp_details.html", context=context
-        )
+        return render(request, template_name="details.html", context=context)
 
 
 @require_http_methods(["GET"])
@@ -157,15 +154,3 @@ def search(request: HttpRequest) -> HttpResponse:
     logger.info("search results page total: %s", context["results_page_total"])
     logger.debug("paginated search results: %s", paginated_search_results)
     return render(request, template_name="orp.html", context=context)
-
-
-@require_http_methods(["GET"])
-def details(request: HttpRequest) -> HttpResponse:
-    """Regulation details.
-
-    Returns regulation details page.
-    """
-    context = {
-        "service_name": settings.SERVICE_NAME,
-    }
-    return render(request, template_name="details.html", context=context)

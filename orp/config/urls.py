@@ -12,7 +12,7 @@ urlpatterns = [
     path("", orp_search_views.search, name="search"),
     # If we choose to have a start page with green button, this is it:
     # path("", core_views.home, name="home"),
-    path("details/", orp_search_views.details, name="details"),
+    path("details/<str:id>", orp_search_views.details, name="details"),
     path("healthcheck/", core_views.health_check, name="healthcheck"),
     path(
         "accessibility-statement/",
