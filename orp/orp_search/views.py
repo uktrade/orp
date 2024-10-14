@@ -4,7 +4,7 @@ from orp_search.public_gateway import PublicGateway, SearchDocumentConfig
 
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
 from core.forms import RegulationSearchForm
@@ -62,6 +62,9 @@ def search(request: HttpRequest) -> HttpResponse:
     The search results are fetched from the DBT Data API. If an error occurs
     during the Data API search, the service problem page is displayed.
     """
+
+    if "query" not in request.GET:
+        return redirect("/?query=")
 
     context = {
         "service_name": settings.SERVICE_NAME_SEARCH,
