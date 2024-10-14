@@ -1,4 +1,7 @@
+import csv
 import logging
+
+import pandas as pd
 
 from orp_search.public_gateway import PublicGateway, SearchDocumentConfig
 
@@ -50,6 +53,45 @@ def details(request: HttpRequest, id) -> HttpResponse:
         logger.error("error fetching details: %s", e)
         context["error"] = f"error fetching details: {e}"
         return render(request, template_name="details.html", context=context)
+
+
+@require_http_methods(["GET"])
+def download_search_csv(request: HttpRequest) -> HttpResponse:
+    search_terms = request.GET.get("query", "")
+    document_type_terms = request.GET.get("document_type", "")
+    publisher_terms = request.GET.getlist("publisher", None)
+    sort_by = request.GET.get("sort", None)
+
+    config = SearchDocumentConfig(
+        search_terms, document_type_terms, dummy=True
+    )
+
+    if publisher_terms:
+        config.publisher_terms = publisher_terms
+
+    if sort_by:
+        config.sort_by = sort_by
+
+    public_gateway = PublicGateway()
+    search_results = public_gateway.search(config)
+
+    # Convert search_results JSON object to DataFrame
+    # (for demonstration purposes)
+    search_results_df = pd.DataFrame(search_results)
+
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = (
+        'attachment; filename="search_results.csv"'
+    )
+
+    # Write the DataFrame to the response
+    writer = csv.writer(response)
+    writer.writerow(search_results_df.columns)  # Write the header
+
+    for _, row in search_results_df.iterrows():
+        writer.writerow(row)
+
+    return response
 
 
 @require_http_methods(["GET"])
@@ -117,7 +159,6 @@ def search(request: HttpRequest) -> HttpResponse:
     if sort_by:
         config.sort_by = sort_by
 
-    # Check if the response is cached
     public_gateway = PublicGateway()
     search_results = public_gateway.search(config)
     context["results_count_total"] = len(search_results)

@@ -180,9 +180,23 @@
         </button>
         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
         <p class="govuk-body">
-          <a href="#" class="govuk-link govuk-link--no-visited-state govuk-!-float-right">Download search results as CSV
+          <a id="download-csv-link" href="#" class="govuk-link govuk-link--no-visited-state govuk-!-float-right">Download search results as CSV
             file</a>
         </p>
+
+      <script>
+      // Function to get the current query parameters from the address bar
+      function getQueryParameters() {
+          return window.location.search;
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+          var csvLink = document.getElementById('download-csv-link');
+          var queryParams = getQueryParameters();
+          var baseURL = '{% url "download_csv" %}';
+          csvLink.href = baseURL + queryParams;
+      });
+    </script>
       </form>
     </div>
 
