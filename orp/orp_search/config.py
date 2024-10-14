@@ -56,4 +56,9 @@ class SearchDocumentConfig:
         if self.limit < 0:
             logger.error("limit must be a positive integer")
             return False
+
+        if self.sort_by:
+            if self.sort_by not in ["recently", "relevance"]:
+                logger.error("sort_by must be 'recently' or 'relevance'")
+                return False
         return True
