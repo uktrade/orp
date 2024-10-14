@@ -14,6 +14,7 @@ class SearchDocumentConfig:
         offset=1,
         publisher_terms=None,
         sort_by=None,
+        id=None,
     ):
         """
         Initializes a new instance of the class.
@@ -32,6 +33,7 @@ class SearchDocumentConfig:
         self.offset = offset
         self.publisher_terms = publisher_terms
         self.sort_by = sort_by
+        self.id = id
 
     def validate(self):
         """

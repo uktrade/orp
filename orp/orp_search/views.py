@@ -13,6 +13,49 @@ logger = logging.getLogger(__name__)
 
 
 @require_http_methods(["GET"])
+def document(request: HttpRequest) -> HttpResponse:
+    """Details view.
+
+    Handles the GET request to fetch details based on the provided id.
+    """
+
+    context = {
+        "service_name": settings.SERVICE_NAME_SEARCH,
+    }
+
+    # Create a new instance of the RegulationSearchForm
+    form = RegulationSearchForm(request.GET or None)
+
+    # Extract the id parameter from the request
+    document_id = form.cleaned_data.get("id")
+    if not document_id:
+        context["error"] = "no document id provided"
+        return render(
+            request, template_name="orp_details.html", context=context
+        )
+
+    # Create a SearchDocumentConfig instance and set the id parameter
+    config = SearchDocumentConfig(search_terms="", id=document_id)
+
+    # Use the PublicGateway class to fetch the details
+    public_gateway = PublicGateway()
+    try:
+        search_results = public_gateway.search(config)
+        logger.info("search results: %s", search_results)
+        search_results = search_results[0] if search_results else {}
+        context["results"] = search_results
+        return render(
+            request, template_name="orp_details.html", context=context
+        )
+    except Exception as e:
+        logger.error("Error fetching details: %s", e)
+        context["error"] = f"error fetching details: {e}"
+        return render(
+            request, template_name="orp_details.html", context=context
+        )
+
+
+@require_http_methods(["GET"])
 def search(request: HttpRequest) -> HttpResponse:
     """Search view.
 
@@ -49,7 +92,8 @@ def search(request: HttpRequest) -> HttpResponse:
     else:
         logger.info("search query: %s", search_query)
 
-    logger.info("Document types: %s", document_types)
+    logger.info("document types: %s", document_types)
+    logger.info("page: %s", offset)
 
     # Get the search results from the Data API using PublicGateway class
     config = SearchDocumentConfig(
