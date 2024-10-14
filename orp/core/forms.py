@@ -43,9 +43,9 @@ class RegulationSearchForm(forms.Form):
     document_type = forms.MultipleChoiceField(
         required=False,
         choices=[
-            ("employment-tribunal", "Legislation"),
-            ("MOD", "Guidance"),
-            ("DfT", "Statutory guidance"),
+            ("legislation", "Legislation"),
+            ("guidance", "Guidance"),
+            ("standard", "British Standard"),
         ],
         widget=forms.CheckboxSelectMultiple(
             attrs={

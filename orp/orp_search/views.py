@@ -24,14 +24,6 @@ def search(request: HttpRequest) -> HttpResponse:
     during the Data API search, the service problem page is displayed.
     """
 
-    # r = requests.get('https://swapi.dev/api/people/1/')
-    # if r.status_code == 200:
-    #     logger = logging.getLogger(__name__)
-    #     logger.info('Data fetched successfully', r.status_code)
-    #     return HttpResponse(r.text)
-
-    # return HttpResponse('Could not save data')
-
     context = {
         "service_name": settings.SERVICE_NAME_SEARCH,
     }
@@ -114,6 +106,7 @@ def search(request: HttpRequest) -> HttpResponse:
             "date_issued": result["date_issued"],
             "date_modified": result["date_modified"],
             "document_type": result["type"],
+            "regulatory_topics": result["regulatory_topics"],
         }
         for result in search_results
     ]
