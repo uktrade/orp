@@ -34,34 +34,105 @@ class PublicGateway:
         """
         return " OR ".join([f"{field} LIKE '%{term}%'" for term in terms])
 
+    def paginate_results(self, config: SearchDocumentConfig, results):
+        """
+        Paginates the search results.
+
+        Args:
+            results (list): The search results to paginate.
+
+        Returns:
+            list: The paginated search results.
+            count: Total number of pages from results
+        """
+        start = (config.offset - 1) * config.limit
+        end = start + config.limit
+        return results[start:end]
+
+    def calculate_total_pages(self, config, results_count):
+        """
+        Calculates the total number of pages for pagination.
+
+        Args:
+            total_results (int): The total number of search results.
+            limit (int): The number of results per page.
+
+        Returns:
+            int: The total number of pages.
+        """
+        if config.limit <= 0:
+            raise ValueError("limit must be greater than 0")
+        return (results_count + config.limit - 1) // config.limit
+
     def search(self, config: SearchDocumentConfig):
         # List of search terms
         title_search_terms = config.search_terms
-        summary_search_terms = config.search_terms
+        document_type_terms = config.document_types
 
         # If the dummy flag is set, return dummy data. Ideally, this will be
         # removed from the final implementation
         if config.dummy:
             df = pd.read_csv("orp/orp_search/construction-data.csv")
-            server_terms_pattern = "|".join(title_search_terms)
-            document_types_pattern = "|".join(summary_search_terms)
-            logger.info("server_terms_pattern: %s", server_terms_pattern)
-            logger.info("document_types_pattern: %s", document_types_pattern)
+            search_terms_pattern = "|".join(title_search_terms)
 
             # Filter the DataFrame based on the search terms
             filtered_df = df[
                 (
                     df["title"].str.contains(
-                        server_terms_pattern, case=False, na=False
+                        search_terms_pattern, case=False, na=False
                     )
                 )
                 & (
                     df["description"].str.contains(
-                        document_types_pattern, case=False, na=False
+                        search_terms_pattern, case=False, na=False
                     )
                 )
             ]
-            results = filtered_df.to_dict(orient="records")
+
+            # If config.publisher_terms is not None, then add filter
+            # for publisher in filtered_df
+            if config.publisher_terms is not None:
+                publisher_terms_pattern = "|".join(config.publisher_terms)
+                filtered_df = filtered_df[
+                    filtered_df["publisher"].str.contains(
+                        publisher_terms_pattern, case=False, na=False
+                    )
+                ]
+
+            # If config.document_types is not None, then add filter
+            # for document types in filtered_df
+            if document_type_terms is not None:
+                document_type_terms_pattern = "|".join(document_type_terms)
+                filtered_df = filtered_df[
+                    filtered_df["type"].str.contains(
+                        document_type_terms_pattern, case=False, na=False
+                    )
+                ]
+
+            if config.sort_by is None:
+                results = filtered_df.to_dict(orient="records")
+                logger.info("filtered data: %s", results)
+                return results
+
+            sorted_df = None
+
+            if config.sort_by == "recently_updated":
+                # Sort the DataFrame by 'date_modified' in descending order
+                sorted_df = filtered_df.sort_values(
+                    by="date_modified", ascending=False
+                )
+
+            elif config.sort_by == "recently_published":
+                # Sort the DataFrame by 'date_issued' in descending order
+                sorted_df = filtered_df.sort_values(
+                    by="date_issued", ascending=False
+                )
+
+            if sorted_df is not None:
+                results = sorted_df.to_dict(orient="records")
+            else:
+                results = []
+
             logger.info("filtered data: %s", results)
             return results
 
@@ -77,9 +148,9 @@ class PublicGateway:
         title_conditions = self._build_like_conditions(
             "b.title", title_search_terms
         )
-        summary_conditions = self._build_like_conditions(
-            "b.summary", summary_search_terms
-        )
+        # summary_conditions = self._build_like_conditions(
+        #     "b.summary", summary_search_terms
+        # )
 
         # SQL query to filter based on title and summary containing search
         # terms
@@ -94,7 +165,7 @@ class PublicGateway:
         template = Template(query_template)
         query = template.render(
             title_conditions=title_conditions,
-            summary_conditions=summary_conditions,
+            # summary_conditions=summary_conditions,
         )
 
         # URL encode the query for the API request
