@@ -80,8 +80,18 @@ def search(request: HttpRequest) -> HttpResponse:
     # Get the search query and document types from the form
     search_query = form.cleaned_data.get("query")
     document_types = form.cleaned_data.get("document_type")
-    limit = form.cleaned_data.get("limit", 10)
-    offset = form.cleaned_data.get("page", 1)
+
+    page = request.GET.get("page", "1")
+    # TODO: some page validation is required here
+    offset = int(page) if page.isdigit() else 1
+
+    limit = request.GET.get("limit", "10")
+    # TODO: some limit validation is required here
+    limit = int(limit) if limit.isdigit() else 10
+
+    publisher = request.GET.getlist("publisher", None)
+    if publisher:
+        logger.info("publisher: %s", publisher)
 
     # If the search query is empty, return the form
     if not search_query:
@@ -96,6 +106,9 @@ def search(request: HttpRequest) -> HttpResponse:
     config = SearchDocumentConfig(
         search_query, document_types, dummy=True, limit=limit, offset=offset
     )
+
+    if publisher:
+        config.publisher_terms = publisher
 
     # Check if the response is cached
     public_gateway = PublicGateway()
@@ -140,6 +153,7 @@ def search(request: HttpRequest) -> HttpResponse:
     else:
         paginated_search_results = []
 
+    context["current_page"] = config.offset
     context["results"] = paginated_search_results
     context["results_count"] = len(paginated_search_results)
     context["results_page_total"] = public_gateway.calculate_total_pages(
