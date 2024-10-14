@@ -1,6 +1,6 @@
 """orp URL configuration."""
 
-import orp_search.views as orp_views
+import orp_search.views as orp_search_views
 
 from django.conf import settings
 from django.contrib import admin
@@ -9,9 +9,10 @@ from django.urls import path
 import core.views as core_views
 
 urlpatterns = [
-    path("", orp_views.search, name="search"),
+    path("", orp_search_views.search, name="search"),
     # If we choose to have a start page with green button, this is it:
     # path("", core_views.home, name="home"),
+    path("details/", orp_search_views.details, name="details"),
     path("healthcheck/", core_views.health_check, name="healthcheck"),
     path(
         "accessibility-statement/",

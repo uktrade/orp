@@ -61,21 +61,21 @@
             <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
               <div class="govuk-checkboxes__item">
                 <input class="govuk-checkboxes__input" id="document_type" name="document_type" type="checkbox"
-                  value="employment-tribunal">
+                  value="legislation">
                 <label class="govuk-label govuk-checkboxes__label" for="document_type">
                   Legislation
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
                 <input class="govuk-checkboxes__input" id="document_type-2" name="document_type" type="checkbox"
-                  value="MOD">
+                  value="guidance">
                 <label class="govuk-label govuk-checkboxes__label" for="document_type-2">
                   Guidance
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
                 <input class="govuk-checkboxes__input" id="document_type-3" name="document_type" type="checkbox"
-                  value="DfT">
+                  value="standard">
                 <label class="govuk-label govuk-checkboxes__label" for="document_type-3">
                   British Standards
                 </label>
@@ -98,10 +98,11 @@
               <label class="govuk-label govuk-visually-hidden" for="{{ form.query.id_for_label }}">
                 Search by publisher
               </label>
-              <div class="search-input-button search-input-button--black orp-publisher-search">
+              <!-- The below will be added as a JavaScript enhancement -->
+              <!-- <div class="search-input-button search-input-button--black orp-publisher-search">
                 <input class="govuk-input orp-publisher-search__input app-site-search__input--default"
                   name="input-autocomplete" placeholder="Search" type="text" role="combobox">
-              </div>
+              </div> -->
             </div>
             <div class="govuk-checkboxes govuk-checkboxes--small orp-max-height-250" data-module="govuk-checkboxes">
               <div class="govuk-checkboxes__item">
@@ -188,13 +189,23 @@
 
     <div class="govuk-grid-column-two-thirds">
       <div class="orp-flex orp-flex--space-between">
-        <p class="govuk-body govuk-!-font-weight-bold govuk-!-margin-bottom-0">4,123 documents</p>
+        <p class="govuk-body govuk-!-font-weight-bold govuk-!-margin-bottom-0">
+          {% if results %}
+          {{ results_count }} documents
+          {% else %}
+          {% if form.is_bound %}
+          No documents found
+          {% endif %}
+          {% endif %}
+        </p>
         <p class="govuk-body govuk-!-margin-bottom-0">
           <a href="#" class="govuk-link govuk-link--no-visited-state
               ">Clear all filters</a>
         </p>
       </div>
-      <ul class="orp-applied-filters-container">
+
+      <!-- Commenting out applied filters for now to avoid confusion -->
+      <!-- <ul class="orp-applied-filters-container">
         <li class="orp-applied-filter-tag">
           <a href="#delete">
             <span class="govuk-visually-hidden">Remove filter:</span>
@@ -207,7 +218,7 @@
             <span class="govuk-body-s">Accreditation Service</span>
           </a>
         </li>
-      </ul>
+      </ul> -->
 
       <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
       <div class="govuk-grid-row">
@@ -226,93 +237,37 @@
       <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
       <div class="govuk-grid-row">
         <div class="govuk-grid-column-full">
-
-          <div class="govuk-summary-list orp-search-results">
-
-            <!-- first search result -->
-            <div class="govuk-summary-list__row--no-border">
-              <span class="govuk-caption-m">Guidance</span>
-              <h2 class="govuk-heading-m">
-                <a href="/document/{{ result.document_id }}/details" class="govuk-link  orp-link-text-decoration-none">
-                  Introduction to asbestos safety
-                </a>
-              </h2>
-              <p class="govuk-body-m">
-                Guidance on complying with the law on asbestos safety including detection, management, controls and
-                training.
-              </p>
-              <p class="govuk-body-s orp-secondary-text-colour govuk-!-margin-bottom-2">
-                Published by: Health and Safety Executive
-              </p>
-              <p class="govuk-body-s orp-secondary-text-colour">
-                Last updated: 24 January 2024
-              </p>
-              <ul class="govuk-list orp-topics-list">
-                <li class="govuk-body-s orp-secondary-text-colour">
-                  COSHH
-                </li>
-                <li class="govuk-body-s orp-secondary-text-colour">
-                  Substances hazardous to health
-                </li>
-                <li class="govuk-body-s orp-secondary-text-colour">
-                  Code of practice
-                </li>
-              </ul>
-            </div>
-            <!-- /first search result -->
-            <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
-            <!-- second search result -->
-            <div class="govuk-summary-list__row--no-border">
-              <span class="govuk-caption-m">Guidance</span>
-              <h2 class="govuk-heading-m">
-                <a href="/document/{{ result.document_id }}/details" class="govuk-link orp-link-text-decoration-none">
-                  Waste and Mining Operations Installations Water Discharge and Groundwater Activities Medium
-                </a>
-              </h2>
-              <p class="govuk-body-m">
-                The Environment Agency consults the public on certain applications for: waste and mining waste
-                operations installations water discharge
-              </p>
-              <p class="govuk-body-s orp-secondary-text-colour govuk-!-margin-bottom-2">
-                Published by: Environment Agency
-              </p>
-              <p class="govuk-body-s orp-secondary-text-colour">
-                Last updated: 30 December 2023
-              </p>
-              <ul class="govuk-list orp-topics-list">
-                <li class="govuk-body-s orp-secondary-text-colour">
-                  Mining
-                </li>
-                <li class="govuk-body-s orp-secondary-text-colour">
-                  Groundwater
-                </li>
-                <li class="govuk-body-s orp-secondary-text-colour">
-                  Waste
-                </li>
-              </ul>
-            </div>
-            <!-- /second search result -->
-            <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
-
-          </div>
-
           {% if results %}
-          <div class="govuk-summary-list">
-            <p class="govuk-body-m">
-              {{ results_count }} matches found.
-            </p>
+          <div class="govuk-summary-list orp-search-results">
             {% for result in results %}
             <div class="govuk-summary-list__row--no-border">
+              <span class="govuk-caption-m">{{ result.document_type }}</span>
               <h2 class="govuk-heading-m">
-                <a href="/document/{{ result.document_id }}/details" class="govuk-link">
+                <a href="/document/{{ result.id }}" class="govuk-link">
                   {{result.title}}
                 </a>
-                {{result.published_date}}
               </h2>
               <p class="govuk-body-m">
-                Regulation: {{ result.document_type }} <br> {{ result.last_updated }}
+                {{result.description}}
               </p>
+
+              <p class="govuk-body-s orp-secondary-text-colour govuk-!-margin-bottom-2">
+                Published by: {{ result.publisher}}
+              </p>
+              <p class="govuk-body-s orp-secondary-text-colour">
+                Last updated: {{ result.date_modified | date:"j F Y" }}
+              </p>
+              <ul class="govuk-list orp-topics-list">
+                <!-- <li class="govuk-body-s orp-secondary-text-colour">
+                  {{ result.subject }}
+                </li> -->
+                <li class="govuk-body-s orp-secondary-text-colour">
+                  {{ result.regulatory_topics }}
+
+                </li>
+              </ul>
             </div>
+            <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
             {% endfor %}
           </div>
           {% else %}

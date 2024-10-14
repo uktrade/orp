@@ -113,3 +113,15 @@ def search(request: HttpRequest) -> HttpResponse:
     logger.info("search results page total: %s", context["results_page_total"])
     logger.debug("paginated search results: %s", paginated_search_results)
     return render(request, template_name="orp.html", context=context)
+
+
+@require_http_methods(["GET"])
+def details(request: HttpRequest) -> HttpResponse:
+    """Regulation details.
+
+    Returns regulation details page.
+    """
+    context = {
+        "service_name": settings.SERVICE_NAME,
+    }
+    return render(request, template_name="details.html", context=context)
