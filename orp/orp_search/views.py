@@ -99,6 +99,10 @@ def search(request: HttpRequest) -> HttpResponse:
     else:
         logger.info("search query: %s", search_query)
 
+    sort_by = request.GET.get("sort", None)
+    if sort_by:
+        logger.info("sort by: %s", sort_by)
+
     logger.info("document types: %s", document_types)
     logger.info("page: %s", offset)
 
@@ -109,6 +113,9 @@ def search(request: HttpRequest) -> HttpResponse:
 
     if publisher:
         config.publisher_terms = publisher
+
+    if sort_by:
+        config.sort_by = sort_by
 
     # Check if the response is cached
     public_gateway = PublicGateway()

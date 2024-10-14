@@ -1,5 +1,6 @@
 import logging
 
+import pandas as pd
 import requests  # type: ignore
 
 from jinja2 import Template
@@ -130,16 +131,44 @@ class PublicGateway:
 
             sorted_df = None
 
-            if config.sort_by == "recently_updated":
+            if config.sort_by == "recently":
                 # Sort the DataFrame by 'date_modified' in descending order
-                sorted_df = filtered_df.sort_values(
-                    by="date_modified", ascending=False
+                # Ensure 'date_issued' is in datetime format
+                filtered_df["date_issued"] = pd.to_datetime(
+                    filtered_df["date_issued"], format="%d/%m/%Y"
                 )
 
-            elif config.sort_by == "recently_published":
                 # Sort the DataFrame by 'date_issued' in descending order
                 sorted_df = filtered_df.sort_values(
                     by="date_issued", ascending=False
+                )
+            elif config.sort_by == "relevance":
+                # Calculate relevance score
+                # (based on the number of keywords found)
+                def calculate_relevance(row, search_terms):
+                    def score_text(text, terms):
+                        text_processed = text.replace(" ", "").lower()
+                        return sum(
+                            1
+                            for term in terms
+                            if term.replace(" ", "").lower() in text_processed
+                        )
+
+                    title_score = score_text(row["title"], search_terms)
+                    description_score = score_text(
+                        row["description"], search_terms
+                    )
+                    return title_score + description_score
+
+                filtered_df["relevance_score"] = filtered_df.apply(
+                    calculate_relevance,
+                    axis=1,
+                    search_terms=config.search_terms,
+                )
+
+                # Sort the DataFrame by 'relevance_score' in descending order
+                sorted_df = filtered_df.sort_values(
+                    by="relevance_score", ascending=False
                 )
 
             if sorted_df is not None:
