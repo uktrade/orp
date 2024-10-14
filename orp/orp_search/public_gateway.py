@@ -73,6 +73,15 @@ class PublicGateway:
         # removed from the final implementation
         if config.dummy:
             df = pd.read_csv("orp/orp_search/construction-data.csv")
+
+            if config.id:
+                # Fetch the record with the specified id
+                record = df[df["id"] == config.id].to_dict(orient="records")
+                if record:
+                    return record[0]  # Return the first matching record
+                else:
+                    return None  # Return None if no matching record is found
+
             search_terms_pattern = "|".join(title_search_terms)
 
             # Filter the DataFrame based on the search terms
