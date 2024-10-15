@@ -106,19 +106,22 @@
             </div>
             <div class="govuk-checkboxes govuk-checkboxes--small orp-max-height-250" data-module="govuk-checkboxes">
               <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="publisher" name="publisher" type="checkbox" value="healthandsafetyexecutive">
+                <input class="govuk-checkboxes__input" id="publisher" name="publisher" type="checkbox"
+                  value="healthandsafetyexecutive">
                 <label class="govuk-label govuk-checkboxes__label" for="publisher">
                   Health and Safety Executive
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="publisher-2" name="publisher" type="checkbox" value="civilaviationauthority">
+                <input class="govuk-checkboxes__input" id="publisher-2" name="publisher" type="checkbox"
+                  value="civilaviationauthority">
                 <label class="govuk-label govuk-checkboxes__label" for="publisher-2">
                   Civil Aviation Authority
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="publisher-3" name="publisher" type="checkbox" value="environmentagency">
+                <input class="govuk-checkboxes__input" id="publisher-3" name="publisher" type="checkbox"
+                  value="environmentagency">
                 <label class="govuk-label govuk-checkboxes__label" for="publisher-3">
                   Environment Agency
                 </label>
@@ -130,43 +133,50 @@
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="publisher-5" name="publisher" type="checkbox" value="officeofgasandelectricitymarkets">
+                <input class="govuk-checkboxes__input" id="publisher-5" name="publisher" type="checkbox"
+                  value="officeofgasandelectricitymarkets">
                 <label class="govuk-label govuk-checkboxes__label" for="publisher-5">
                   Office of Gas and Electricity Markets
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="publisher-6" name="publisher" type="checkbox" value="officeofrailandroad">
+                <input class="govuk-checkboxes__input" id="publisher-6" name="publisher" type="checkbox"
+                  value="officeofrailandroad">
                 <label class="govuk-label govuk-checkboxes__label" for="publisher-6">
                   Office of Rail and Road
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="publisher-7" name="publisher" type="checkbox" value="naturalengland">
+                <input class="govuk-checkboxes__input" id="publisher-7" name="publisher" type="checkbox"
+                  value="naturalengland">
                 <label class="govuk-label govuk-checkboxes__label" for="publisher-7">
                   Natural England
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="publisher-8" name="publisher" type="checkbox" value="historicengland">
+                <input class="govuk-checkboxes__input" id="publisher-8" name="publisher" type="checkbox"
+                  value="historicengland">
                 <label class="govuk-label govuk-checkboxes__label" for="publisher-8">
                   Historic England
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="publisher-9" name="publisher" type="checkbox" value="nationalhighways">
+                <input class="govuk-checkboxes__input" id="publisher-9" name="publisher" type="checkbox"
+                  value="nationalhighways">
                 <label class="govuk-label govuk-checkboxes__label" for="publisher-9">
                   National Highways
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="publisher-10" name="publisher" type="checkbox" value="homesengland">
+                <input class="govuk-checkboxes__input" id="publisher-10" name="publisher" type="checkbox"
+                  value="homesengland">
                 <label class="govuk-label govuk-checkboxes__label" for="publisher-10">
                   Homes England
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="publisher-11" name="publisher" type="checkbox" value="departmentfortransport">
+                <input class="govuk-checkboxes__input" id="publisher-11" name="publisher" type="checkbox"
+                  value="departmentfortransport">
                 <label class="govuk-label govuk-checkboxes__label" for="publisher-11">
                   Department for Transport
                 </label>
@@ -180,23 +190,24 @@
         </button>
         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
         <p class="govuk-body">
-          <a id="download-csv-link" href="#" class="govuk-link govuk-link--no-visited-state govuk-!-float-right">Download search results as CSV
+          <a id="download-csv-link" href="#"
+            class="govuk-link govuk-link--no-visited-state govuk-!-float-right">Download search results as CSV
             file</a>
         </p>
 
-      <script>
-      // Function to get the current query parameters from the address bar
-      function getQueryParameters() {
-          return window.location.search;
-      }
+        <script>
+          // Function to get the current query parameters from the address bar
+          function getQueryParameters() {
+            return window.location.search;
+          }
 
-      document.addEventListener('DOMContentLoaded', function() {
-          var csvLink = document.getElementById('download-csv-link');
-          var queryParams = getQueryParameters();
-          var baseURL = '{% url "download_csv" %}';
-          csvLink.href = baseURL + queryParams;
-      });
-    </script>
+          document.addEventListener('DOMContentLoaded', function () {
+            var csvLink = document.getElementById('download-csv-link');
+            var queryParams = getQueryParameters();
+            var baseURL = '{% url "download_csv" %}';
+            csvLink.href = baseURL + queryParams;
+          });
+        </script>
       </form>
     </div>
 
@@ -268,16 +279,12 @@
                 Published by: {{ result.publisher}}
               </p>
               <p class="govuk-body-s orp-secondary-text-colour">
-                Last updated: {{ result.date_modified | date:"j F Y" }}
+                Last updated: {{ result.date_modified }}
               </p>
               <ul class="govuk-list orp-topics-list">
-                <!-- <li class="govuk-body-s orp-secondary-text-colour">
-                  {{ result.subject }}
-                </li> -->
-                <li class="govuk-body-s orp-secondary-text-colour">
-                  {{ result.regulatory_topics }}
-
-                </li>
+                {% for topic in result.regulatory_topics %}
+                <li class="govuk-body-s orp-secondary-text-colour">{{ topic }}</li>
+                {% endfor %}
               </ul>
             </div>
             <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">

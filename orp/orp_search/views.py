@@ -47,6 +47,11 @@ def details(request: HttpRequest, id) -> HttpResponse:
                 "regulatory_topics"
             ].split("\n")
 
+        if "related_legislation" in search_result:
+            search_result["related_legislation"] = search_result[
+                "related_legislation"
+            ].split("\n")
+
         context["result"] = search_result
         return render(request, template_name="details.html", context=context)
     except Exception as e:
@@ -191,9 +196,7 @@ def search(request: HttpRequest) -> HttpResponse:
                 "date_issued": result["date_issued"],
                 "date_modified": result["date_modified"],
                 "document_type": result["type"],
-                "regulatory_topics": " | ".join(
-                    result["regulatory_topics"].split("\n")
-                ),
+                "regulatory_topics": result["regulatory_topics"].split("\n"),
             }
             for result in paginated_search_results
         ]
