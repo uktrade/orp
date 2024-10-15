@@ -17,7 +17,7 @@ urlpatterns = [
         orp_search_views.download_search_csv,
         name="download_csv",
     ),
-    path("details/<str:id>", orp_search_views.details, name="details"),
+    path("document/<str:id>", orp_search_views.document, name="document"),
     path("healthcheck/", core_views.health_check, name="healthcheck"),
     path(
         "accessibility-statement/",
