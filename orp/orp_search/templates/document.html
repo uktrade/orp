@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block head_title %}{{service_name}}{% endblock %}
+{% block head_title %}{{service_name}} - {{ result.title }}{% endblock %}
 {% block service_name %}{{service_name}}{% endblock %}
 
 {% block body_content %}
@@ -8,21 +8,22 @@
   <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
     <ol class="govuk-breadcrumbs__list">
       <li class="govuk-breadcrumbs__list-item">
-        <a class="govuk-breadcrumbs__link" href="#">Search results</a>
+        <a class="govuk-breadcrumbs__link" href="{{ request.META.HTTP_REFERER }}">Search results</a>
       </li>
       <li class="govuk-breadcrumbs__list-item">
-        <a class="govuk-breadcrumbs__link" href="#">{{ result.title }}</a>
+        {{ result.title }}
       </li>
     </ol>
   </nav>
   <main class="govuk-main-wrapper govuk-main-wrapper--l" id="main-content" role="main">
     <div class="govuk-grid-row govuk-!-margin-bottom-4">
-      <div class="govuk-grid-column-three-quarters">
+      <div class="govuk-grid-column-two-thirds">
+        <span class="govuk-caption-xl">{{ result.type }}</span>
         <h1 class="govuk-heading-xl">{{ result.title }}</h1>
       </div>
     </div>
     <div class="govuk-grid-row govuk-body">
-      <div class="govuk-grid-column-three-quarters">
+      <div class="govuk-grid-column-two-thirds">
         <p class="govuk-body">
           {{ result.description }}
         </p>
@@ -30,10 +31,10 @@
         <dl class="govuk-summary-list">
           <div class="govuk-summary-list__row">
             <dt class="govuk-summary-list__key">
-              Link to document on publisher’s website
+              Link to document on publisher's website
             </dt>
             <dd class="govuk-summary-list__value">
-              <a class="govuk-link" href="{{ result.identifier }}">{{ result.title }}</a>
+              <a class="govuk-link" href="{{ result.identifier }}">{{ result.title }}</a> from {{ result.publisher }}
             </dd>
           </div>
           <div class="govuk-summary-list__row">
@@ -70,19 +71,24 @@
           </div>
         </dl>
         <h2 class="govuk-heading-m">Related content on legislation.gov.uk</h2>
-        <p class="govuk-body">
-          <a class="govuk-link" href="#">{{ result.related_legislation }}</a>
-        </p>
+        <!--
+         The design shows these links as document titles which we don't have.
+         We'd need to look up each one using the legislation.gov.uk API
+        -->
+        <div class="govuk-!-margin-bottom-6">
+          {% for legislation in result.related_legislation %}
+          <p class="govuk-body govuk-!-margin-bottom-2">
+            <a class="govuk-link" href="{{legislation}}">{{ legislation }}</a>
+          </p>
+          {% endfor %}
+        </div>
 
         <h2 class="govuk-heading-m">Regulatory topics</h2>
         <ul class="govuk-list orp-topics-list">
-          <li class="govuk-body-s orp-secondary-text-colour">
-              {% for topic in result.regulatory_topics %}
-                   <p>{{ topic }}</p>
-               {% endfor %}
-          </li>
+          {% for topic in result.regulatory_topics %}
+          <li class="govuk-body-s orp-secondary-text-colour">{{ topic }}</li>
+          {% endfor %}
         </ul>
-
       </div>
     </div>
   </main>

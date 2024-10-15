@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 @require_http_methods(["GET"])
-def details(request: HttpRequest, id) -> HttpResponse:
-    """Details view.
+def document(request: HttpRequest, id) -> HttpResponse:
+    """Document details view.
 
     Handles the GET request to fetch details based on the provided id.
     """
@@ -31,7 +31,7 @@ def details(request: HttpRequest, id) -> HttpResponse:
     logger.info("document id: %s", document_id)
     if not document_id:
         context["error"] = "no document id provided"
-        return render(request, template_name="details.html", context=context)
+        return render(request, template_name="document.html", context=context)
 
     # Create a SearchDocumentConfig instance and set the id parameter
     config = SearchDocumentConfig(search_terms="", dummy=True, id=document_id)
@@ -47,12 +47,17 @@ def details(request: HttpRequest, id) -> HttpResponse:
                 "regulatory_topics"
             ].split("\n")
 
+        if "related_legislation" in search_result:
+            search_result["related_legislation"] = search_result[
+                "related_legislation"
+            ].split("\n")
+
         context["result"] = search_result
-        return render(request, template_name="details.html", context=context)
+        return render(request, template_name="document.html", context=context)
     except Exception as e:
         logger.error("error fetching details: %s", e)
         context["error"] = f"error fetching details: {e}"
-        return render(request, template_name="details.html", context=context)
+        return render(request, template_name="document.html", context=context)
 
 
 @require_http_methods(["GET"])
@@ -191,9 +196,7 @@ def search(request: HttpRequest) -> HttpResponse:
                 "date_issued": result["date_issued"],
                 "date_modified": result["date_modified"],
                 "document_type": result["type"],
-                "regulatory_topics": " | ".join(
-                    result["regulatory_topics"].split("\n")
-                ),
+                "regulatory_topics": result["regulatory_topics"].split("\n"),
             }
             for result in paginated_search_results
         ]
