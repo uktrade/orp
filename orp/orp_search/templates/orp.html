@@ -61,21 +61,21 @@
             <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
               <div class="govuk-checkboxes__item">
                 <input class="govuk-checkboxes__input" id="document_type" name="document_type" type="checkbox"
-                  value="legislation">
+                  value="legislation" {% if 'legislation' in form.document_type.value %}checked{% endif %}>
                 <label class="govuk-label govuk-checkboxes__label" for="document_type">
                   Legislation
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
                 <input class="govuk-checkboxes__input" id="document_type-2" name="document_type" type="checkbox"
-                  value="guidance">
+                  value="guidance" {% if 'guidance' in form.document_type.value %}checked{% endif %}>
                 <label class="govuk-label govuk-checkboxes__label" for="document_type-2">
                   Guidance
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
                 <input class="govuk-checkboxes__input" id="document_type-3" name="document_type" type="checkbox"
-                  value="standard">
+                  value="standard" {% if 'standard' in form.document_type.value %}checked{% endif %}>
                 <label class="govuk-label govuk-checkboxes__label" for="document_type-3">
                   British Standards
                 </label>
@@ -94,89 +94,91 @@
             <!-- <div id="status-hint" class="govuk-hint govuk-!-font-size-14">
                 1 selected
               </div> -->
-            <div class="govuk-form-group {% if form.query.errors %}govuk-form-group--error{% endif %} search-group">
-              <label class="govuk-label govuk-visually-hidden" for="{{ form.query.id_for_label }}">
+            <!-- <div class="govuk-form-group {% if form.query.errors %}govuk-form-group--error{% endif %} search-group"> -->
+            <!-- <label class="govuk-label govuk-visually-hidden" for="{{ form.query.id_for_label }}">
                 Search by publisher
-              </label>
-              <!-- The below will be added as a JavaScript enhancement -->
-              <!-- <div class="search-input-button search-input-button--black orp-publisher-search">
+              </label> -->
+            <!-- The below will be added as a JavaScript enhancement -->
+            <!-- <div class="search-input-button search-input-button--black orp-publisher-search">
                 <input class="govuk-input orp-publisher-search__input app-site-search__input--default"
                   name="input-autocomplete" placeholder="Search" type="text" role="combobox">
               </div> -->
-            </div>
-            <div class="govuk-checkboxes govuk-checkboxes--small orp-max-height-250" data-module="govuk-checkboxes">
+            <!-- </div> -->
+            <!-- <div class="govuk-checkboxes govuk-checkboxes--small orp-max-height-250" data-module="govuk-checkboxes"> -->
+            <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
               <div class="govuk-checkboxes__item">
                 <input class="govuk-checkboxes__input" id="publisher" name="publisher" type="checkbox"
-                  value="healthandsafetyexecutive">
+                  value="healthandsafetyexecutive" {% if 'healthandsafetyexecutive' in form.publisher.value %}checked{% endif %}>
                 <label class="govuk-label govuk-checkboxes__label" for="publisher">
                   Health and Safety Executive
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
                 <input class="govuk-checkboxes__input" id="publisher-2" name="publisher" type="checkbox"
-                  value="civilaviationauthority">
+                  value="civilaviationauthority" {% if 'civilaviationauthority' in form.publisher.value %}checked{% endif %}>
                 <label class="govuk-label govuk-checkboxes__label" for="publisher-2">
                   Civil Aviation Authority
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
                 <input class="govuk-checkboxes__input" id="publisher-3" name="publisher" type="checkbox"
-                  value="environmentagency">
+                  value="environmentagency" {% if 'environmentagency' in form.publisher.value %}checked{% endif %}>
                 <label class="govuk-label govuk-checkboxes__label" for="publisher-3">
                   Environment Agency
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="publisher-4" name="publisher" type="checkbox" value="defra">
+                <input class="govuk-checkboxes__input" id="publisher-4" name="publisher" type="checkbox" value="defra"
+                  {% if 'defra' in form.publisher.value %}checked{% endif %}>
                 <label class="govuk-label govuk-checkboxes__label" for="publisher-4">
                   Defra
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
                 <input class="govuk-checkboxes__input" id="publisher-5" name="publisher" type="checkbox"
-                  value="officeofgasandelectricitymarkets">
+                  value="officeofgasandelectricitymarkets" {% if 'officeofgasandelectricitymarkets' in form.publisher.value %}checked{% endif %}>
                 <label class="govuk-label govuk-checkboxes__label" for="publisher-5">
                   Office of Gas and Electricity Markets
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
                 <input class="govuk-checkboxes__input" id="publisher-6" name="publisher" type="checkbox"
-                  value="officeofrailandroad">
+                  value="officeofrailandroad" {% if 'officeofrailandroad' in form.publisher.value %}checked{% endif %}>
                 <label class="govuk-label govuk-checkboxes__label" for="publisher-6">
                   Office of Rail and Road
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
                 <input class="govuk-checkboxes__input" id="publisher-7" name="publisher" type="checkbox"
-                  value="naturalengland">
+                  value="naturalengland" {% if 'naturalengland' in form.publisher.value %}checked{% endif %}>
                 <label class="govuk-label govuk-checkboxes__label" for="publisher-7">
                   Natural England
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
                 <input class="govuk-checkboxes__input" id="publisher-8" name="publisher" type="checkbox"
-                  value="historicengland">
+                  value="historicengland" {% if 'historicengland' in form.publisher.value %}checked{% endif %}>
                 <label class="govuk-label govuk-checkboxes__label" for="publisher-8">
                   Historic England
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
                 <input class="govuk-checkboxes__input" id="publisher-9" name="publisher" type="checkbox"
-                  value="nationalhighways">
+                  value="nationalhighways" {% if 'nationalhighways' in form.publisher.value %}checked{% endif %}>
                 <label class="govuk-label govuk-checkboxes__label" for="publisher-9">
                   National Highways
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
                 <input class="govuk-checkboxes__input" id="publisher-10" name="publisher" type="checkbox"
-                  value="homesengland">
+                  value="homesengland" {% if 'homesengland' in form.publisher.value %}checked{% endif %}>
                 <label class="govuk-label govuk-checkboxes__label" for="publisher-10">
                   Homes England
                 </label>
               </div>
               <div class="govuk-checkboxes__item">
                 <input class="govuk-checkboxes__input" id="publisher-11" name="publisher" type="checkbox"
-                  value="departmentfortransport">
+                  value="departmentfortransport" {% if 'departmentfortransport' in form.publisher.value %}checked{% endif %}>
                 <label class="govuk-label govuk-checkboxes__label" for="publisher-11">
                   Department for Transport
                 </label>
@@ -201,7 +203,7 @@
       <div class="orp-flex orp-flex--space-between">
         <p class="govuk-body govuk-!-font-weight-bold govuk-!-margin-bottom-0">
           {% if results %}
-          {{ results_count }} documents
+          {{ results_total_count }} documents
           {% else %}
           {% if form.is_bound %}
           No documents found
@@ -251,7 +253,7 @@
           <div class="govuk-summary-list orp-search-results">
             {% for result in results %}
             <div class="govuk-summary-list__row--no-border">
-              <span class="govuk-caption-m">{{ result.document_type }}</span>
+              <span class="govuk-caption-m">{{ result.type }}</span>
               <h2 class="govuk-heading-m">
                 <a href="/document/{{ result.id }}" class="govuk-link">
                   {{result.title}}

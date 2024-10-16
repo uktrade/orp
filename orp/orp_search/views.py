@@ -170,5 +170,5 @@ def search(request: HttpRequest) -> HttpResponse:
     context = public_gateway.finalise_results(config, search_results, context)
 
     logger.info("search results: %s", context["results"])
-    logger.info("search results count: %s", context["results_count"])
+    # logger.info("search results count: %s", context["results_count"])
     return render(request, template_name="orp.html", context=context)
