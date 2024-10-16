@@ -174,32 +174,40 @@ def search(request: HttpRequest) -> HttpResponse:
     # on the landing page.
 
     if search_results:
-        paginated_search_results = public_gateway.paginate_results(
-            config, search_results
-        )
-        logger.info(
-            "paginated search results after paginate: %s",
-            paginated_search_results,
+        context, paginator = public_gateway.paginate_results(
+            config, search_results, context
         )
 
+        # Initialize a list to hold all results from all pages
+        paginated_search_results = []
+
+        # Iterate over each page
+        for page_num in paginator.page_range:
+            # Get the page
+            page = paginator.page(page_num)
+            # Add the objects of the current page to the aggregate list
+
+            for result in page.object_list:
+                paginated_search_results.append(
+                    {
+                        "id": result["id"],
+                        "title": result["title"],
+                        "publisher": result["publisher"],
+                        "description": (
+                            result["description"][:100] + "..."
+                            if len(result["description"]) > 100
+                            else result["description"]
+                        ),
+                        "date_issued": result["date_issued"],
+                        "date_modified": result["date_modified"],
+                        "document_type": result["type"],
+                        "regulatory_topics": result["regulatory_topics"].split(
+                            "\n"
+                        ),
+                    }
+                )
+
         # We can use the following code to filter the search_results list:
-        paginated_search_results = [
-            {
-                "id": result["id"],
-                "title": result["title"],
-                "publisher": result["publisher"],
-                "description": (
-                    result["description"][:100] + "..."
-                    if len(result["description"]) > 100
-                    else result["description"]
-                ),
-                "date_issued": result["date_issued"],
-                "date_modified": result["date_modified"],
-                "document_type": result["type"],
-                "regulatory_topics": result["regulatory_topics"].split("\n"),
-            }
-            for result in paginated_search_results
-        ]
         context["results_count"] = len(paginated_search_results)
     else:
         paginated_search_results = []
