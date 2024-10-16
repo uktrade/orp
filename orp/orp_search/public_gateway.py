@@ -1,7 +1,5 @@
 import logging
 
-from typing import Tuple
-
 import pandas as pd
 import requests  # type: ignore
 
@@ -9,7 +7,7 @@ from jinja2 import Template
 from orp_search.config import SearchDocumentConfig
 from orp_search.dummy_data import get_construction_data_as_dataframe
 
-from django.core.paginator import InvalidPage, Paginator
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 
 logger = logging.getLogger(__name__)
 
@@ -39,9 +37,9 @@ class PublicGateway:
         """
         return " OR ".join([f"{field} LIKE '%{term}%'" for term in terms])
 
-    def paginate_results(
+    def finalise_results(
         self, config: SearchDocumentConfig, results, context
-    ) -> Tuple[dict, Paginator]:
+    ) -> dict:
         """
         Paginates the given search results based on the provided configuration.
 
@@ -66,29 +64,35 @@ class PublicGateway:
         paginator = Paginator(results, config.limit)
         try:
             paginated_documents = paginator.page(config.offset)
-        except InvalidPage:
+        except PageNotAnInteger:
             paginated_documents = paginator.page(1)
+        except EmptyPage:
+            paginated_documents = paginator.page(paginator.num_pages)
+
+        # Iterate over each document in paginated_documents
+        if paginated_documents:
+            for paginated_document in paginated_documents:
+                if "description" in paginated_document:
+                    paginated_document["description"] = (
+                        paginated_document["description"][:100] + "..."
+                        if len(paginated_document["description"]) > 100
+                        else paginated_document["description"]
+                    )
+                if "regulatory_topics" in paginated_document:
+                    paginated_document["regulatory_topics"] = str(
+                        paginated_document["regulatory_topics"]
+                    ).split("\n")
+
+        # Pass the paginated results to the template
         context["is_paginated"] = paginator.num_pages > 1
+        context["results"] = paginated_documents
         context["documents"] = paginated_documents
         context["paginator"] = paginator
         context["page_obj"] = paginated_documents
-        return context, paginator
-
-    def calculate_total_pages(self, config, results_count):
-        """
-        Calculates the total number of pages for pagination.
-
-        Args:
-            total_results (int): The total number of search results.
-            limit (int): The number of results per page.
-
-        Returns:
-            int: The total number of pages.
-        """
-
-        if config.limit <= 0:
-            raise ValueError("limit must be greater than 0")
-        return (results_count + config.limit - 1) // config.limit
+        context["results_count"] = paginator.count
+        context["results_page_total"] = paginator.num_pages
+        context["current_page"] = config.offset
+        return context
 
     def search(self, config: SearchDocumentConfig):
         # List of search terms
