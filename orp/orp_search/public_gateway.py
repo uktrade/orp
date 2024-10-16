@@ -156,7 +156,7 @@ class PublicGateway:
 
             if config.sort_by is None:
                 results = filtered_df.to_dict(orient="records")
-                logger.info("filtered data: %s", results)
+                # logger.info("filtered data: %s", results)
                 return results
 
             sorted_df = None
@@ -206,7 +206,7 @@ class PublicGateway:
             else:
                 results = []
 
-            logger.info("filtered data: %s", results)
+            # logger.info("filtered data: %s", results)
             return results
 
         # Base URL for the API
