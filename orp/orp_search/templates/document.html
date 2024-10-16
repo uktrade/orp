@@ -70,18 +70,21 @@
             </dd>
           </div>
         </dl>
-        <h2 class="govuk-heading-m">Related content on legislation.gov.uk</h2>
-        <!--
-         The design shows these links as document titles which we don't have.
-         We'd need to look up each one using the legislation.gov.uk API
-        -->
-        <div class="govuk-!-margin-bottom-6">
-          {% for legislation in result.related_legislation %}
-          <p class="govuk-body govuk-!-margin-bottom-2">
-            <a class="govuk-link" href="{{legislation}}">{{ legislation }}</a>
-          </p>
-          {% endfor %}
-        </div>
+
+        {% if 'nan' not in result.related_legislation %}
+          <h2 class="govuk-heading-m">Related content on legislation.gov.uk</h2>
+          <!--
+          The design shows these links as document titles which we don't have.
+          We'd need to look up each one using the legislation.gov.uk API
+          -->
+          <div class="govuk-!-margin-bottom-6">
+            {% for legislation in result.related_legislation %}
+            <p class="govuk-body govuk-!-margin-bottom-2">
+              <a class="govuk-link" href="{{legislation}}">{{ legislation }}</a>
+            </p>
+            {% endfor %}
+          </div>
+        {% endif %}
 
         <h2 class="govuk-heading-m">Regulatory topics</h2>
         <ul class="govuk-list orp-topics-list">

@@ -125,7 +125,7 @@ def search(request: HttpRequest) -> HttpResponse:
     context["form"] = form
 
     # Get the search query and document types from the form
-    search_query = form.cleaned_data.get("query")
+    search_query = form.cleaned_data.get("search")
     document_types = form.cleaned_data.get("document_type")
 
     page = request.GET.get("page", "1")
