@@ -47,12 +47,32 @@ class RegulationSearchForm(forms.Form):
             ("guidance", "Guidance"),
             ("standard", "British Standard"),
         ],
-        widget=forms.CheckboxSelectMultiple(
-            attrs={
-                "class": "govuk-checkboxes__input",
-                "data-module": "govuk-checkboxes",
-            }
-        ),
-        label="Select document types",
-        help_text="You can select multiple document types.",
+        # widget=forms.CheckboxSelectMultiple(
+        #     attrs={
+        #         "class": "govuk-checkboxes__input",
+        #         "data-module": "govuk-checkboxes",
+        #     }
+        # ),
+        # label="Select document types",
+        # help_text="You can select multiple document types.",
+    )
+
+    publisher = forms.MultipleChoiceField(
+        required=False,
+        choices=[
+            ("healthandsafetyexecutive", "Health and Safety Executive"),
+            ("civilaviationauthority", "Civil Aviation Authority"),
+            ("environmentagency", "Environment Agency"),
+            ("defra", "Defra"),
+            (
+                "officeofgasandelectricitymarkets",
+                "Office of Gas and Electricity Markets",
+            ),
+            ("officeofrailandroad", "Office of Rail and Road"),
+            ("naturalengland", "Natural England"),
+            ("historicengland", "Historic England"),
+            ("nationalhighways", "National Highways"),
+            ("homesengland", "Homes England"),
+            ("departmentfortransport", "Department for Transport"),
+        ],
     )
