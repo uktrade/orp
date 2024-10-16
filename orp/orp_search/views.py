@@ -62,7 +62,7 @@ def document(request: HttpRequest, id) -> HttpResponse:
 
 @require_http_methods(["GET"])
 def download_search_csv(request: HttpRequest) -> HttpResponse:
-    search_terms = request.GET.get("query", "")
+    search_terms = request.GET.get("search", "")
     document_type_terms = request.GET.get("document_type", "")
     publisher_terms = request.GET.getlist("publisher", None)
     sort_by = request.GET.get("sort", None)
