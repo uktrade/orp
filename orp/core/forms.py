@@ -25,15 +25,15 @@ class RegulationSearchForm(forms.Form):
     for regulations by name or description.
     """
 
-    query = forms.CharField(
+    search = forms.CharField(
         required=False,
         label="Search",
         help_text="",
         widget=forms.TextInput(
             attrs={
                 "class": "govuk-input",
-                "id": "query",
-                "name": "query",
+                "id": "search",
+                "name": "search",
                 "type": "search",
                 "placeholder": "",
             }
