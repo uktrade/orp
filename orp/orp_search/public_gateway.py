@@ -87,6 +87,7 @@ class PublicGateway:
         context["paginator"] = paginator
         context["is_paginated"] = paginator.num_pages > 1
         context["results"] = paginated_documents
+        context["results_count"] = len(paginated_documents)
         context["results_total_count"] = paginator.count
         context["results_page_total"] = paginator.num_pages
         context["current_page"] = config.offset
