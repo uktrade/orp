@@ -166,64 +166,9 @@ def search(request: HttpRequest) -> HttpResponse:
 
     public_gateway = PublicGateway()
     search_results = public_gateway.search(config)
-    context["results_count_total"] = len(search_results)
 
-    # search_results contains too much information for the
-    # landing page (search) so we need to filter it and
-    # reduce the amount of information to be displayed
-    # on the landing page.
-
-    if search_results:
-        context, paginator = public_gateway.paginate_results(
-            config, search_results, context
-        )
-
-        # Initialize a list to hold all results from all pages
-        paginated_search_results = []
-
-        # Iterate over each page
-        for page_num in paginator.page_range:
-            # Get the page
-            page = paginator.page(page_num)
-            # Add the objects of the current page to the aggregate list
-
-            for result in page.object_list:
-                paginated_search_results.append(
-                    {
-                        "id": result["id"],
-                        "title": result["title"],
-                        "publisher": result["publisher"],
-                        "description": (
-                            result["description"][:100] + "..."
-                            if len(result["description"]) > 100
-                            else result["description"]
-                        ),
-                        "date_issued": result["date_issued"],
-                        "date_modified": result["date_modified"],
-                        "document_type": result["type"],
-                        "regulatory_topics": result["regulatory_topics"].split(
-                            "\n"
-                        ),
-                    }
-                )
-
-        # We can use the following code to filter the search_results list:
-        context["results_count"] = len(paginated_search_results)
-    else:
-        paginated_search_results = []
-
-    context["current_page"] = config.offset
-    context["results"] = paginated_search_results
-    context["results_count"] = len(paginated_search_results)
-    context["results_page_total"] = public_gateway.calculate_total_pages(
-        config, context["results_count_total"]
-    )
+    context = public_gateway.finalise_results(config, search_results, context)
 
     logger.info("search results: %s", context["results"])
     logger.info("search results count: %s", context["results_count"])
-    logger.info(
-        "search results total count: %s", context["results_count_total"]
-    )
-    logger.info("search results page total: %s", context["results_page_total"])
-    logger.debug("paginated search results: %s", paginated_search_results)
     return render(request, template_name="orp.html", context=context)
