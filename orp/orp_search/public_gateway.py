@@ -65,13 +65,13 @@ class PublicGateway:
         """
         paginator = Paginator(results, config.limit)
         try:
-            paginated_reports = paginator.page(config.offset)
+            paginated_documents = paginator.page(config.offset)
         except InvalidPage:
-            paginated_reports = paginator.page(1)
+            paginated_documents = paginator.page(1)
         context["is_paginated"] = paginator.num_pages > 1
-        context["reports"] = paginated_reports
+        context["documents"] = paginated_documents
         context["paginator"] = paginator
-        context["page_obj"] = paginated_reports
+        context["page_obj"] = paginated_documents
         return context, paginator
 
     def calculate_total_pages(self, config, results_count):
