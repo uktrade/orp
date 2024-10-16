@@ -1,13 +1,15 @@
+import base64
 import csv
 import logging
 
 import pandas as pd
 
+from orp_search.legislation import Legislation
 from orp_search.public_gateway import PublicGateway, SearchDocumentConfig
 
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
 from core.forms import RegulationSearchForm
@@ -21,13 +23,24 @@ def document(request: HttpRequest, id) -> HttpResponse:
 
     Handles the GET request to fetch details based on the provided id.
     """
-
     context = {
         "service_name": settings.SERVICE_NAME_SEARCH,
     }
 
+    def _decode_url(encoded_url):
+        decoded_bytes = base64.urlsafe_b64decode(encoded_url.encode("utf-8"))
+        return decoded_bytes.decode("utf-8")
+
     # Extract the id parameter from the request
     document_id = id
+
+    # Decode id to see if it's a url ?
+    try:
+        decoded_url = _decode_url(document_id)
+        return redirect(decoded_url)
+    except Exception:
+        logger.info("document id is not a url")
+
     logger.info("document id: %s", document_id)
     if not document_id:
         context["error"] = "no document id provided"
@@ -155,7 +168,11 @@ def search(request: HttpRequest) -> HttpResponse:
 
     # Get the search results from the Data API using PublicGateway class
     config = SearchDocumentConfig(
-        search_query, document_types, dummy=True, limit=limit, offset=offset
+        str(search_query).lower(),
+        document_types,
+        dummy=True,
+        limit=limit,
+        offset=offset,
     )
 
     if publisher:
@@ -164,11 +181,31 @@ def search(request: HttpRequest) -> HttpResponse:
     if sort_by:
         config.sort_by = sort_by
 
-    public_gateway = PublicGateway()
-    search_results = public_gateway.search(config)
+    if (
+        not config.document_types
+        or "standard" in config.document_types
+        or "guidance" in config.document_types
+    ):
+        public_gateway = PublicGateway()
+        search_results = public_gateway.search(config)
+        context = public_gateway.finalise_results(
+            config, search_results, context
+        )
 
-    context = public_gateway.finalise_results(config, search_results, context)
+    # Legislation search
+    # If config.search_terms is empty then we don't need to
+    # search for legislation
+    if not config.search_terms or "" in config.search_terms:
+        logger.info("no search terms provided")
+        return render(request, template_name="orp.html", context=context)
 
-    logger.info("search results: %s", context["results"])
-    # logger.info("search results count: %s", context["results_count"])
+    if not config.document_types or "legislation" in config.document_types:
+        logger.info("searching for legislation: %s", config.search_terms)
+        legislation = Legislation()
+        legislation_results = legislation.search(config)
+        logger.info(f"legislation results: {legislation_results}")
+        context = legislation.finalise_results(
+            config, legislation_results, context
+        )
+
     return render(request, template_name="orp.html", context=context)
