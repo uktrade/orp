@@ -193,8 +193,7 @@
         </button>
         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
         <p class="govuk-body">
-          {% comment %} <a id="download-csv-link" href="download_csv/?{{ request.META.QUERY_STRING }}" {% endcomment %}
-          <a id="download-csv-link" href="download_csv/?{{ request.GET.query }}"
+          <a id="download-csv-link" href="download_csv/?{{ request.META.QUERY_STRING }}"
             class="govuk-link govuk-link--no-visited-state govuk-!-float-right">Download search results as CSV
             file</a>
         </p>
