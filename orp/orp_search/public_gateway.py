@@ -1,11 +1,15 @@
 import logging
 
+from typing import Tuple
+
 import pandas as pd
 import requests  # type: ignore
 
 from jinja2 import Template
 from orp_search.config import SearchDocumentConfig
 from orp_search.dummy_data import get_construction_data_as_dataframe
+
+from django.core.paginator import InvalidPage, Paginator
 
 logger = logging.getLogger(__name__)
 
@@ -35,20 +39,40 @@ class PublicGateway:
         """
         return " OR ".join([f"{field} LIKE '%{term}%'" for term in terms])
 
-    def paginate_results(self, config: SearchDocumentConfig, results):
+    def paginate_results(
+        self, config: SearchDocumentConfig, results, context
+    ) -> Tuple[dict, Paginator]:
         """
-        Paginates the search results.
+        Paginates the given search results based on the provided configuration.
 
-        Args:
-            results (list): The search results to paginate.
+        Arguments:
+         config (SearchDocumentConfig): Configuration parameters for search,
+                                        including pagination limits.
+         results: A collection of search results to be paginated.
+         context: A dictionary containing context data which will be updated
+                  with pagination details.
 
         Returns:
-            list: The paginated search results.
-            count: Total number of pages from results
+         A tuple containing:
+          - Updated context dictionary with pagination information.
+          - Paginator instance used for paginating the results.
+
+        The context dictionary is updated with the following keys:
+         is_paginated: A boolean indicating if the results span multiple pages.
+         reports: The paginated results for the current page.
+         paginator: The Paginator instance.
+         page_obj: The current page of results.
         """
-        start = (config.offset - 1) * config.limit
-        end = start + config.limit
-        return results[start:end]
+        paginator = Paginator(results, config.limit)
+        try:
+            paginated_reports = paginator.page(config.offset)
+        except InvalidPage:
+            paginated_reports = paginator.page(1)
+        context["is_paginated"] = paginator.num_pages > 1
+        context["reports"] = paginated_reports
+        context["paginator"] = paginator
+        context["page_obj"] = paginated_reports
+        return context, paginator
 
     def calculate_total_pages(self, config, results_count):
         """
@@ -61,6 +85,7 @@ class PublicGateway:
         Returns:
             int: The total number of pages.
         """
+
         if config.limit <= 0:
             raise ValueError("limit must be greater than 0")
         return (results_count + config.limit - 1) // config.limit
