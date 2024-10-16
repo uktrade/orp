@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load service_problem_tags %}
 {% load url_replace_tags %}
-{% block head_title %}{{service_name}}{% endblock %}
+{% block head_title %}{% if is_paginated %}Page {{current_page}} - {% endif %}{{service_name}}{% endblock %}
 {% block service_name %}{{service_name}}{% endblock %}
 {% block body_content %}
 <div class="govuk-!-padding-top-4"></div>
@@ -204,11 +204,10 @@
       <div class="orp-flex orp-flex--space-between">
         <p class="govuk-body govuk-!-font-weight-bold govuk-!-margin-bottom-0">
           {% if results %}
-            {{ results_total_count }} documents
-          {% else %}
-            {% if form.is_bound %}
-              No documents found
+            {% if is_paginated %}
+              {{ start_index }} to {{ end_index }} of
             {% endif %}
+            {{ results_total_count }} documents
           {% endif %}
         </p>
         <p class="govuk-body govuk-!-margin-bottom-0">
@@ -234,20 +233,24 @@
       </ul> -->
 
       <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
-      <div class="govuk-grid-row">
-        <div class="govuk-grid-column-full">
-          <div class="orp-flex">
-            <label class="govuk-label govuk-!-margin-right-3 orp-!-no-text-wrap" for="sort">
-              Sort by
-            </label>
-            <select class="govuk-select" id="sort" name="sort">
-              <option value="date">Recently updated</option>
-              <option value="sort">Relevance</option>
-            </select>
+
+      {% if results %}
+        <div class="govuk-grid-row">
+          <div class="govuk-grid-column-full">
+            <div class="orp-flex">
+              <label class="govuk-label govuk-!-margin-right-3 orp-!-no-text-wrap" for="sort">
+                Sort by
+              </label>
+              <select class="govuk-select" id="sort" name="sort">
+                <option value="date">Recently updated</option>
+                <option value="sort">Relevance</option>
+              </select>
+            </div>
           </div>
         </div>
-      </div>
-      <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+      {% endif %}
+
       <div class="govuk-grid-row">
         <div class="govuk-grid-column-full">
           {% if results %}
@@ -321,14 +324,42 @@
           </nav>
           {% endif %}
           {% else %}
-          {% if form.is_bound %}
-          <p class="govuk-body-l govuk-!-font-weight-bold">
-            We didn't find any regulations for that search.
-          </p>
-          <p class="govuk-body-m">
-            Please try searching again using different search terms.
-          </p>
-          {% endif %}
+            {% if form.is_bound %}
+              <h2 class="govuk-heading-l">There are no matching results</h2>
+              <p class="govuk-body-m">
+                Improve your search results by:
+              </p>
+              <ul class="govuk-list govuk-list--bullet">
+                <li class="govuk-body-m">
+                  removing filters
+                </li>
+                <li class="govuk-body-m">
+                  double-checking your spelling
+                </li>
+                <li class="govuk-body-m">
+                  using fewer keywords
+                </li>
+                <li class="govuk-body-m">
+                  searching for something less specific
+                </li>
+              </ul>
+              <h3 class="govuk-heading-m">Related searches</h2>
+              <p class="govuk-body">
+                Try these related search terms.
+              </p>
+              <ul class="govuk-list">
+                <li class="govuk-body">
+                  <a class="govuk-link" href="/?search=construction+site+safety">construction site safety</a>
+                </li>
+                <li class="govuk-body">
+                  <a class="govuk-link" href="/?search=building+site+safety">building site safety</a>
+                </li>
+                <li class="govuk-body">
+                  <a class="govuk-link" href="/?search=aggregate+use">aggregate use</a>
+                </li>
+
+              </ul>
+            {% endif %}
           {% endif %}
         </div>
       </div>

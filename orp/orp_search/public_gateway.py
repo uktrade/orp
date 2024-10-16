@@ -91,6 +91,8 @@ class PublicGateway:
         context["results_total_count"] = paginator.count
         context["results_page_total"] = paginator.num_pages
         context["current_page"] = config.offset
+        context["start_index"] = paginated_documents.start_index()
+        context["end_index"] = paginated_documents.end_index()
         return context
 
     def search(self, config: SearchDocumentConfig):
