@@ -76,7 +76,7 @@ def document(request: HttpRequest, id) -> HttpResponse:
 @require_http_methods(["GET"])
 def download_search_csv(request: HttpRequest) -> HttpResponse:
     search_terms = request.GET.get("search", "")
-    document_type_terms = request.GET.get("document_type", "")
+    document_type_terms = request.GET.getlist("document_type", "")
     publisher_terms = request.GET.getlist("publisher", None)
     sort_by = request.GET.get("sort", None)
 
@@ -90,8 +90,53 @@ def download_search_csv(request: HttpRequest) -> HttpResponse:
     if sort_by:
         config.sort_by = sort_by
 
-    public_gateway = PublicGateway()
-    search_results = public_gateway.search(config)
+    public_gateway_search_results = []
+    legislation_search_results = []
+
+    if (
+        not config.document_types
+        or "standard" in config.document_types
+        or "guidance" in config.document_types
+    ):
+        public_gateway = PublicGateway()
+        public_gateway_search_results = public_gateway.search(config)
+
+    # Legislation search
+    # If config.search_terms is empty then we don't need to
+    # search for legislation
+    if (
+        "" not in config.search_terms
+        and not config.document_types
+        or "legislation" in config.document_types
+    ):
+        legislation = Legislation()
+        legislation_search_results = legislation.search(config)
+
+    search_results = []
+
+    for result in public_gateway_search_results:
+        search_results.append(
+            {
+                "id": result["id"],
+                "title": result["title"],
+                "publisher": result["publisher"],
+                "description": result["description"],
+                "type": result["type"],
+                "date_modified": result["date_modified"],
+            }
+        )
+
+    for result in legislation_search_results:
+        search_results.append(
+            {
+                "id": result["id"],
+                "title": result["title"],
+                "publisher": result["publisher"],
+                "description": "",
+                "type": result["type"],
+                "date_modified": result["date_modified"],
+            }
+        )
 
     # Convert search_results JSON object to DataFrame
     # (for demonstration purposes)
