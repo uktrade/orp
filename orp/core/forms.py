@@ -76,3 +76,21 @@ class RegulationSearchForm(forms.Form):
             ("departmentfortransport", "Department for Transport"),
         ],
     )
+
+    sort = forms.ChoiceField(
+        # initial="relevance",
+        required=False,
+        label="Sort by",
+        choices=[
+            ("recent", "Recently updated"),
+            ("relevance", "Relevance"),
+        ],
+        widget=forms.Select(
+            attrs={
+                "class": "govuk-select",
+                "id": "sort",
+                "name": "sort",
+                "onChange": "form.submit()",
+            }
+        ),
+    )
