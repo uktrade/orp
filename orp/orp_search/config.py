@@ -58,7 +58,7 @@ class SearchDocumentConfig:
             return False
 
         if self.sort_by:
-            if self.sort_by not in ["recently", "relevance"]:
-                logger.error("sort_by must be 'recently' or 'relevance'")
+            if self.sort_by not in ["recent", "relevance"]:
+                logger.error("sort_by must be 'recent' or 'relevance'")
                 return False
         return True

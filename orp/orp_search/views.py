@@ -173,7 +173,7 @@ def search(request: HttpRequest) -> HttpResponse:
     }
 
     # Create a new instance of the RegulationSearchForm
-    form = RegulationSearchForm(request.GET or None)
+    form = RegulationSearchForm(request.GET)
 
     # If the form is not valid, return the form
     if not form.is_valid():

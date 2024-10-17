@@ -161,16 +161,16 @@ class PublicGateway:
 
             sorted_df = None
 
-            if config.sort_by == "recently":
+            if config.sort_by == "recent":
                 # Sort the DataFrame by 'date_modified' in descending order
-                # Ensure 'date_issued' is in datetime format
-                filtered_df["date_issued"] = pd.to_datetime(
-                    filtered_df["date_issued"], format="%d/%m/%Y"
+                # Ensure 'date_modified' is in datetime format
+                filtered_df["date_modified"] = pd.to_datetime(
+                    filtered_df["date_modified"], format="%d/%m/%Y"
                 )
 
-                # Sort the DataFrame by 'date_issued' in descending order
+                # Sort the DataFrame by 'date_modified' in descending order
                 sorted_df = filtered_df.sort_values(
-                    by="date_issued", ascending=False
+                    by="date_modified", ascending=False
                 )
             elif config.sort_by == "relevance":
                 # Calculate relevance score
