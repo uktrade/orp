@@ -262,7 +262,7 @@
                 Published by: {{ result.publisher}}
               </p>
               <p class="govuk-body-s orp-secondary-text-colour">
-                Last updated: {{ result.date_modified }}
+                Last updated: {{ result.date_modified | date:"j F Y" }}
               </p>
               <ul class="govuk-list orp-topics-list">
                 {% for topic in result.regulatory_topics %}
