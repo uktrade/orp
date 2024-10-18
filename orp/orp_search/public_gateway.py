@@ -84,13 +84,11 @@ class PublicGateway:
                     ).split("\n")
 
         # Pass the paginated results to the template
+        context["current_page"] = config.offset
         context["paginator"] = paginator
         context["is_paginated"] = paginator.num_pages > 1
-        context["results"] = paginated_documents
-        context["results_count"] = len(paginated_documents)
         context["results_total_count"] = paginator.count
-        context["results_page_total"] = paginator.num_pages
-        context["current_page"] = config.offset
+        context["results"] = paginated_documents
         context["start_index"] = paginated_documents.start_index()
         context["end_index"] = paginated_documents.end_index()
         return context

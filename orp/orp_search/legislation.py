@@ -113,21 +113,21 @@ class Legislation:
     def finalise_results(
         self, config: SearchDocumentConfig, results, context
     ) -> dict:
-        title_search_terms = config.search_terms
-        search_terms = ",".join(title_search_terms)
-        params = {
-            "amendments": "include",
-            "query": search_terms,
-            # 'counting': 'documents',
-        }
+        # title_search_terms = config.search_terms
+        # search_terms = ",".join(title_search_terms)
+        # params = {
+        #     "amendments": "include",
+        #     "query": search_terms,
+        #     # 'counting': 'documents',
+        # }
 
-        # Get count of total results
-        count_data_html_page = _perform_request(
-            self.count_url, params, config.timeout
-        )
-        total_document_count = _extract_td_value(
-            count_data_html_page, "documents"
-        )
+        # # Get count of total results
+        # count_data_html_page = _perform_request(
+        #     self.count_url, params, config.timeout
+        # )
+        # total_document_count = _extract_td_value(
+        #     count_data_html_page, "documents"
+        # )
 
         paginated_documents = []
         exists = False
@@ -166,11 +166,11 @@ class Legislation:
             except EmptyPage:
                 paginated_documents = paginator.page(paginator.num_pages)
 
+        context["current_page"] = config.offset
         context["paginator"] = paginator
         context["is_paginated"] = paginator.num_pages > 1
+        context["results_total_count"] = paginator.count
         context["results"] = paginated_documents
-        context["results_count"] = len(paginated_documents)
-        context["results_total_count"] = total_document_count
-        context["results_page_total"] = paginator.num_pages
-        context["current_page"] = config.offset
+        # context["start_index"] = paginated_documents.start_index()
+        # context["end_index"] = paginated_documents.end_index()
         return context
