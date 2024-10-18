@@ -65,6 +65,16 @@ def document(request: HttpRequest, id) -> HttpResponse:
                 search_result["related_legislation"]
             ).split("\n")
 
+        if "date_modified" in search_result:
+            search_result["date_modified"] = pd.to_datetime(
+                search_result["date_modified"], format="%d/%m/%Y"
+            )
+
+        if "date_issued" in search_result:
+            search_result["date_issued"] = pd.to_datetime(
+                search_result["date_issued"], format="%d/%m/%Y"
+            )
+
         context["result"] = search_result
         return render(request, template_name="document.html", context=context)
     except Exception as e:
