@@ -131,6 +131,11 @@ class PublicGateway:
                 )
             ]
 
+            # Format dates in the DataFrame
+            filtered_df["date_modified"] = pd.to_datetime(
+                filtered_df["date_modified"], format="%d/%m/%Y"
+            )
+
             # If config.publisher_terms is not None, then add filter
             # for publisher in filtered_df
             if config.publisher_terms is not None:
@@ -154,27 +159,21 @@ class PublicGateway:
                     )
                 ]
 
-            if config.sort_by is None:
-                results = filtered_df.to_dict(orient="records")
-                # logger.info("filtered data: %s", results)
-                return results
+            # if config.sort_by is None:
+            #     results = filtered_df.to_dict(orient="records")
+            #     # logger.info("filtered data: %s", results)
+            #     return results
 
-            sorted_df = None
+            # sorted_df = None
 
-            if config.sort_by == "recent":
-                # Sort the DataFrame by 'date_modified' in descending order
-                # Ensure 'date_modified' is in datetime format
-                filtered_df["date_modified"] = pd.to_datetime(
-                    filtered_df["date_modified"], format="%d/%m/%Y"
-                )
-
+            if config.sort_by == "recent" or config.sort_by is None:
                 # Sort the DataFrame by 'date_modified' in descending order
                 sorted_df = filtered_df.sort_values(
                     by="date_modified", ascending=False
                 )
             elif config.sort_by == "relevance":
                 # Calculate relevance score
-                # (based on the number of keywords found)
+
                 def calculate_relevance(row, search_terms):
                     def score_text(text, terms):
                         text_processed = text.replace(" ", "").lower()
