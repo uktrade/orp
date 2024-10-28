@@ -62,3 +62,23 @@ class SearchDocumentConfig:
                 logger.error("sort_by must be 'recent' or 'relevance'")
                 return False
         return True
+
+    def build_search_term(self):
+        # Rules config.search_terms
+        # 1. If search terms is empty, return empty string
+        # 2. If search terms begin with a quote and end with a quote
+        # then treat as a phrase
+        # 3. If search terms contain a + between two terms then treat
+        # as an AND search
+        # 4. If search terms contain a space between two terms then treat
+        # as a OR search
+
+        search_term_tmp = []
+
+        for term in self.search_terms:
+            if term.startswith('"') and term.endswith('"'):
+                search_term_tmp.append(f'"{term}"')
+            elif "+" in term:
+                search_term_tmp.append(term.replace("+", " AND "))
+            else:
+                search_term_tmp.append(term)

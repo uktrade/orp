@@ -7,8 +7,6 @@ from jinja2 import Template
 from orp_search.config import SearchDocumentConfig
 from orp_search.dummy_data import get_construction_data_as_dataframe
 
-from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-
 logger = logging.getLogger(__name__)
 
 
@@ -36,62 +34,6 @@ class PublicGateway:
             str: A string containing the LIKE conditions combined with 'OR'.
         """
         return " OR ".join([f"{field} LIKE '%{term}%'" for term in terms])
-
-    def finalise_results(
-        self, config: SearchDocumentConfig, results, context
-    ) -> dict:
-        """
-        Paginates the given search results based on the provided configuration.
-
-        Arguments:
-         config (SearchDocumentConfig): Configuration parameters for search,
-                                        including pagination limits.
-         results: A collection of search results to be paginated.
-         context: A dictionary containing context data which will be updated
-                  with pagination details.
-
-        Returns:
-         A tuple containing:
-          - Updated context dictionary with pagination information.
-          - Paginator instance used for paginating the results.
-
-        The context dictionary is updated with the following keys:
-         is_paginated: A boolean indicating if the results span multiple pages.
-         reports: The paginated results for the current page.
-         paginator: The Paginator instance.
-         page_obj: The current page of results.
-        """
-        paginator = Paginator(results, config.limit)
-        try:
-            paginated_documents = paginator.page(config.offset)
-        except PageNotAnInteger:
-            paginated_documents = paginator.page(1)
-        except EmptyPage:
-            paginated_documents = paginator.page(paginator.num_pages)
-
-        # Iterate over each document in paginated_documents
-        if paginated_documents:
-            for paginated_document in paginated_documents:
-                if "description" in paginated_document:
-                    paginated_document["description"] = (
-                        paginated_document["description"][:100] + "..."
-                        if len(paginated_document["description"]) > 100
-                        else paginated_document["description"]
-                    )
-                if "regulatory_topics" in paginated_document:
-                    paginated_document["regulatory_topics"] = str(
-                        paginated_document["regulatory_topics"]
-                    ).split("\n")
-
-        # Pass the paginated results to the template
-        context["current_page"] = config.offset
-        context["paginator"] = paginator
-        context["is_paginated"] = paginator.num_pages > 1
-        context["results_total_count"] = paginator.count
-        context["results"] = paginated_documents
-        context["start_index"] = paginated_documents.start_index()
-        context["end_index"] = paginated_documents.end_index()
-        return context
 
     def search(self, config: SearchDocumentConfig):
         # List of search terms
@@ -157,53 +99,7 @@ class PublicGateway:
                     )
                 ]
 
-            # if config.sort_by is None:
-            #     results = filtered_df.to_dict(orient="records")
-            #     # logger.info("filtered data: %s", results)
-            #     return results
-
-            # sorted_df = None
-
-            if config.sort_by == "recent" or config.sort_by is None:
-                # Sort the DataFrame by 'date_modified' in descending order
-                sorted_df = filtered_df.sort_values(
-                    by="date_modified", ascending=False
-                )
-            elif config.sort_by == "relevance":
-                # Calculate relevance score
-
-                def calculate_relevance(row, search_terms):
-                    def score_text(text, terms):
-                        text_processed = text.replace(" ", "").lower()
-                        return sum(
-                            1
-                            for term in terms
-                            if term.replace(" ", "").lower() in text_processed
-                        )
-
-                    title_score = score_text(row["title"], search_terms)
-                    description_score = score_text(
-                        row["description"], search_terms
-                    )
-                    return title_score + description_score
-
-                filtered_df["relevance_score"] = filtered_df.apply(
-                    calculate_relevance,
-                    axis=1,
-                    search_terms=config.search_terms,
-                )
-
-                # Sort the DataFrame by 'relevance_score' in descending order
-                sorted_df = filtered_df.sort_values(
-                    by="relevance_score", ascending=False
-                )
-
-            if sorted_df is not None:
-                results = sorted_df.to_dict(orient="records")
-            else:
-                results = []
-
-            # logger.info("filtered data: %s", results)
+            results = filtered_df.to_dict(orient="records")
             return results
 
         # Base URL for the API
