@@ -8,6 +8,7 @@ from orp_search.legislation import Legislation
 from orp_search.public_gateway import PublicGateway, SearchDocumentConfig
 
 from django.conf import settings
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
@@ -64,16 +65,6 @@ def document(request: HttpRequest, id) -> HttpResponse:
             search_result["related_legislation"] = str(
                 search_result["related_legislation"]
             ).split("\n")
-
-        if "date_modified" in search_result:
-            search_result["date_modified"] = pd.to_datetime(
-                search_result["date_modified"], format="%d/%m/%Y"
-            )
-
-        if "date_issued" in search_result:
-            search_result["date_issued"] = pd.to_datetime(
-                search_result["date_issued"], format="%d/%m/%Y"
-            )
 
         context["result"] = search_result
         return render(request, template_name="document.html", context=context)
@@ -236,6 +227,8 @@ def search(request: HttpRequest) -> HttpResponse:
     if sort_by:
         config.sort_by = sort_by
 
+    search_results = []
+
     if (
         not config.document_types
         or "standard" in config.document_types
@@ -243,24 +236,70 @@ def search(request: HttpRequest) -> HttpResponse:
     ):
         public_gateway = PublicGateway()
         search_results = public_gateway.search(config)
-        context = public_gateway.finalise_results(
-            config, search_results, context
-        )
 
     # Legislation search
     # If config.search_terms is empty then we don't need to
     # search for legislation
-    # if not config.search_terms or "" in config.search_terms:
-    #     logger.info("no search terms provided")
-    #     return render(request, template_name="orp.html", context=context)
+    if not config.search_terms or "" in config.search_terms:
+        logger.info("no search terms provided")
+        return render(request, template_name="orp.html", context=context)
 
-    # if not config.document_types or "legislation" in config.document_types:
-    #     logger.info("searching for legislation: %s", config.search_terms)
-    #     legislation = Legislation()
-    #     legislation_results = legislation.search(config)
-    #     logger.info(f"legislation results: {legislation_results}")
-    #     context = legislation.finalise_results(
-    #         config, legislation_results, context
-    #     )
+    if not config.document_types or "legislation" in config.document_types:
+        logger.info("searching for legislation: %s", config.search_terms)
+        legislation = Legislation()
+        search_results += legislation.search(config)
+
+    search_results_normalised = []
+
+    for result in search_results:
+        # If result is type of [] then extract each item and append to
+        # search_dict_results otherwise just append the result to
+        # search_dict_results
+        if isinstance(result, list):
+            for item in result:
+                search_results_normalised.append(item)
+        else:
+            search_results_normalised.append(result)
+
+    # Sort results by date_modified (recent) or relevance
+    # (calculate score and sort by score)
+
+    # Paginate results
+    paginator = Paginator(search_results, config.limit)
+    try:
+        paginated_documents = paginator.page(config.offset)
+    except PageNotAnInteger:
+        paginated_documents = paginator.page(1)
+    except EmptyPage:
+        paginated_documents = paginator.page(paginator.num_pages)
+
+    # Iterate over each document in paginated_documents
+    if paginated_documents:
+        for paginated_document in paginated_documents:
+            if "description" in paginated_document:
+                description = paginated_document["description"]
+
+                # If description is not an empty string
+                if description:
+                    # Truncate description to 100 characters
+                    paginated_document["description"] = (
+                        description[:100] + "..."
+                        if len(description) > 100
+                        else description
+                    )
+            if "regulatory_topics" in paginated_document:
+                paginated_document["regulatory_topics"] = str(
+                    paginated_document["regulatory_topics"]
+                ).split("\n")
+
+    context["paginator"] = paginator
+    context["results"] = paginated_documents
+    context["results_count"] = len(paginated_documents)
+    context["is_paginated"] = paginator.num_pages > 1
+    context["results_total_count"] = paginator.count
+    context["results_page_total"] = paginator.num_pages
+    context["current_page"] = config.offset
+    context["start_index"] = paginated_documents.start_index()
+    context["end_index"] = paginated_documents.end_index()
 
     return render(request, template_name="orp.html", context=context)
