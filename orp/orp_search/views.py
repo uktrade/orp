@@ -238,12 +238,6 @@ def search(request: HttpRequest) -> HttpResponse:
         search_results = public_gateway.search(config)
 
     # Legislation search
-    # If config.search_terms is empty then we don't need to
-    # search for legislation
-    if not config.search_terms or "" in config.search_terms:
-        logger.info("no search terms provided")
-        return render(request, template_name="orp.html", context=context)
-
     if not config.document_types or "legislation" in config.document_types:
         logger.info("searching for legislation: %s", config.search_terms)
         legislation = Legislation()
