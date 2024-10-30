@@ -2,6 +2,9 @@ import base64
 import csv
 import logging
 
+from datetime import datetime, timezone
+
+import dateutil.parser  # type: ignore
 import pandas as pd
 
 from orp_search.legislation import Legislation
@@ -158,6 +161,25 @@ def download_search_csv(request: HttpRequest) -> HttpResponse:
     return response
 
 
+def _parse_date(date_value):
+    if isinstance(date_value, datetime):
+        if date_value.tzinfo is None:
+            # If the datetime is offset-naive, make it offset-aware in UTC
+            return date_value.replace(tzinfo=timezone.utc)
+        return date_value
+    if isinstance(date_value, str):
+        try:
+            dt = dateutil.parser.parse(date_value)
+            if dt.tzinfo is None:
+                # If parsed datetime is offset-naive,
+                # make it offset-aware in UTC
+                return dt.replace(tzinfo=timezone.utc)
+            return dt
+        except ValueError:
+            return None
+    return None  # Return None for invalid date types
+
+
 @require_http_methods(["GET"])
 def search(request: HttpRequest) -> HttpResponse:
     """Search view.
@@ -243,20 +265,20 @@ def search(request: HttpRequest) -> HttpResponse:
         legislation = Legislation()
         search_results += legislation.search(config)
 
-    search_results_normalised = []
-
-    for result in search_results:
-        # If result is type of [] then extract each item and append to
-        # search_dict_results otherwise just append the result to
-        # search_dict_results
-        if isinstance(result, list):
-            for item in result:
-                search_results_normalised.append(item)
-        else:
-            search_results_normalised.append(result)
-
     # Sort results by date_modified (recent) or relevance
     # (calculate score and sort by score)
+    if sort_by == "recent":
+        search_results = sorted(
+            search_results,
+            key=lambda x: _parse_date(x["date_modified"]),
+            reverse=True,
+        )
+    # elif sort_by == "relevance":
+    #     search_results = sorted(
+    #         search_results_normalised,
+    #         key=lambda x: x["score"],
+    #         reverse=True,
+    #     )
 
     # Paginate results
     paginator = Paginator(search_results, config.limit)
