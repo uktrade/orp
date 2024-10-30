@@ -29,7 +29,7 @@ class Legislation:
             "lang": "en",
             "title": search_terms,
             "text": search_terms,
-            "results-count": 100,
+            "results-count": 20,
         }
 
         # Register namespaces
@@ -137,12 +137,15 @@ class Legislation:
         all_entries += _extract_entries(root)
 
         morePages = int(page_data["morePages"])
-        logger.info(f"legislation more pages: {morePages}")
         if morePages > 1:
+            logger.info(f"legislation more pages: {morePages}")
+
             # Get remaining pages
             for page in range(2, morePages + 1):
+                params["page"] = page
                 root, _ = _do_request()
-                all_entries.append(_extract_entries(root))
+                results = _extract_entries(root)
+                all_entries += results
 
         logger.info(f"legislation total results: {len(all_entries)}")
         return all_entries
