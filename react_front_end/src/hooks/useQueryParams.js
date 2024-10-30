@@ -23,8 +23,8 @@ const useQueryParams = (key, defaultVal = []) => {
     query.delete(key);
 
     // Set new values for the key
-    newVals.forEach(val => {
-      if (val.trim() !== '') {
+    newVals.map(val => {
+      if (typeof val === 'string' && val.trim() !== '') {
         query.append(key, val);
       }
     });

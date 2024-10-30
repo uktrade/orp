@@ -9,7 +9,6 @@ const CheckboxFilter = ({ checkboxData, checkedState, setCheckedState, setQueryP
     const checkedItems = checkboxData
       .filter((_, index) => updatedCheckedState[index])
       .map(({ name }) => name);
-    console.log(checkedItems);
 
     setQueryParams(checkedItems);
     setCheckedState(updatedCheckedState);

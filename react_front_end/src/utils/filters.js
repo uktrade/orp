@@ -10,7 +10,7 @@ export const documentType = [
     label: "Guidance"
   },
   {
-    name: "standards",
+    name: "standard",
     label: "British Standards"
   },
 ];

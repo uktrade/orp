@@ -3,7 +3,9 @@ import { useQueryParams } from './hooks/useQueryParams';
 import { Search } from './components/Search';
 import { CheckboxFilter } from './components/CheckboxFilter';
 import { AppliedFilters } from './components/AppliedFilters';
-
+import { Results } from './components/Results';
+import { Pagination } from './components/Pagination';
+import { SortSelect } from './components/SortSelect';
 import { documentType, publisher } from './utils/filters';
 
 const generateCheckedState = (checkboxes, queryValues) => checkboxes.map(({ name }) => queryValues.includes(name))
@@ -12,6 +14,9 @@ function App() {
   const [searchQuery, setSearchQuery] = useQueryParams('search', []);
   const [docTypeQuery, setDocTypeQuery] = useQueryParams('document_type', []);
   const [publisherQuery, setPublisherQuery] = useQueryParams('publisher', []);
+  const [sortQuery, setSortQuery] = useQueryParams('sort', ['recent']);
+  const [pageQuery, setPageQuery] = useQueryParams('page', [1]);
+
 
   // Set initial checked state as array of booleans for checkboxes based on query params
   const [documentTypeCheckedState, setDocumentTypeCheckedState] = useState(generateCheckedState(documentType, docTypeQuery));
@@ -72,7 +77,7 @@ function App() {
           <fieldset className="govuk-fieldset">
             <legend className="govuk-fieldset__legend govuk-fieldset__legend--m">
               <h2 className="govuk-fieldset__heading">
-                Document type
+                Document types
               </h2>
             </legend>
             <CheckboxFilter
@@ -100,36 +105,25 @@ function App() {
         </div>
       </div>
       <div className="govuk-grid-column-two-thirds">
-        <AppliedFilters
-          documentTypeCheckedState={documentTypeCheckedState}
-          publisherCheckedState={publisherCheckedState}
-          removeFilter={handleDeleteFilter}
-        />
+        {docTypeQuery.length > 0 || publisherQuery.length > 0 ? (
+          <AppliedFilters
+            documentTypeCheckedState={documentTypeCheckedState}
+            publisherCheckedState={publisherCheckedState}
+            removeFilter={handleDeleteFilter}
+          />
+        ) : null}
+        <SortSelect sortQuery={sortQuery} setSortQuery={setSortQuery} />
         <Results
           searchQuery={searchQuery}
           docTypeQuery={docTypeQuery}
           publisherQuery={publisherQuery}
+          pageQuery={pageQuery}
+          sortQuery={sortQuery}
         />
+        <Pagination pageQuery={pageQuery} setPageQuery={setPageQuery} />
       </div>
     </div>
   );
 }
-
-
-const Results = ({
-  searchQuery,
-  docTypeQuery,
-  publisherQuery
-}) => (
-  <div>
-    <h2 className="govuk-heading-m">Results</h2>
-    <pre>
-      <p>Search query: {searchQuery.join(', ')}</p>
-      <p>Document type: {docTypeQuery.join(', ')}</p>
-      <p>Published by: {publisherQuery.join(', ')}</p>
-    </pre>
-  </div>
-);
-
 
 export default App;

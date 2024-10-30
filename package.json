@@ -19,8 +19,8 @@
     "webpack-cli": "^5.1.4"
   },
   "scripts": {
-    "dev": "npx webpack-cli --config webpack.config.js --watch",
-    "build": "npx webpack-cli --config webpack.config.js --stats-children",
+    "dev": "webpack-cli --config webpack.config.js --watch",
+    "build": "webpack-cli --config webpack.config.js --stats-children",
     "clean": "rm -f ./front_end/webpack_bundles/*"
   },
   "version": "0.1.0",
