@@ -1,11 +1,11 @@
 // This hides the Django search form when JavaScript is enabled
-#orp-django-search {
-  display: block;
-}
+// #orp-django-search {
+//   display: block;
+// }
 
-.js-enabled #orp-django-search {
-  display: none;
-}
+// .js-enabled #orp-django-search {
+//   display: none;
+// }
 
 .search-form {
   .search-group {
