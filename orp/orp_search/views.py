@@ -180,6 +180,23 @@ def _parse_date(date_value):
     return None  # Return None for invalid date types
 
 
+def _calculate_score(search_result, search_terms):
+    """
+    Calculate the score of a search result based on the number of
+    search terms found in the title and description.
+
+    :param search_result: A dictionary containing the search result.
+    :param search_terms: A list of search terms to look for in the
+                         search result.
+    :return: The score based on the number of search terms found.
+    """
+    title = search_result.get("title", "") or ""
+    description = search_result.get("description", "") or ""
+    combined_content = title.lower() + " " + description.lower()
+    score = sum(combined_content.count(term.lower()) for term in search_terms)
+    return score
+
+
 @require_http_methods(["GET"])
 def search(request: HttpRequest) -> HttpResponse:
     """Search view.
@@ -273,12 +290,17 @@ def search(request: HttpRequest) -> HttpResponse:
             key=lambda x: _parse_date(x["date_modified"]),
             reverse=True,
         )
-    # elif sort_by == "relevance":
-    #     search_results = sorted(
-    #         search_results_normalised,
-    #         key=lambda x: x["score"],
-    #         reverse=True,
-    #     )
+    elif sort_by == "relevance":
+        # Add the 'score' to each search result
+        for result in search_results:
+            logger.info("result to pass to calculate score: %s", result)
+            result["score"] = _calculate_score(result, config.search_terms)
+
+        search_results = sorted(
+            search_results,
+            key=lambda x: x["score"],
+            reverse=True,
+        )
 
     # Paginate results
     paginator = Paginator(search_results, config.limit)
