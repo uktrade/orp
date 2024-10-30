@@ -21,14 +21,16 @@ class Legislation:
     def search(self, config: SearchDocumentConfig):
         logger.info("searching legislation...")
 
+        logger.info(
+            f"final_search_expression terms: {config.final_search_expression}"
+        )
+
         # List of search terms
-        title_search_terms = config.search_terms
-        search_terms = ",".join(title_search_terms)
         headers = {"Accept": "application/atom+xml"}
         params = {
             "lang": "en",
-            "title": search_terms,
-            "text": search_terms,
+            "title": config.final_search_expression,
+            "text": config.final_search_expression,
             "results-count": 20,
         }
 

@@ -1,6 +1,6 @@
 import logging
 
-from orp_search.utils.terms import parse_search_terms
+from orp_search.utils.terms import combine_search_terms, parse_search_terms
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +41,9 @@ class SearchDocumentConfig:
         search_terms_and, search_terms_or = parse_search_terms(search_terms)
         self.search_terms_and = search_terms_and
         self.search_terms_or = search_terms_or
+        self.final_search_expression = combine_search_terms(
+            search_terms_and, search_terms_or
+        )
 
     def validate(self):
         """

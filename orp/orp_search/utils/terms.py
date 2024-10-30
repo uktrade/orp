@@ -98,3 +98,20 @@ def parse_search_terms(search):
                 search_terms_or.append(token)
 
     return search_terms_and, search_terms_or
+
+
+def combine_search_terms(search_terms_and, search_terms_or):
+    # Join terms in `search_terms_and` with " AND "
+    combined_and = " AND ".join(search_terms_and) if search_terms_and else ""
+
+    # Join terms in `search_terms_or` with " OR "
+    combined_or = " OR ".join(search_terms_or) if search_terms_or else ""
+
+    # Combine both parts, adding parentheses around each if both are present
+    if combined_and and combined_or:
+        combined_query = f"{combined_and} OR {combined_or}"
+    else:
+        # Use whichever part is non-empty
+        combined_query = combined_and or combined_or
+
+    return combined_query
