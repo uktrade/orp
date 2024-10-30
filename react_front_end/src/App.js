@@ -56,7 +56,9 @@ function App() {
         const queryString = new URLSearchParams({
           search: searchQuery.join(','),
           document_type: docTypeQuery.join(','),
-          publisher: publisherQuery.join(',')
+          publisher: publisherQuery.join(','),
+          sort: sortQuery.join(','),
+          page: pageQuery.join(','),
         }).toString();
 
         // fetchData(queryString);

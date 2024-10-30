@@ -26,6 +26,8 @@ const useQueryParams = (key, defaultVal = []) => {
     newVals.map(val => {
       if (typeof val === 'string' && val.trim() !== '') {
         query.append(key, val);
+      } else if (typeof val === 'number') {
+        query.append(key, val.toString());
       }
     });
 
