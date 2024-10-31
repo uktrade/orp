@@ -1,20 +1,15 @@
-import { documentType, publisher } from '../utils/filters';
+import { documentType, publisher } from "../utils/filters"
 
-const AppliedFilters = ({
-  documentTypeCheckedState,
-  publisherCheckedState,
-  removeFilter,
-}) => {
-
+const AppliedFilters = ({ documentTypeCheckedState, publisherCheckedState, removeFilter }) => {
   // Combine checked document types and publishers into a single array
   const checkedFilters = [
     ...documentTypeCheckedState
-      .map((item, index) => item ? { type: 'docType', ...documentType[index] } : null)
-      .filter(item => item !== null),
+      .map((item, index) => (item ? { type: "docType", ...documentType[index] } : null))
+      .filter((item) => item !== null),
     ...publisherCheckedState
-      .map((item, index) => item ? { type: 'publisher', ...publisher[index] } : null)
-      .filter(item => item !== null)
-  ];
+      .map((item, index) => (item ? { type: "publisher", ...publisher[index] } : null))
+      .filter((item) => item !== null),
+  ]
 
   return (
     <ul className="orp-applied-filters-container">
@@ -27,7 +22,7 @@ const AppliedFilters = ({
         </li>
       ))}
     </ul>
-  );
+  )
 }
 
-export { AppliedFilters };
+export { AppliedFilters }

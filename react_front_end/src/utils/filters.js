@@ -3,61 +3,61 @@
 export const documentType = [
   {
     name: "legislation",
-    label: "Legislation"
+    label: "Legislation",
   },
   {
     name: "guidance",
-    label: "Guidance"
+    label: "Guidance",
   },
   {
     name: "standard",
-    label: "British Standards"
+    label: "British Standards",
   },
-];
+]
 
 export const publisher = [
   {
     name: "healthandsafetyexecutive",
-    label: "Health and Safety Executive"
+    label: "Health and Safety Executive",
   },
   {
     name: "civilaviationauthority",
-    label: "Civil Aviation Authority"
+    label: "Civil Aviation Authority",
   },
   {
     name: "environmentagency",
-    label: "Environment Agency"
+    label: "Environment Agency",
   },
   {
     name: "defra",
-    label: "Defra"
+    label: "Defra",
   },
   {
     name: "officeofgasandelectricitymarkets",
-    label: "Office of Gas and Electricity Markets"
+    label: "Office of Gas and Electricity Markets",
   },
   {
     name: "officeofrailandroad",
-    label: "Office of Rail and Road"
+    label: "Office of Rail and Road",
   },
   {
     name: "naturalengland",
-    label: "Natural England"
+    label: "Natural England",
   },
   {
     name: "historicengland",
-    label: "Historic England"
+    label: "Historic England",
   },
   {
     name: "nationalhighways",
-    label: "National Highways"
+    label: "National Highways",
   },
   {
     name: "homesengland",
-    label: "Homes England"
+    label: "Homes England",
   },
   {
     name: "departmentfortransport",
-    label: "Department for Transport"
+    label: "Department for Transport",
   },
 ]

@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "@babel/preset-react": "^7.25.9",
-    "babel-loader": "^9.2.1"
+    "babel-loader": "^9.2.1",
+    "prettier": "3.3.3"
   }
 }

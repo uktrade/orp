@@ -1,61 +1,55 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react"
 
 const CheckboxFilter = ({ checkboxData, checkedState, setCheckedState, setQueryParams, withSearch }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredData, setFilteredData] = useState(checkboxData);
+  const [searchQuery, setSearchQuery] = useState("")
+  const [filteredData, setFilteredData] = useState(checkboxData)
 
   useEffect(() => {
-    setFilteredData(
-      checkboxData.filter(({ label }) =>
-        label.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    );
-  }, [searchQuery, checkboxData]);
-
+    setFilteredData(checkboxData.filter(({ label }) => label.toLowerCase().includes(searchQuery.toLowerCase())))
+  }, [searchQuery, checkboxData])
 
   const handleCheckboxChange = (position) => {
-    const updatedCheckedState = checkedState.map((item, index) =>
-      index === position ? !item : item
-    );
+    const updatedCheckedState = checkedState.map((item, index) => (index === position ? !item : item))
 
     // Generate an array of the names of all checked checkboxes
-    const checkedItems = checkboxData
-      .filter((_, index) => updatedCheckedState[index])
-      .map(({ name }) => name);
+    const checkedItems = checkboxData.filter((_, index) => updatedCheckedState[index]).map(({ name }) => name)
 
-    setQueryParams(checkedItems);
-    setCheckedState(updatedCheckedState);
+    setQueryParams(checkedItems)
+    setCheckedState(updatedCheckedState)
   }
-
-
 
   return (
     <>
       {withSearch ? <SearchCheckboxes searchQuery={searchQuery} setSearchQuery={setSearchQuery} /> : null}
-      <div className={`govuk-checkboxes govuk-checkboxes--small ${withSearch ? 'orp-max-height-250' : ""}`} data-module="govuk-checkboxes">
+      <div
+        className={`govuk-checkboxes govuk-checkboxes--small ${withSearch ? "orp-max-height-250" : ""}`}
+        data-module="govuk-checkboxes"
+      >
         {filteredData.map(({ name, label }, index) => (
-          <div className="govuk-checkboxes__item" key={index}>
+          <div className="govuk-checkboxes__item" key={name}>
             <input
               className="govuk-checkboxes__input"
               type="checkbox"
-              id={`${name}-${index}`}
+              id={`checkbox-${name}`}
               name={name}
               value={name}
               checked={checkedState[index]}
               onChange={() => handleCheckboxChange(index)}
+              aria-labelledby={`label-${name}`}
             />
-            <label className="govuk-label govuk-checkboxes__label" htmlFor={`${name}-${index}`}>{label}</label>
+            <label className="govuk-label govuk-checkboxes__label" htmlFor={`checkbox-${name}`} id={`label-${name}`}>
+              {label}
+            </label>
           </div>
         ))}
       </div>
     </>
   )
-};
+}
 
 const SearchCheckboxes = ({ searchQuery, setSearchQuery }) => {
-
   const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
+    setSearchQuery(event.target.value)
   }
 
   return (
@@ -73,10 +67,13 @@ const SearchCheckboxes = ({ searchQuery, setSearchQuery }) => {
           value={searchQuery}
           onChange={handleSearchChange}
           role="combobox"
+          aria-autocomplete="list"
+          aria-controls="autocomplete-list"
+          aria-expanded="true"
         />
       </div>
     </div>
   )
 }
 
-export { CheckboxFilter };
+export { CheckboxFilter }

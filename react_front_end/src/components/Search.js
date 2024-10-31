@@ -12,11 +12,14 @@ const Search = ({ handleSearchChange, searchQuery }) => {
           type="search"
           onChange={handleSearchChange}
           value={searchQuery}
+          aria-label="Search input"
         />
-        <button type="submit" className="search__button"></button>
+        <button type="submit" className="search__button" aria-label="Submit search">
+          <span className="govuk-visually-hidden">Submit search</span>
+        </button>
       </div>
     </div>
   )
-};
+}
 
-export { Search };
+export { Search }
