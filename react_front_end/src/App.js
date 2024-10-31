@@ -5,7 +5,9 @@ import { CheckboxFilter } from './components/CheckboxFilter';
 import { AppliedFilters } from './components/AppliedFilters';
 import { Results } from './components/Results';
 import { Pagination } from './components/Pagination';
+import { ResultsCount } from './components/ResultsCount';
 import { SortSelect } from './components/SortSelect';
+import { DevToggle } from './components/DevToggle';
 import { documentType, publisher } from './utils/filters';
 
 const generateCheckedState = (checkboxes, queryValues) => checkboxes.map(({ name }) => queryValues.includes(name))
@@ -17,6 +19,11 @@ function App() {
   const [sortQuery, setSortQuery] = useQueryParams('sort', ['recent']);
   const [pageQuery, setPageQuery] = useQueryParams('page', [1]);
 
+  // DEVELOPMENT ONLY: Toggle React and Django apps
+  const [appsToDisplay, setAppsToDisplay] = useState({
+    reactApp: true,
+    djangoApp: false,
+  });
 
   // Set initial checked state as array of booleans for checkboxes based on query params
   const [documentTypeCheckedState, setDocumentTypeCheckedState] = useState(generateCheckedState(documentType, docTypeQuery));
@@ -40,6 +47,16 @@ function App() {
     }
   };
 
+  const handleClearFilters = (event) => {
+    event.preventDefault();
+    setDocTypeQuery([]);
+    setPublisherQuery([]);
+    setDocumentTypeCheckedState(generateCheckedState(documentType, []));
+    setPublisherCheckedState(generateCheckedState(publisher, []));
+    // fetchData(queryString);
+    console.log("Fetching data with empty query string");
+  }
+
   const fetchData = async (queryString) => {
     try {
       const response = await fetch(`/api/data?${queryString}`);
@@ -52,18 +69,19 @@ function App() {
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      if (searchQuery.length > 0 || docTypeQuery.length > 0 || publisherQuery.length > 0) {
-        const queryString = new URLSearchParams({
-          search: searchQuery.join(','),
-          document_type: docTypeQuery.join(','),
-          publisher: publisherQuery.join(','),
-          sort: sortQuery.join(','),
-          page: pageQuery.join(','),
-        }).toString();
+      // if (searchQuery.length > 0 || docTypeQuery.length > 0 || publisherQuery.length > 0) {
+      const queryString = new URLSearchParams({
+        // Only include query params with values
+        ...(searchQuery.length > 0 && { search: searchQuery.join(',') }),
+        ...(docTypeQuery.length > 0 && { document_type: docTypeQuery.join(',') }),
+        ...(publisherQuery.length > 0 && { publisher: publisherQuery.join(',') }),
+        sort: sortQuery,
+        page: pageQuery,
+      }).toString();
 
-        // fetchData(queryString);
-        console.log("Fetching data with query string:", queryString);
-      }
+      // fetchData(queryString);
+      console.log("Fetching data with query string:", queryString);
+      // }
     }, 300); // Adjust the delay as needed
 
     return () => {
@@ -72,60 +90,77 @@ function App() {
   }, [searchQuery, docTypeQuery, publisherQuery]);
 
   return (
-    <div className="govuk-grid-row search-form">
-      <div className="govuk-grid-column-one-third">
-        <Search handleSearchChange={handleSearchChange} searchQuery={searchQuery} />
-        <div className="govuk-form-group ">
-          <fieldset className="govuk-fieldset">
-            <legend className="govuk-fieldset__legend govuk-fieldset__legend--m">
-              <h2 className="govuk-fieldset__heading">
-                Document types
-              </h2>
-            </legend>
-            <CheckboxFilter
-              checkboxData={documentType}
-              checkedState={documentTypeCheckedState}
-              setCheckedState={setDocumentTypeCheckedState}
-              setQueryParams={setDocTypeQuery}
+    <>
+      {appsToDisplay.reactApp ? (
+        <div className="govuk-grid-row search-form">
+          <div className="govuk-grid-column-one-third">
+            <Search handleSearchChange={handleSearchChange} searchQuery={searchQuery} />
+            <div className="govuk-form-group ">
+              <fieldset className="govuk-fieldset">
+                <legend className="govuk-fieldset__legend govuk-fieldset__legend--m">
+                  <h2 className="govuk-fieldset__heading">
+                    Document types
+                  </h2>
+                </legend>
+                <CheckboxFilter
+                  checkboxData={documentType}
+                  checkedState={documentTypeCheckedState}
+                  setCheckedState={setDocumentTypeCheckedState}
+                  setQueryParams={setDocTypeQuery}
+                  withSearch={false}
+                />
+              </fieldset>
+            </div>
+            <div className="govuk-form-group ">
+              <fieldset className="govuk-fieldset">
+                <legend className="govuk-fieldset__legend govuk-fieldset__legend--m">
+                  <h2 className="govuk-fieldset__heading">
+                    Published by
+                  </h2>
+                </legend>
+                <CheckboxFilter
+                  checkboxData={publisher}
+                  checkedState={publisherCheckedState}
+                  setCheckedState={setPublisherCheckedState}
+                  setQueryParams={setPublisherQuery}
+                  withSearch={true}
+                />
+              </fieldset>
+            </div>
+          </div>
+          <div className="govuk-grid-column-two-thirds">
+            <div className="orp-flex orp-flex--space-between">
+              <ResultsCount />
+              <p className="govuk-body govuk-!-margin-bottom-0">
+                <a href="" onClick={handleClearFilters} className="govuk-link govuk-link--no-visited-state
+                    ">Clear all filters</a>
+              </p>
+            </div>
+            {docTypeQuery.length > 0 || publisherQuery.length > 0 ? (
+              <AppliedFilters
+                documentTypeCheckedState={documentTypeCheckedState}
+                publisherCheckedState={publisherCheckedState}
+                removeFilter={handleDeleteFilter}
+              />
+            ) : (
+              <hr className="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
+            )}
+            <SortSelect sortQuery={sortQuery} setSortQuery={setSortQuery} />
+            <hr className="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
+            <Results
+              searchQuery={searchQuery}
+              docTypeQuery={docTypeQuery}
+              publisherQuery={publisherQuery}
+              pageQuery={pageQuery}
+              sortQuery={sortQuery}
             />
-          </fieldset>
+            <Pagination pageQuery={pageQuery} setPageQuery={setPageQuery} />
+          </div>
         </div>
-        <div className="govuk-form-group ">
-          <fieldset className="govuk-fieldset">
-            <legend className="govuk-fieldset__legend govuk-fieldset__legend--m">
-              <h2 className="govuk-fieldset__heading">
-                Published by
-              </h2>
-            </legend>
-            <CheckboxFilter
-              checkboxData={publisher}
-              checkedState={publisherCheckedState}
-              setCheckedState={setPublisherCheckedState}
-              setQueryParams={setPublisherQuery}
-            />
-          </fieldset>
-        </div>
-      </div>
-      <div className="govuk-grid-column-two-thirds">
-        {docTypeQuery.length > 0 || publisherQuery.length > 0 ? (
-          <AppliedFilters
-            documentTypeCheckedState={documentTypeCheckedState}
-            publisherCheckedState={publisherCheckedState}
-            removeFilter={handleDeleteFilter}
-          />
-        ) : null}
-        <SortSelect sortQuery={sortQuery} setSortQuery={setSortQuery} />
-        <Results
-          searchQuery={searchQuery}
-          docTypeQuery={docTypeQuery}
-          publisherQuery={publisherQuery}
-          pageQuery={pageQuery}
-          sortQuery={sortQuery}
-        />
-        <Pagination pageQuery={pageQuery} setPageQuery={setPageQuery} />
-      </div>
-    </div>
-  );
+      ) : null}
+      <DevToggle appsToDisplay={appsToDisplay} setAppsToDisplay={setAppsToDisplay} />
+    </>
+  )
 }
 
 export default App;

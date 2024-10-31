@@ -7,7 +7,7 @@ const Search = ({ handleSearchChange, searchQuery }) => {
       <div className="search-input-button">
         <input
           id="search"
-          className="govuk-input"
+          className="govuk-input search-input"
           name="search"
           type="search"
           onChange={handleSearchChange}
