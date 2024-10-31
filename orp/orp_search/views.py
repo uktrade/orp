@@ -2,16 +2,14 @@ import base64
 import csv
 import logging
 
-from datetime import datetime, timezone
-
-import dateutil.parser  # type: ignore
 import pandas as pd
 
 from orp_search.legislation import Legislation
 from orp_search.public_gateway import PublicGateway, SearchDocumentConfig
+from orp_search.utils.paginate import paginate
+from orp_search.utils.results import calculate_score, parse_date
 
 from django.conf import settings
-from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
@@ -161,42 +159,6 @@ def download_search_csv(request: HttpRequest) -> HttpResponse:
     return response
 
 
-def _parse_date(date_value):
-    if isinstance(date_value, datetime):
-        if date_value.tzinfo is None:
-            # If the datetime is offset-naive, make it offset-aware in UTC
-            return date_value.replace(tzinfo=timezone.utc)
-        return date_value
-    if isinstance(date_value, str):
-        try:
-            dt = dateutil.parser.parse(date_value)
-            if dt.tzinfo is None:
-                # If parsed datetime is offset-naive,
-                # make it offset-aware in UTC
-                return dt.replace(tzinfo=timezone.utc)
-            return dt
-        except ValueError:
-            return None
-    return None  # Return None for invalid date types
-
-
-def _calculate_score(search_result, search_terms):
-    """
-    Calculate the score of a search result based on the number of
-    search terms found in the title and description.
-
-    :param search_result: A dictionary containing the search result.
-    :param search_terms: A list of search terms to look for in the
-                         search result.
-    :return: The score based on the number of search terms found.
-    """
-    title = search_result.get("title", "") or ""
-    description = search_result.get("description", "") or ""
-    combined_content = title.lower() + " " + description.lower()
-    score = sum(combined_content.count(term.lower()) for term in search_terms)
-    return score
-
-
 @require_http_methods(["GET"])
 def search(request: HttpRequest) -> HttpResponse:
     """Search view.
@@ -253,7 +215,7 @@ def search(request: HttpRequest) -> HttpResponse:
 
     # Get the search results from the Data API using PublicGateway class
     config = SearchDocumentConfig(
-        str(search_query).lower(),
+        search_query,
         document_types,
         dummy=True,
         limit=limit,
@@ -287,14 +249,14 @@ def search(request: HttpRequest) -> HttpResponse:
     if sort_by == "recent":
         search_results = sorted(
             search_results,
-            key=lambda x: _parse_date(x["date_modified"]),
+            key=lambda x: parse_date(x["date_modified"]),
             reverse=True,
         )
     elif sort_by == "relevance":
         # Add the 'score' to each search result
         for result in search_results:
             logger.info("result to pass to calculate score: %s", result)
-            result["score"] = _calculate_score(result, config.search_terms)
+            result["score"] = calculate_score(result, config.search_terms)
 
         search_results = sorted(
             search_results,
@@ -302,42 +264,5 @@ def search(request: HttpRequest) -> HttpResponse:
             reverse=True,
         )
 
-    # Paginate results
-    paginator = Paginator(search_results, config.limit)
-    try:
-        paginated_documents = paginator.page(config.offset)
-    except PageNotAnInteger:
-        paginated_documents = paginator.page(1)
-    except EmptyPage:
-        paginated_documents = paginator.page(paginator.num_pages)
-
-    # Iterate over each document in paginated_documents
-    if paginated_documents:
-        for paginated_document in paginated_documents:
-            if "description" in paginated_document:
-                description = paginated_document["description"]
-
-                # If description is not an empty string
-                if description:
-                    # Truncate description to 100 characters
-                    paginated_document["description"] = (
-                        description[:100] + "..."
-                        if len(description) > 100
-                        else description
-                    )
-            if "regulatory_topics" in paginated_document:
-                paginated_document["regulatory_topics"] = str(
-                    paginated_document["regulatory_topics"]
-                ).split("\n")
-
-    context["paginator"] = paginator
-    context["results"] = paginated_documents
-    context["results_count"] = len(paginated_documents)
-    context["is_paginated"] = paginator.num_pages > 1
-    context["results_total_count"] = paginator.count
-    context["results_page_total"] = paginator.num_pages
-    context["current_page"] = config.offset
-    context["start_index"] = paginated_documents.start_index()
-    context["end_index"] = paginated_documents.end_index()
-
+    context = paginate(context, config, search_results)
     return render(request, template_name="orp.html", context=context)
