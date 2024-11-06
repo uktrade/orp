@@ -2,9 +2,64 @@
   white-space: nowrap;
 }
 
+// .orp-checkbox-filters {
+//   padding-left: 10px;
+// }
+
+// Ensure scrollbars are always visible
+.orp-scrollbars-visible {
+  overflow-y: auto; /* Show vertical scrollbars when needed */
+  overflow-x: hidden; /* Hide horizontal scrollbars */
+
+  -ms-overflow-style: scrollbar;
+
+  &::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 12px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 6px;
+    background-color: rgba(0, 0, 0, .5);
+    box-shadow: 0 0 1px rgba(255, 255, 255, .5);
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, .8);
+  }
+
+  &::-webkit-scrollbar-thumb:active {
+    background: rgba(0, 0, 0, .6);
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: #f1f1f1;
+  }
+
+  &::-webkit-scrollbar-button {
+    display: none;
+  }
+
+  &::-webkit-scrollbar-track-piece {
+    display: none;
+  }
+
+  &::-webkit-scrollbar-corner {
+    display: none;
+  }
+
+  &::-webkit-resizer {
+    display: none;
+  }
+
+}
+
 .orp-max-height-250 {
   max-height: 250px;
-  overflow: scroll;
 }
 
 .orp-flex {

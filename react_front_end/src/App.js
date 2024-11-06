@@ -81,6 +81,18 @@ function App() {
     }
   }
 
+  const handleSearchSubmit = useCallback(() => {
+    const filterParams = {
+      ...(searchQuery.length > 0 && { search: searchQuery.join(",") }),
+      ...(docTypeQuery.length > 0 && { document_type: docTypeQuery }),
+      ...(publisherQuery.length > 0 && { publisher: publisherQuery }),
+      sort: sortQuery.join(","),
+      page: pageQuery.join(","),
+    }
+
+    fetchDataWithLoading(filterParams)
+  }, [searchQuery, docTypeQuery, publisherQuery, sortQuery, pageQuery])
+
   useEffect(() => {
     const handler = setTimeout(() => {
       // This version is to send to the Django backend
@@ -101,19 +113,22 @@ function App() {
         page: pageQuery.join(","),
       }
 
-      // console.log("Fetching data with query string:", queryString)
       fetchDataWithLoading(filterParams)
     }, 300) // Adjust the delay as needed
 
     return () => {
       clearTimeout(handler)
     }
-  }, [searchQuery, docTypeQuery, publisherQuery, sortQuery, pageQuery])
+  }, [docTypeQuery, publisherQuery, sortQuery, pageQuery])
 
   return (
     <div className="govuk-grid-row search-form">
       <div className="govuk-grid-column-one-third">
-        <Search handleSearchChange={handleSearchChange} searchQuery={searchQuery} />
+        <Search
+          handleSearchChange={handleSearchChange}
+          searchQuery={searchQuery}
+          handleSearchSubmit={handleSearchSubmit}
+        />
         <div className="govuk-form-group ">
           <fieldset className="govuk-fieldset">
             <legend className="govuk-fieldset__legend govuk-fieldset__legend--m">

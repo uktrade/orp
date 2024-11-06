@@ -1,10 +1,15 @@
-function Search({ handleSearchChange, searchQuery }) {
+function Search({ handleSearchChange, searchQuery, handleSearchSubmit }) {
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    handleSearchSubmit()
+  }
+
   return (
     <div className="govuk-form-group search-group">
       <label className="govuk-label" htmlFor="search">
         Search
       </label>
-      <div className="search-input-button">
+      <form onSubmit={handleSubmit} className="search-input-button">
         <input
           id="search"
           className="govuk-input search-input"
@@ -17,7 +22,7 @@ function Search({ handleSearchChange, searchQuery }) {
         <button type="submit" className="search__button" aria-label="Submit search">
           <span className="govuk-visually-hidden">Submit search</span>
         </button>
-      </div>
+      </form>
     </div>
   )
 }

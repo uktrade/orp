@@ -23,7 +23,7 @@ function CheckboxFilter({ checkboxData, checkedState, setCheckedState, setQueryP
     <>
       {withSearch ? <SearchCheckboxes searchQuery={searchQuery} setSearchQuery={setSearchQuery} /> : null}
       <div
-        className={`govuk-checkboxes govuk-checkboxes--small ${withSearch ? "orp-max-height-250" : ""}`}
+        className={`govuk-checkboxes govuk-checkboxes--small orp-checkbox-filters ${withSearch ? "orp-max-height-250 orp-scrollbars-visible" : ""}`}
         data-module="govuk-checkboxes"
       >
         {filteredData.map(({ name, label }, index) => (
