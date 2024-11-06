@@ -1,4 +1,4 @@
-const Search = ({ handleSearchChange, searchQuery }) => {
+function Search({ handleSearchChange, searchQuery }) {
   return (
     <div className="govuk-form-group search-group">
       <label className="govuk-label" htmlFor="search">

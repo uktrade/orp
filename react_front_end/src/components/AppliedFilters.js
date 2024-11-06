@@ -1,13 +1,13 @@
-import { documentType, publisher } from "../utils/filters"
+import { DOCUMENT_TYPES, PUBLISHERS } from "../utils/constants"
 
-const AppliedFilters = ({ documentTypeCheckedState, publisherCheckedState, removeFilter }) => {
+function AppliedFilters({ documentTypeCheckedState, publisherCheckedState, removeFilter }) {
   // Combine checked document types and publishers into a single array
   const checkedFilters = [
     ...documentTypeCheckedState
-      .map((item, index) => (item ? { type: "docType", ...documentType[index] } : null))
+      .map((item, index) => (item ? { type: "docType", ...DOCUMENT_TYPES[index] } : null))
       .filter((item) => item !== null),
     ...publisherCheckedState
-      .map((item, index) => (item ? { type: "publisher", ...publisher[index] } : null))
+      .map((item, index) => (item ? { type: "publisher", ...PUBLISHERS[index] } : null))
       .filter((item) => item !== null),
   ]
 

@@ -1,4 +1,4 @@
-const SortSelect = ({ sortQuery, setSortQuery }) => {
+function SortSelect({ sortQuery, setSortQuery }) {
   const handleSortChange = (e) => {
     setSortQuery([e.target.value])
   }

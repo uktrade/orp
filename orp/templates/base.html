@@ -99,7 +99,9 @@
       </div>
     </div>
   </footer>
-  {% render_bundle "main" "js" %}
+  {% block js_bundles %}
+    {% render_bundle "main" "js" %}
+  {% endblock js_bundles%}
 </body>
 
 </html>

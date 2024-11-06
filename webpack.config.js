@@ -6,11 +6,17 @@ module.exports = {
   mode: process.env.ENV == "production" ? "production" : "development",
   context: __dirname,
   entry: {
+    // Non-react bundle
+    // This is the main entry point for the non-react bundle
+    // It will include all the JS and SCSS files that are not part of the React app
     main: [
       "./front_end/js/application.js",
       "./front_end/stylesheets/application.scss",
-      "./react_front_end/src/index.js",
     ],
+    // React bundle
+    // This is the main entry point for the React bundle
+    // It will include all the JS and SCSS files that are part of the React app
+    react: ["./react_front_end/src/index.js"],
   },
   output: {
     // Where Webpack will compile assets to

@@ -1,4 +1,4 @@
-const Pagination = ({ pageQuery, setPageQuery }) => {
+function Pagination({ pageQuery, setPageQuery }) {
   const handlePreviousPage = (e) => {
     e.preventDefault()
     setPageQuery([parseInt(pageQuery[0]) - 1])
@@ -17,7 +17,6 @@ const Pagination = ({ pageQuery, setPageQuery }) => {
   // results.paginator.num_pages
   // results.has_next
   // results.next_page_number
-
   const results = {
     has_previous: true,
     previous_page_number: 1,
@@ -61,9 +60,7 @@ const Pagination = ({ pageQuery, setPageQuery }) => {
         {results.paginator.page_range.map((page_number) => (
           <li key={page_number} className="govuk-pagination__item">
             <a
-              className={`govuk-link govuk-pagination__link ${
-                results.number === page_number ? "govuk-pagination__link--current" : ""
-              }`}
+              className={`govuk-link govuk-pagination__link ${results.number === page_number ? "govuk-pagination__link--current" : ""}`}
               href="#"
               onClick={(e) => {
                 e.preventDefault()

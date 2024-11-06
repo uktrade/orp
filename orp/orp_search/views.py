@@ -266,3 +266,16 @@ def search(request: HttpRequest) -> HttpResponse:
 
     context = paginate(context, config, search_results)
     return render(request, template_name="orp.html", context=context)
+
+
+def search_react(request: HttpRequest) -> HttpResponse:
+    """Search view.
+
+    Renders the React based search page.
+    """
+
+    context = {
+        "service_name": settings.SERVICE_NAME_SEARCH,
+    }
+
+    return render(request, template_name="react-orp.html", context=context)

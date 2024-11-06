@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 
-const CheckboxFilter = ({ checkboxData, checkedState, setCheckedState, setQueryParams, withSearch }) => {
+function CheckboxFilter({ checkboxData, checkedState, setCheckedState, setQueryParams, withSearch, setIsLoading }) {
   const [searchQuery, setSearchQuery] = useState("")
   const [filteredData, setFilteredData] = useState(checkboxData)
 
@@ -14,6 +14,7 @@ const CheckboxFilter = ({ checkboxData, checkedState, setCheckedState, setQueryP
     // Generate an array of the names of all checked checkboxes
     const checkedItems = checkboxData.filter((_, index) => updatedCheckedState[index]).map(({ name }) => name)
 
+    setIsLoading(true)
     setQueryParams(checkedItems)
     setCheckedState(updatedCheckedState)
   }
@@ -47,7 +48,7 @@ const CheckboxFilter = ({ checkboxData, checkedState, setCheckedState, setQueryP
   )
 }
 
-const SearchCheckboxes = ({ searchQuery, setSearchQuery }) => {
+function SearchCheckboxes({ searchQuery, setSearchQuery }) {
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value)
   }
