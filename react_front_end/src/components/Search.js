@@ -1,4 +1,4 @@
-function Search({ handleSearchChange, searchQuery, handleSearchSubmit }) {
+function Search({ handleSearchChange, searchInput, handleSearchSubmit }) {
   const handleSubmit = (event) => {
     event.preventDefault()
     handleSearchSubmit()
@@ -16,7 +16,7 @@ function Search({ handleSearchChange, searchQuery, handleSearchSubmit }) {
           name="search"
           type="search"
           onChange={handleSearchChange}
-          value={searchQuery}
+          value={searchInput}
           aria-label="Search input"
         />
         <button type="submit" className="search__button" aria-label="Submit search">

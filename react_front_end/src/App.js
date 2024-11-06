@@ -15,6 +15,7 @@ import { NoResultsContent } from "./components/NoResultsContent"
 const generateCheckedState = (checkboxes, queryValues) => checkboxes.map(({ name }) => queryValues.includes(name))
 
 function App() {
+  const [searchInput, setSearchInput] = useState(useQueryParams("search")[0] || "")
   const [searchQuery, setSearchQuery] = useQueryParams("search", [])
   const [docTypeQuery, setDocTypeQuery] = useQueryParams("document_type", [])
   const [publisherQuery, setPublisherQuery] = useQueryParams("publisher", [])
@@ -40,9 +41,9 @@ function App() {
   // Memoize the handleSearchChange function
   const handleSearchChange = useCallback(
     (event) => {
-      setSearchQuery([event.target.value])
+      setSearchInput(event.target.value)
     },
-    [setSearchQuery],
+    [setSearchInput],
   )
 
   const handleDeleteFilter = (filterName, filter) => {
@@ -65,8 +66,6 @@ function App() {
     setPublisherQuery([])
     setDocumentTypeCheckedState(generateCheckedState(DOCUMENT_TYPES, []))
     setPublisherCheckedState(generateCheckedState(PUBLISHERS, []))
-    // fetchData("asbestos", 10);
-    console.log("Fetching data with empty query string")
   }
 
   const fetchDataWithLoading = async (queryString) => {
@@ -82,8 +81,9 @@ function App() {
   }
 
   const handleSearchSubmit = useCallback(() => {
+    setSearchQuery([searchInput])
     const filterParams = {
-      ...(searchQuery.length > 0 && { search: searchQuery.join(",") }),
+      ...(searchInput.length > 0 && { search: searchInput }),
       ...(docTypeQuery.length > 0 && { document_type: docTypeQuery }),
       ...(publisherQuery.length > 0 && { publisher: publisherQuery }),
       sort: sortQuery.join(","),
@@ -91,7 +91,7 @@ function App() {
     }
 
     fetchDataWithLoading(filterParams)
-  }, [searchQuery, docTypeQuery, publisherQuery, sortQuery, pageQuery])
+  }, [searchInput, docTypeQuery, publisherQuery, sortQuery, pageQuery])
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -126,7 +126,7 @@ function App() {
       <div className="govuk-grid-column-one-third">
         <Search
           handleSearchChange={handleSearchChange}
-          searchQuery={searchQuery}
+          searchInput={searchInput}
           handleSearchSubmit={handleSearchSubmit}
         />
         <div className="govuk-form-group ">
