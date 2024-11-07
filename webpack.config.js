@@ -6,10 +6,17 @@ module.exports = {
   mode: process.env.ENV == "production" ? "production" : "development",
   context: __dirname,
   entry: {
+    // Non-react bundle
+    // This is the main entry point for the non-react bundle
+    // It will include all the JS and SCSS files that are not part of the React app
     main: [
       "./front_end/js/application.js",
       "./front_end/stylesheets/application.scss",
     ],
+    // React bundle
+    // This is the main entry point for the React bundle
+    // It will include all the JS and SCSS files that are part of the React app
+    react: ["./react_front_end/src/index.js"],
   },
   output: {
     // Where Webpack will compile assets to
@@ -30,6 +37,20 @@ module.exports = {
 
   module: {
     rules: [
+      // Use Babel to transpile JS/JSX
+      {
+        test: /\.(js|jsx)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: [
+              "@babel/preset-env",
+              ["@babel/preset-react", { runtime: "automatic" }],
+            ],
+          },
+        },
+      },
       // Use file-loader to handle image assets
       {
         test: /\.(png|jpe?g|gif|woff2?|svg|ico)$/i,
@@ -50,7 +71,7 @@ module.exports = {
 
       // Extract compiled SCSS separately from JS
       {
-        test: /\.s[ac]ss$/i,
+        test: /\.(s[ac]ss|css)$/i,
         use: [
           {
             loader: MiniCssExtractPlugin.loader,
@@ -66,6 +87,6 @@ module.exports = {
 
   resolve: {
     modules: ["node_modules"],
-    extensions: [".js", ".scss"],
+    extensions: [".js", ".jsx", ".scss"],
   },
 };

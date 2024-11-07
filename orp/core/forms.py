@@ -31,7 +31,7 @@ class RegulationSearchForm(forms.Form):
         help_text="",
         widget=forms.TextInput(
             attrs={
-                "class": "govuk-input",
+                "class": "govuk-input search-input",
                 "id": "search",
                 "name": "search",
                 "type": "search",
