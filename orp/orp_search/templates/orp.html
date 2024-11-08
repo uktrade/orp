@@ -3,18 +3,20 @@
 {% load url_replace_tags %}
 {% block head_title %}{% if is_paginated %}Page {{current_page}} - {% endif %}{{service_name}}{% endblock %}
 {% block service_name %}{{service_name}}{% endblock %}
+
+{% block js_toggle %}
+<li class="govuk-footer__inline-list-item">
+  <a class="govuk-footer__link" href="/">
+    JavaScript on version
+  </a>
+</li>
+{% endblock js_toggle %}
+
 {% block body_content %}
 
 {% comment %}
-
 This is the main template for the ORP search page.
 It includes the search form, search results and pagination.
-
-To pass small amounts of data from the Django view to the React app,
-we use the following template tags passed in from orp_search/views.py:
-{{ document_types|json_script:"document_types" }}
-{{ publishers|json_script:"publishers" }}
-
 {% endcomment %}
 
 <div class="govuk-width-container">

@@ -276,6 +276,11 @@ def search_react(request: HttpRequest) -> HttpResponse:
 
     context = {
         "service_name": settings.SERVICE_NAME_SEARCH,
+        "document_types": {
+            "standard": "Standard",
+            "guidance": "Guidance",
+            "legislation": "Legislation",
+        },
     }
 
     return render(request, template_name="react-orp.html", context=context)
