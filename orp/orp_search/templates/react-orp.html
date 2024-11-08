@@ -2,10 +2,32 @@
 
 {% load render_bundle from webpack_loader %}
 
-{% block head_title %}{{service_name}}{% endblock %}
-{% block service_name %}{{service_name}}{% endblock %}
+{% block head_title %}
+  {{service_name}}
+{% endblock %}
 
+{% block service_name %}
+  {{service_name}}
+{% endblock %}
+
+{% block js_bundles %}
+{% render_bundle "main" "js" %}
+{% render_bundle "react" "js" %}
+{% endblock %}
+
+{% block no_script_redirect %}
+  <noscript>
+    <meta http-equiv="refresh" content="0;url=/nojs" />
+  </noscript>
+{% endblock %}
+
+{% comment %}
+To pass small amounts of data from the Django view to the React app,
+we use the following template tags passed in from orp_search/views.py:
+{{ publishers|json_script:"publishers" }}
+{% endcomment %}
 {% block body_content %}
+{{ document_types|json_script:"document_types" }}
 
 <div class="govuk-width-container">
   <main class="govuk-main-wrapper" id="main-content" role="main">
@@ -61,9 +83,4 @@
     <div id="orp-react-app"></div>
   </main>
 </div>
-{% endblock %}
-
-{% block js_bundles %}
-{% render_bundle "main" "js" %}
-{% render_bundle "react" "js" %}
 {% endblock %}

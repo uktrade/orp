@@ -9,8 +9,8 @@ from django.urls import path
 import core.views as core_views
 
 urlpatterns = [
-    path("", orp_search_views.search, name="search"),
-    path("new/", orp_search_views.search_react, name="search_react"),
+    path("", orp_search_views.search_react, name="search_react"),
+    path("nojs/", orp_search_views.search, name="search"),
     # If we choose to have a start page with green button, this is it:
     # path("", core_views.home, name="home"),
     path(
