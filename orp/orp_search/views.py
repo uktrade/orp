@@ -75,7 +75,6 @@ def document(request: HttpRequest, id) -> HttpResponse:
         return render(request, template_name="document.html", context=context)
 
 
-# TODO: use the _search function to refactor the download_search_csv function
 @require_http_methods(["GET"])
 def download_search_csv(request: HttpRequest) -> HttpResponse:
     search_query = request.GET.get("search", "")
