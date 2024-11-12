@@ -6,19 +6,19 @@ from orp_search.models import DataResponseModel, logger
 from django.db.models import QuerySet
 
 
-def insert_or_update_document(document_data):
+def insert_or_update_document(document_json):
     try:
         # Try to create a new document
-        document = DataResponseModel.objects.create(**document_data)
+        document = DataResponseModel.objects.create(**document_json)
     except Exception as e:
         logger.error(f"error creating document: {e}. attempting to update...")
 
         # If a duplicate key error occurs, update the existing document
-        document = DataResponseModel.objects.get(pk=document_data["id"])
+        document = DataResponseModel.objects.get(pk=document_json["id"])
         existing_search_terms = json.loads(document.query)
         logger.info(f"existing_search_terms: {existing_search_terms}")
 
-        doc_search_terms = document_data["query"]
+        doc_search_terms = document_json["query"]
 
         for search_term in doc_search_terms:
             if search_term not in existing_search_terms["search_terms"]:
@@ -26,7 +26,7 @@ def insert_or_update_document(document_data):
 
         document.query = json.dumps(existing_search_terms)
 
-        for key, value in document_data.items():
+        for key, value in document_json.items():
             setattr(document, key, value)
         document.save()
 

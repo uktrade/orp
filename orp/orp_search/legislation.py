@@ -17,18 +17,29 @@ def _encode_url(url):
     return encoded_bytes.decode("utf-8")
 
 
+def _get_url_data(url, config=None):
+    try:
+        response = requests.get(  # nosec BXXX
+            url, timeout=10 if not config.timeout else config.timeout
+        )
+        if response.status_code == 200:
+            return response.text
+        return None
+    except requests.exceptions.RequestException as e:
+        logger.error(f"error fetching legislation data: {e}")
+        return None
+
+
 class Legislation:
-    def _get_url_data(self, url, config=None):
-        try:
-            response = requests.get(  # nosec BXXX
-                url, timeout=10 if not config.timeout else config.timeout
-            )
-            if response.status_code == 200:
-                return response.text
-            return None
-        except requests.exceptions.RequestException as e:
-            logger.error(f"error fetching legislation data: {e}")
-            return None
+    def __init__(self):
+        # Define the XML namespaces
+        self._namespaces = {
+            "leg": "http://www.legislation.gov.uk/namespaces/legislation",
+            "dc": "http://purl.org/dc/elements/1.1/",
+            "dct": "http://purl.org/dc/terms/",
+            "atom": "http://www.w3.org/2005/Atom",
+            "ukm": "http://www.legislation.gov.uk/namespaces/metadata",
+        }
 
     def parse_dataset_and_store(self):
         # Read construction_legislation.xlsx into panda
@@ -40,82 +51,100 @@ class Legislation:
         xml_data = []
         for index, row in dataset.iterrows():
             url = row["URI to Extract XML Data"]
-            data = self._get_url_data(url)
+            data = _get_url_data(url)
             if data:
                 xml_data.append(data)
 
         # For each xml_data parse the XML data but extracting the
         # following fields and store the data in a dictionary and
         # the key should be identifier
-
-        # Define the XML namespaces
-        namespaces = {
-            "leg": "http://www.legislation.gov.uk/namespaces/legislation",
-            "dc": "http://purl.org/dc/elements/1.1/",
-            "dct": "http://purl.org/dc/terms/",
-            "atom": "http://www.w3.org/2005/Atom",
-            "ukm": "http://www.legislation.gov.uk/namespaces/metadata",
-        }
-
         for data in xml_data:
             root = ET.fromstring(data)  # nosec BXXX
             identifier = root.find(
-                ".//dc:identifier", namespaces
+                ".//dc:identifier", self._namespaces
             ).text  # nosec BXXX
-            title = root.find(".//dc:title", namespaces).text  # nosec BXXX
+            title = root.find(
+                ".//dc:title", self._namespaces
+            ).text  # nosec BXXX
             description = root.find(
-                ".//dc:description", namespaces
+                ".//dc:description", self._namespaces
             ).text  # nosec BXXX
-            format = root.find(".//dc:format", namespaces).text  # nosec BXXX
+            format = root.find(
+                ".//dc:format", self._namespaces
+            ).text  # nosec BXXX
             language = root.find(
-                ".//dc:language", namespaces
+                ".//dc:language", self._namespaces
             ).text  # nosec BXXX
             publisher = root.find(
-                ".//dc:publisher", namespaces
+                ".//dc:publisher", self._namespaces
             ).text  # nosec BXXX
             modified = root.find(
-                ".//dc:modified", namespaces
+                ".//dc:modified", self._namespaces
             ).text  # nosec BXXX
-            valid = root.find(".//dct:valid", namespaces).text  # nosec BXXX
+            valid = root.find(
+                ".//dct:valid", self._namespaces
+            ).text  # nosec BXXX
 
-            document_data = {
-                "id": _encode_url(identifier),
-                "title": title,
-                "identifier": identifier,
-                "publisher": publisher,
-                "language": language,
-                "format": format,
-                "description": description,
-                "date_issued": datetime.strptime(
-                    modified, "%Y-%m-%d"
-                ).strftime("%Y-%m-%d"),
-                "date_modified": datetime.strptime(
-                    modified, "%Y-%m-%d"
-                ).strftime("%Y-%m-%d"),
-                "date_valid": datetime.strptime(valid, "%Y-%m-%d").strftime(
-                    "%Y-%m-%d"
-                ),
-                "type": "legislation",
-                "coverage": "gb",
-                "audience": None,
-                "subject": None,
-                "license": None,
-                "regulatory_topics": None,
-                "status": None,
-                "date_uploaded_to_orp": None,
-                "has_format": None,
-                "is_format_of": None,
-                "has_version": None,
-                "is_version_of": None,
-                "references": None,
-                "is_referenced_by": None,
-                "has_part": None,
-                "is_part_of": None,
-                "is_replaced_by": None,
-                "replaces": None,
-                "related_legislation": None,
-                "score": 0,
-            }
+            document_json = self._to_json(
+                description,
+                format,
+                identifier,
+                language,
+                modified,
+                publisher,
+                title,
+                valid,
+            )
 
             # Insert or update the document
-            insert_or_update_document(document_data)
+            insert_or_update_document(document_json)
+
+    def _to_json(
+        self,
+        description,
+        format,
+        identifier,
+        language,
+        modified,
+        publisher,
+        title,
+        valid,
+    ):
+        return {
+            "id": _encode_url(identifier),
+            "title": title,
+            "identifier": identifier,
+            "publisher": publisher,
+            "language": language,
+            "format": format,
+            "description": description,
+            "date_issued": datetime.strptime(modified, "%Y-%m-%d").strftime(
+                "%Y-%m-%d"
+            ),
+            "date_modified": datetime.strptime(modified, "%Y-%m-%d").strftime(
+                "%Y-%m-%d"
+            ),
+            "date_valid": datetime.strptime(valid, "%Y-%m-%d").strftime(
+                "%Y-%m-%d"
+            ),
+            "type": "legislation",
+            "coverage": "gb",
+            "audience": None,
+            "subject": None,
+            "license": None,
+            "regulatory_topics": None,
+            "status": None,
+            "date_uploaded_to_orp": None,
+            "has_format": None,
+            "is_format_of": None,
+            "has_version": None,
+            "is_version_of": None,
+            "references": None,
+            "is_referenced_by": None,
+            "has_part": None,
+            "is_part_of": None,
+            "is_replaced_by": None,
+            "replaces": None,
+            "related_legislation": None,
+            "score": 0,
+        }

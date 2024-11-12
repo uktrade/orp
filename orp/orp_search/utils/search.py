@@ -15,7 +15,7 @@ from django.http import HttpRequest
 logger = logging.getLogger(__name__)
 
 
-def create_search_query(search_string):
+def _create_search_query(search_string):
     """
     Create a search query from a search string with AND/OR operators
 
@@ -63,7 +63,7 @@ def search_database(
     query_str = sanitize_input(config.search_query)
 
     # Generate query object
-    query_objs = create_search_query(query_str)
+    query_objs = _create_search_query(query_str)
 
     # Search across specific fields
     vector = SearchVector("title", "description")
