@@ -20,20 +20,3 @@ def parse_date(date_value):
         except ValueError:
             return None
     return None  # Return None for invalid date types
-
-
-def calculate_score(search_result, search_terms):
-    """
-    Calculate the score of a search result based on the number of
-    search terms found in the title and description.
-
-    :param search_result: A dictionary containing the search result.
-    :param search_terms: A list of search terms to look for in the
-                         search result.
-    :return: The score based on the number of search terms found.
-    """
-    title = search_result.get("title", "") or ""
-    description = search_result.get("description", "") or ""
-    combined_content = title.lower() + " " + description.lower()
-    score = sum(combined_content.count(term.lower()) for term in search_terms)
-    return score

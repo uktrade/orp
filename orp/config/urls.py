@@ -2,15 +2,67 @@
 
 import orp_search.views as orp_search_views
 
+from orp_search.models import DataResponseModel
+from rest_framework import routers, serializers, viewsets
+
 from django.conf import settings
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 
 import core.views as core_views
 
+
+# Serializers define the API representation.
+class DataResponseSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = DataResponseModel
+        fields = [
+            "id",
+            "title",
+            "link",
+            "publisher",
+            "language",
+            "format",
+            "description",
+            "date_issued",
+            "date_modified",
+            "date_valid",
+            "audience",
+            "coverage",
+            "subject",
+            "type",
+            "license",
+            "regulatory_topics",
+            "status",
+            "date_uploaded_to_orp",
+            "has_format",
+            "is_format_of",
+            "has_version",
+            "is_version_of",
+            "references",
+            "is_referenced_by",
+            "has_part",
+            "is_part_of",
+            "is_replaced_by",
+            "replaces",
+            "related_legislation",
+            "id",
+        ]
+
+
+class DataResponseViewSet(viewsets.ModelViewSet):
+    serializer_class = DataResponseSerializer
+    queryset = DataResponseModel.objects.all()
+
+
+# Routers provide an easy way of automatically determining the URL conf.
+router = routers.DefaultRouter()
+router.register(r"results", DataResponseViewSet)
+
 urlpatterns = [
+    path("", include(router.urls)),
     path("", orp_search_views.search_react, name="search_react"),
-    path("nojs/", orp_search_views.search, name="search"),
+    path("nojs/", orp_search_views.search_django, name="search_django"),
     # If we choose to have a start page with green button, this is it:
     # path("", core_views.home, name="home"),
     path(

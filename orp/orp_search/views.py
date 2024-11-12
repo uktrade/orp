@@ -1,20 +1,20 @@
 import base64
 import csv
 import logging
+import time
 
 import pandas as pd
 
-from orp_search.legislation import Legislation
-from orp_search.public_gateway import PublicGateway, SearchDocumentConfig
+from orp_search.config import SearchDocumentConfig
+from orp_search.models import DataResponseModel
+from orp_search.public_gateway import PublicGateway
 from orp_search.utils.paginate import paginate
-from orp_search.utils.results import calculate_score, parse_date
+from orp_search.utils.search import search
 
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
-
-from core.forms import RegulationSearchForm
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ def document(request: HttpRequest, id) -> HttpResponse:
         return render(request, template_name="document.html", context=context)
 
     # Create a SearchDocumentConfig instance and set the id parameter
-    config = SearchDocumentConfig(search_terms="", dummy=True, id=document_id)
+    config = SearchDocumentConfig(search_query="", id=document_id)
 
     # Use the PublicGateway class to fetch the details
     public_gateway = PublicGateway()
@@ -75,66 +75,33 @@ def document(request: HttpRequest, id) -> HttpResponse:
         return render(request, template_name="document.html", context=context)
 
 
+# TODO: use the _search function to refactor the download_search_csv function
 @require_http_methods(["GET"])
 def download_search_csv(request: HttpRequest) -> HttpResponse:
-    search_terms = request.GET.get("search", "")
-    document_type_terms = request.GET.getlist("document_type", "")
-    publisher_terms = request.GET.getlist("publisher", None)
+    search_query = request.GET.get("search", "")
+    document_types = request.GET.getlist("document_type", "")
+    publishers = request.GET.getlist("publisher", None)
     sort_by = request.GET.get("sort", None)
-
     config = SearchDocumentConfig(
-        search_terms, document_type_terms, dummy=True
+        search_query,
+        document_types,
+        publisher_names=publishers,
+        sort_by=sort_by,
     )
+    # Perform search
+    search(config)
 
-    if publisher_terms:
-        config.publisher_terms = publisher_terms
-
-    if sort_by:
-        config.sort_by = sort_by
-
-    public_gateway_search_results = []
-    legislation_search_results = []
-
-    if (
-        not config.document_types
-        or "standard" in config.document_types
-        or "guidance" in config.document_types
-    ):
-        public_gateway = PublicGateway()
-        public_gateway_search_results = public_gateway.search(config)
-
-    # Legislation search
-    # If config.search_terms is empty then we don't need to
-    # search for legislation
-    if (
-        "" not in config.search_terms
-        and not config.document_types
-        or "legislation" in config.document_types
-    ):
-        legislation = Legislation()
-        legislation_search_results = legislation.search(config)
+    # Get DataResponseModel objects from the search results
+    documents = DataResponseModel.objects.all()
 
     search_results = []
-
-    for result in public_gateway_search_results:
+    for result in documents:
         search_results.append(
             {
                 "id": result["id"],
                 "title": result["title"],
                 "publisher": result["publisher"],
                 "description": result["description"],
-                "type": result["type"],
-                "date_modified": result["date_modified"],
-            }
-        )
-
-    for result in legislation_search_results:
-        search_results.append(
-            {
-                "id": result["id"],
-                "title": result["title"],
-                "publisher": result["publisher"],
-                "description": "",
                 "type": result["type"],
                 "date_modified": result["date_modified"],
             }
@@ -159,115 +126,69 @@ def download_search_csv(request: HttpRequest) -> HttpResponse:
     return response
 
 
-@require_http_methods(["GET"])
-def search(request: HttpRequest) -> HttpResponse:
-    """Search view.
+def search_source_data(context: dict, request: HttpRequest) -> dict:
+    logger.info("received search request: %s", request)
+    start_time = time.time()
 
-    Handles the search functionality and renders the search page. This view
-    function processes GET requests for the search page. It displays the search
-    form and, if a valid search query is provided, shows the search results.
-    The search results are fetched from the DBT Data API. If an error occurs
-    during the Data API search, the service problem page is displayed.
-    """
-
-    context = {
-        "service_name": settings.SERVICE_NAME_SEARCH,
-    }
-
-    # Create a new instance of the RegulationSearchForm
-    form = RegulationSearchForm(request.GET)
-
-    # If the form is not valid, return the form
-    if not form.is_valid():
-        return render(request, template_name="orp.html", context=context)
-
-    # Add the form to the context
-    context["form"] = form
-
-    # Get the search query and document types from the form
-    search_query = form.cleaned_data.get("search")
-    document_types = form.cleaned_data.get("document_type")
-
-    page = request.GET.get("page", "1")
-    # TODO: some page validation is required here
-    offset = int(page) if page.isdigit() else 1
-
+    search_query = request.GET.get("search", "")
+    document_types = request.GET.get("document_type", "").lower().split(",")
+    offset = request.GET.get("page", "1")
+    offset = int(offset) if offset.isdigit() else 1
     limit = request.GET.get("limit", "10")
-    # TODO: some limit validation is required here
     limit = int(limit) if limit.isdigit() else 10
-
     publisher = request.GET.getlist("publisher", None)
-    if publisher:
-        logger.info("publisher: %s", publisher)
-
-    # If the search query is empty, return the form
-    if not search_query:
-        logger.info("no search query provided")
-    else:
-        logger.info("search query: %s", search_query)
-
     sort_by = request.GET.get("sort", None)
-    if sort_by:
-        logger.info("sort by: %s", sort_by)
-
-    logger.info("document types: %s", document_types)
-    logger.info("page: %s", offset)
 
     # Get the search results from the Data API using PublicGateway class
     config = SearchDocumentConfig(
         search_query,
         document_types,
-        dummy=True,
         limit=limit,
         offset=offset,
+        publisher_names=publisher,
+        sort_by=sort_by,
     )
 
-    if publisher:
-        config.publisher_terms = publisher
+    # Display the search query in the log
+    config.print_to_log()
 
-    if sort_by:
-        config.sort_by = sort_by
+    # Search across specific fields
+    search(config)
 
-    search_results = []
+    # convert search_results into json
+    pag_start_time = time.time()
+    context = paginate(context, config)
+    pag_end_time = time.time()
 
-    if (
-        not config.document_types
-        or "standard" in config.document_types
-        or "guidance" in config.document_types
-    ):
-        public_gateway = PublicGateway()
-        search_results = public_gateway.search(config)
+    logger.info(
+        f"time taken to paginate (called from views.py): "
+        f"{round(pag_end_time - pag_start_time, 2)} seconds"
+    )
 
-    # Legislation search
-    if not config.document_types or "legislation" in config.document_types:
-        logger.info("searching for legislation: %s", config.search_terms)
-        legislation = Legislation()
-        search_results += legislation.search(config)
+    end_time = time.time()
+    logger.info(
+        f"time taken to search and produce response: "
+        f"{round(end_time - start_time, 2)} seconds"
+    )
 
-    # Sort results by date_modified (recent) or relevance
-    # (calculate score and sort by score)
-    if sort_by == "recent":
-        search_results = sorted(
-            search_results,
-            key=lambda x: parse_date(x["date_modified"]),
-            reverse=True,
-        )
-    elif sort_by == "relevance":
-        # Add the 'score' to each search result
-        for result in search_results:
-            logger.info("result to pass to calculate score: %s", result)
-            result["score"] = calculate_score(result, config.search_terms)
+    return context
 
-        search_results = sorted(
-            search_results,
-            key=lambda x: x["score"],
-            reverse=True,
-        )
 
-    context = paginate(context, config, search_results)
+@require_http_methods(["GET"])
+def search_django(request: HttpRequest):
+    """Search view.
+
+    Renders the Django based search page.
+    """
+    context = {
+        "service_name": settings.SERVICE_NAME_SEARCH,
+    }
+
+    context = search_source_data(context, request)
     return render(request, template_name="orp.html", context=context)
 
 
+@require_http_methods(["GET"])
 def search_react(request: HttpRequest) -> HttpResponse:
     """Search view.
 

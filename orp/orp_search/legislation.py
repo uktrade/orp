@@ -2,9 +2,12 @@ import base64
 import logging
 import xml.etree.ElementTree as ET  # nosec BXXX
 
+from datetime import datetime
+
+import pandas as pd
 import requests  # type: ignore
 
-from orp_search.config import SearchDocumentConfig
+from orp_search.utils.documents import insert_or_update_document
 
 logger = logging.getLogger(__name__)
 
@@ -15,139 +18,104 @@ def _encode_url(url):
 
 
 class Legislation:
-    def __init__(self):
-        self.search_url = "https://www.legislation.gov.uk/search"
-
-    def search(self, config: SearchDocumentConfig):
-        logger.info("searching legislation...")
-
-        logger.info(
-            f"final_search_expression terms: {config.final_search_expression}"
-        )
-
-        # List of search terms
-        headers = {"Accept": "application/atom+xml"}
-        params = {
-            "lang": "en",
-            "title": config.final_search_expression,
-            "text": config.final_search_expression,
-            "results-count": 20,
-        }
-
-        # Register namespaces
-        ET.register_namespace("", "http://www.w3.org/2005/Atom")
-        ET.register_namespace(
-            "leg", "http://www.legislation.gov.uk/namespaces/legislation"
-        )
-        ET.register_namespace(
-            "openSearch", "http://a9.com/-/spec/opensearch/1.1/"
-        )
-
-        # Namespace dictionary
-        ns = {
-            "": "http://www.w3.org/2005/Atom",
-            "leg": "http://www.legislation.gov.uk/namespaces/legislation",
-            "ukm": "http://www.legislation.gov.uk/namespaces/metadata",
-            "theme": "http://www.legislation.gov.uk/namespaces/theme",
-            "openSearch": "http://a9.com/-/spec/opensearch/1.1/",
-        }
-
-        def _do_request():
-            # Get search results and parse XML data (root)
-            response = requests.get(
-                self.search_url,
-                params=params,
-                headers=headers,
-                timeout=config.timeout,
+    def _get_url_data(self, url, config=None):
+        try:
+            response = requests.get(  # nosec BXXX
+                url, timeout=10 if not config.timeout else config.timeout
             )
             if response.status_code == 200:
-                root = ET.fromstring(
-                    response.content.decode("utf-8")
-                )  # nosec BXXX
-            else:
-                root = None
+                return response.text
+            return None
+        except requests.exceptions.RequestException as e:
+            logger.error(f"error fetching legislation data: {e}")
+            return None
 
-            try:
-                # Extract pagination values
-                page_data = {
-                    "page": (
-                        root.find(".//leg:page", ns).text
-                        if root.find(".//leg:page", ns) is not None
-                        else None
-                    ),
-                    "morePages": (
-                        root.find(".//leg:morePages", ns).text
-                        if root.find(".//leg:morePages", ns) is not None
-                        else None
-                    ),
-                }
+    def parse_dataset_and_store(self):
+        # Read construction_legislation.xlsx into panda
+        dataset = pd.read_excel("construction_legislation.xlsx")
 
-                logger.info(f"legislation page data: {page_data}")
-                return root, page_data
-            except Exception as e:
-                logger.error(f"error fetching legislation: {e}")
-                return None, None
+        # For each row, get the URL from the column named
+        # 'URI to Extract XML Data'
+        # and store the XML data in a list
+        xml_data = []
+        for index, row in dataset.iterrows():
+            url = row["URI to Extract XML Data"]
+            data = self._get_url_data(url)
+            if data:
+                xml_data.append(data)
 
-        root, page_data = _do_request()
+        # For each xml_data parse the XML data but extracting the
+        # following fields and store the data in a dictionary and
+        # the key should be identifier
 
-        if not root:
-            return []
+        # Define the XML namespaces
+        namespaces = {
+            "leg": "http://www.legislation.gov.uk/namespaces/legislation",
+            "dc": "http://purl.org/dc/elements/1.1/",
+            "dct": "http://purl.org/dc/terms/",
+            "atom": "http://www.w3.org/2005/Atom",
+            "ukm": "http://www.legislation.gov.uk/namespaces/metadata",
+        }
 
-        all_entries = []
+        for data in xml_data:
+            root = ET.fromstring(data)  # nosec BXXX
+            identifier = root.find(
+                ".//dc:identifier", namespaces
+            ).text  # nosec BXXX
+            title = root.find(".//dc:title", namespaces).text  # nosec BXXX
+            description = root.find(
+                ".//dc:description", namespaces
+            ).text  # nosec BXXX
+            format = root.find(".//dc:format", namespaces).text  # nosec BXXX
+            language = root.find(
+                ".//dc:language", namespaces
+            ).text  # nosec BXXX
+            publisher = root.find(
+                ".//dc:publisher", namespaces
+            ).text  # nosec BXXX
+            modified = root.find(
+                ".//dc:modified", namespaces
+            ).text  # nosec BXXX
+            valid = root.find(".//dct:valid", namespaces).text  # nosec BXXX
 
-        def _extract_entries(root):
-            # Extract entries
-            entries = []
-            for entry in root.findall("entry", ns):
-                entry_id = (
-                    entry.find("id", ns).text
-                    if entry.find("id", ns) is not None
-                    else None
-                )
-                title = (
-                    entry.find("title", ns).text
-                    if entry.find("title", ns) is not None
-                    else None
-                )
-                updated = (
-                    entry.find("updated", ns).text
-                    if entry.find("updated", ns) is not None
-                    else None
-                )
-                published = (
-                    entry.find("published", ns).text
-                    if entry.find("published", ns) is not None
-                    else "N/A"
-                )  # Placeholder if missing
-                summary = (
-                    entry.find("summary", ns).text
-                    if entry.find("summary", ns) is not None
-                    else "N/A"
-                )  # Placeholder if missing
-                entries.append(
-                    {
-                        "id": _encode_url(entry_id),
-                        "title": title,
-                        "date_modified": updated if updated else published,
-                        "publisher": "Legislation",
-                        "description": summary,
-                        "type": "Legislation",
-                    }
-                )
-            return entries
+            document_data = {
+                "id": _encode_url(identifier),
+                "title": title,
+                "identifier": identifier,
+                "publisher": publisher,
+                "language": language,
+                "format": format,
+                "description": description,
+                "date_issued": datetime.strptime(
+                    modified, "%Y-%m-%d"
+                ).strftime("%Y-%m-%d"),
+                "date_modified": datetime.strptime(
+                    modified, "%Y-%m-%d"
+                ).strftime("%Y-%m-%d"),
+                "date_valid": datetime.strptime(valid, "%Y-%m-%d").strftime(
+                    "%Y-%m-%d"
+                ),
+                "type": "legislation",
+                "coverage": "gb",
+                "audience": None,
+                "subject": None,
+                "license": None,
+                "regulatory_topics": None,
+                "status": None,
+                "date_uploaded_to_orp": None,
+                "has_format": None,
+                "is_format_of": None,
+                "has_version": None,
+                "is_version_of": None,
+                "references": None,
+                "is_referenced_by": None,
+                "has_part": None,
+                "is_part_of": None,
+                "is_replaced_by": None,
+                "replaces": None,
+                "related_legislation": None,
+                "score": 0,
+            }
 
-        all_entries += _extract_entries(root)
-
-        morePages = int(page_data["morePages"])
-        if morePages > 1:
-            logger.info(f"legislation more pages: {morePages}")
-
-            # Get remaining pages
-            for page in range(2, morePages + 1):
-                params["page"] = page
-                root, _ = _do_request()
-                results = _extract_entries(root)
-                all_entries += results
-
-        logger.info(f"legislation total results: {len(all_entries)}")
-        return all_entries
+            # Insert or update the document
+            insert_or_update_document(document_data)
