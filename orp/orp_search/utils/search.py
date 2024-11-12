@@ -56,7 +56,7 @@ def _create_search_query(search_string):
     return preprocess_query
 
 
-def search_database(
+def _search_database(
     config: SearchDocumentConfig,
 ) -> QuerySet[DataResponseModel]:
     # Sanatize the query string
@@ -114,7 +114,7 @@ def search(context: dict, request: HttpRequest) -> dict:
     config.print_to_log()
 
     # Search across specific fields
-    results = search_database(config)
+    results = _search_database(config)
 
     # convert search_results into json
     pag_start_time = time.time()

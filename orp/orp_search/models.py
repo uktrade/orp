@@ -7,7 +7,7 @@ _default_char_size = 2048
 
 
 class DataResponseModel(models.Model):
-    query = models.JSONField()
+    query = models.JSONField()  # TODO: remove this field
     title = models.CharField(max_length=_default_char_size)
     identifier = models.URLField(unique=True)
     publisher = models.CharField(

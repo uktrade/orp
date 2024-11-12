@@ -3,7 +3,11 @@
 import orp_search.views as orp_search_views
 
 from orp_search.models import DataResponseModel
-from rest_framework import routers, serializers, viewsets
+from orp_search.utils.documents import clear_all_documents
+from orp_search.utils.search import search
+from rest_framework import routers, serializers, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from django.conf import settings
 from django.contrib import admin
@@ -52,12 +56,45 @@ class DataResponseSerializer(serializers.HyperlinkedModelSerializer):
 
 class DataResponseViewSet(viewsets.ModelViewSet):
     serializer_class = DataResponseSerializer
-    queryset = DataResponseModel.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        # Assuming `search` is a function that
+        # processes the request and returns data
+        context = {
+            "service_name": settings.SERVICE_NAME_SEARCH,
+        }
+        response_data = search(context, request)
+
+        # Return the response
+        return Response(response_data, status=status.HTTP_200_OK)
+
+
+class RebuildCacheViewSet(viewsets.ViewSet):
+    @action(detail=False, methods=["post"], url_path="cache")
+    def rebuild_cache(self, request, *args, **kwargs):
+        from orp_search.legislation import Legislation
+
+        # from orp_search.public_gateway import PublicGateway
+
+        try:
+            clear_all_documents()
+            Legislation().build_cache()
+            # PublicGateway().build_cache()
+        except Exception as e:
+            return Response(
+                data={"message": f"error clearing documents: {e}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response(
+            data={"message": "rebuilt cache"}, status=status.HTTP_200_OK
+        )
 
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
-router.register(r"results", DataResponseViewSet)
+router.register(r"dataresults", DataResponseViewSet, basename="dataresponse")
+router.register(r"rebuild", RebuildCacheViewSet, basename="cache")
 
 urlpatterns = [
     path("", include(router.urls)),

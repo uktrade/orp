@@ -1,13 +1,25 @@
 import json
 import re
 
+from numpy.f2py.auxfuncs import throw_error
 from orp_search.models import DataResponseModel, logger
 
 from django.db.models import QuerySet
 
 
+def clear_all_documents():
+    logger.info("clearing all documents from table...")
+    try:
+        DataResponseModel.objects.all().delete()
+        logger.info("documents cleared from table")
+    except Exception as e:
+        logger.error(f"error clearing documents: {e}")
+        throw_error(f"error clearing documents: {e}")
+
+
 def insert_or_update_document(document_json):
     try:
+        logger.info(f"creating document: {document_json}")
         # Try to create a new document
         document = DataResponseModel.objects.create(**document_json)
     except Exception as e:
@@ -19,7 +31,6 @@ def insert_or_update_document(document_json):
         logger.info(f"existing_search_terms: {existing_search_terms}")
 
         doc_search_terms = document_json["query"]
-
         for search_term in doc_search_terms:
             if search_term not in existing_search_terms["search_terms"]:
                 existing_search_terms["search_terms"].append(search_term)
@@ -29,6 +40,7 @@ def insert_or_update_document(document_json):
         for key, value in document_json.items():
             setattr(document, key, value)
         document.save()
+        logger.info(f"document updated: {document}")
 
 
 def calculate_score(config, queryset: QuerySet):
