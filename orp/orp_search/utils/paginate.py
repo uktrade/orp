@@ -2,19 +2,20 @@ import logging
 import time
 
 from orp_search.config import SearchDocumentConfig
-from orp_search.models import DataResponseModel
 
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.db.models import QuerySet
 
 logger = logging.getLogger(__name__)
 
 
-def paginate(context: dict, config: SearchDocumentConfig) -> dict:
+def paginate(
+    context: dict, config: SearchDocumentConfig, results: QuerySet
+) -> dict:
     start_time = time.time()
 
     logger.info("paginating documents...")
-    documents = DataResponseModel.objects.all().order_by("id")
-    paginator = Paginator(documents, config.limit)
+    paginator = Paginator(results, config.limit)
     try:
         paginated_documents = paginator.page(config.offset)
     except PageNotAnInteger:

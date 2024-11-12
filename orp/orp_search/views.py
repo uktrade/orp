@@ -1,14 +1,12 @@
 import base64
 import csv
 import logging
-import time
 
 import pandas as pd
 
 from orp_search.config import SearchDocumentConfig
 from orp_search.models import DataResponseModel
 from orp_search.public_gateway import PublicGateway
-from orp_search.utils.paginate import paginate
 from orp_search.utils.search import search
 
 from django.conf import settings
@@ -125,54 +123,6 @@ def download_search_csv(request: HttpRequest) -> HttpResponse:
     return response
 
 
-def search_source_data(context: dict, request: HttpRequest) -> dict:
-    logger.info("received search request: %s", request)
-    start_time = time.time()
-
-    search_query = request.GET.get("search", "")
-    document_types = request.GET.get("document_type", "").lower().split(",")
-    offset = request.GET.get("page", "1")
-    offset = int(offset) if offset.isdigit() else 1
-    limit = request.GET.get("limit", "10")
-    limit = int(limit) if limit.isdigit() else 10
-    publisher = request.GET.getlist("publisher", None)
-    sort_by = request.GET.get("sort", None)
-
-    # Get the search results from the Data API using PublicGateway class
-    config = SearchDocumentConfig(
-        search_query,
-        document_types,
-        limit=limit,
-        offset=offset,
-        publisher_names=publisher,
-        sort_by=sort_by,
-    )
-
-    # Display the search query in the log
-    config.print_to_log()
-
-    # Search across specific fields
-    search(config)
-
-    # convert search_results into json
-    pag_start_time = time.time()
-    context = paginate(context, config)
-    pag_end_time = time.time()
-
-    logger.info(
-        f"time taken to paginate (called from views.py): "
-        f"{round(pag_end_time - pag_start_time, 2)} seconds"
-    )
-
-    end_time = time.time()
-    logger.info(
-        f"time taken to search and produce response: "
-        f"{round(end_time - start_time, 2)} seconds"
-    )
-
-    return context
-
-
 @require_http_methods(["GET"])
 def search_django(request: HttpRequest):
     """Search view.
@@ -183,7 +133,7 @@ def search_django(request: HttpRequest):
         "service_name": settings.SERVICE_NAME_SEARCH,
     }
 
-    context = search_source_data(context, request)
+    context = search(context, request)
     return render(request, template_name="orp.html", context=context)
 
 
