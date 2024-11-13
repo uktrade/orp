@@ -3,6 +3,7 @@ import logging
 import xml.etree.ElementTree as ET  # nosec BXXX
 
 from datetime import datetime
+from typing import Optional
 
 import requests  # type: ignore
 
@@ -38,6 +39,10 @@ def _get_url_data(config, url):
         return e
 
 
+def _get_text_from_element(element: Optional[ET.Element]) -> Optional[str]:
+    return element.text if element is not None else None
+
+
 class Legislation:
     def __init__(self):
         # Define the XML namespaces
@@ -49,7 +54,7 @@ class Legislation:
             "ukm": "http://www.legislation.gov.uk/namespaces/metadata",
         }
 
-    def build_cache(self):
+    def build_cache(self, config: SearchDocumentConfig):
         logger.info("building legislation cache...")
         dataset = construction_legislation_dataframe()
 
@@ -64,7 +69,6 @@ class Legislation:
             )
 
             try:
-                config = SearchDocumentConfig(search_query="", timeout=10)
                 data = _get_url_data(config, url)
 
                 if data is None:
@@ -78,30 +82,30 @@ class Legislation:
                 if data:
                     logger.info(f"parsing data from {url}...")
                     root = ET.fromstring(data)  # nosec BXXX
-                    identifier = root.find(
-                        ".//dc:identifier", self._namespaces
-                    ).text  # nosec BXXX
-                    title = root.find(
-                        ".//dc:title", self._namespaces
-                    ).text  # nosec BXXX
-                    description = root.find(
-                        ".//dc:description", self._namespaces
-                    ).text  # nosec BXXX
-                    format = root.find(
-                        ".//dc:format", self._namespaces
-                    ).text  # nosec BXXX
-                    language = root.find(
-                        ".//dc:language", self._namespaces
-                    ).text  # nosec BXXX
-                    publisher = root.find(
-                        ".//dc:publisher", self._namespaces
-                    ).text  # nosec BXXX
-                    modified = root.find(
-                        ".//dc:modified", self._namespaces
-                    ).text  # nosec BXXX
-                    valid = root.find(
-                        ".//dct:valid", self._namespaces
-                    ).text  # nosec BXXX
+                    identifier = _get_text_from_element(
+                        root.find(".//dc:identifier", self._namespaces)
+                    )  # nosec BXXX
+                    title = _get_text_from_element(
+                        root.find(".//dc:title", self._namespaces)
+                    )  # nosec BXXX
+                    description = _get_text_from_element(
+                        root.find(".//dc:description", self._namespaces)
+                    )  # nosec BXXX
+                    format = _get_text_from_element(
+                        root.find(".//dc:format", self._namespaces)
+                    )  # nosec BXXX
+                    language = _get_text_from_element(
+                        root.find(".//dc:language", self._namespaces)
+                    )  # nosec BXXX
+                    publisher = _get_text_from_element(
+                        root.find(".//dc:publisher", self._namespaces)
+                    )  # nosec BXXX
+                    modified = _get_text_from_element(
+                        root.find(".//dc:modified", self._namespaces)
+                    )  # nosec BXXX
+                    valid = _get_text_from_element(
+                        root.find(".//dct:valid", self._namespaces)
+                    )  # nosec BXXX
 
                     document_json = self._to_json(
                         description,
@@ -149,6 +153,6 @@ class Legislation:
             "date_valid": datetime.strptime(valid, "%Y-%m-%d").strftime(
                 "%Y-%m-%d"
             ),
-            "type": "legislation",
+            "type": "Legislation",
             "score": 0,
         }

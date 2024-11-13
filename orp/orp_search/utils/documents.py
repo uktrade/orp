@@ -1,4 +1,3 @@
-import json
 import re
 
 from numpy.f2py.auxfuncs import throw_error
@@ -19,7 +18,8 @@ def clear_all_documents():
 
 def insert_or_update_document(document_json):
     try:
-        logger.info(f"creating document: {document_json}")
+        logger.info("creating document...")
+        logger.debug(f"document: {document_json}")
         # Try to create a new document
         document = DataResponseModel.objects.create(**document_json)
     except Exception as e:
@@ -27,16 +27,6 @@ def insert_or_update_document(document_json):
 
         # If a duplicate key error occurs, update the existing document
         document = DataResponseModel.objects.get(pk=document_json["id"])
-        existing_search_terms = json.loads(document.query)
-        logger.info(f"existing_search_terms: {existing_search_terms}")
-
-        doc_search_terms = document_json["query"]
-        for search_term in doc_search_terms:
-            if search_term not in existing_search_terms["search_terms"]:
-                existing_search_terms["search_terms"].append(search_term)
-
-        document.query = json.dumps(existing_search_terms)
-
         for key, value in document_json.items():
             setattr(document, key, value)
         document.save()

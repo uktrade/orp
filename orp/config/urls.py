@@ -2,6 +2,7 @@
 
 import orp_search.views as orp_search_views
 
+from orp_search.config import SearchDocumentConfig
 from orp_search.models import DataResponseModel
 from orp_search.utils.documents import clear_all_documents
 from orp_search.utils.search import search
@@ -73,16 +74,16 @@ class RebuildCacheViewSet(viewsets.ViewSet):
     @action(detail=False, methods=["post"], url_path="cache")
     def rebuild_cache(self, request, *args, **kwargs):
         from orp_search.legislation import Legislation
-
-        # from orp_search.public_gateway import PublicGateway
+        from orp_search.public_gateway import PublicGateway
 
         try:
             clear_all_documents()
-            Legislation().build_cache()
-            # PublicGateway().build_cache()
+            config = SearchDocumentConfig(search_query="", timeout=10)
+            Legislation().build_cache(config)
+            PublicGateway().build_cache(config)
         except Exception as e:
             return Response(
-                data={"message": f"error clearing documents: {e}"},
+                data={"message": f"[urls] error clearing documents: {e}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
