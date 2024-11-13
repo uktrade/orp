@@ -23,7 +23,9 @@ def insert_or_update_document(document_json):
         # Try to create a new document
         document = DataResponseModel.objects.create(**document_json)
     except Exception as e:
-        logger.error(f"error creating document: {e}. attempting to update...")
+        logger.error(f"error creating document: {document_json}")
+        logger.error(f"error: {e}")
+        logger.info("document already exists, updating...")
 
         # If a duplicate key error occurs, update the existing document
         document = DataResponseModel.objects.get(pk=document_json["id"])

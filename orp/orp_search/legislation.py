@@ -1,5 +1,6 @@
 import base64
 import logging
+import re
 import xml.etree.ElementTree as ET  # nosec BXXX
 
 from datetime import datetime
@@ -41,6 +42,45 @@ def _get_url_data(config, url):
 
 def _get_text_from_element(element: Optional[ET.Element]) -> Optional[str]:
     return element.text if element is not None else None
+
+
+def _convert_to_date_string(
+    date_str: Optional[str], date_format: str = "%Y-%m-%d"
+) -> Optional[str]:
+    """
+    Converts a date string to a specified date format.
+    Supports both "%Y-%m-%d" and "%Y-%m" formats.
+    Removes double quotes if present in the string.
+
+    :param date_str: The date string to convert
+                    (e.g., '2021-03-01', '2014-11').
+    :return: The formatted date string or None if input is invalid.
+    """
+    if date_str and isinstance(date_str, str):
+        if date_str is None:
+            return None
+
+        # Remove double quotes and any non-date characters from the string
+        date_str = re.sub(r"[^\d-]", "", date_str)
+
+        # Determine the expected format and adjust the string accordingly
+        parts = date_str.split("-")
+        if len(parts) == 1:  # Handle "YYYY" case
+            date_str += "-01-01"
+            date_format = "%Y-%m-%d"
+        elif len(parts) == 2:  # Handle "YYYY-MM" case
+            date_str += "-01"
+            date_format = "%Y-%m-%d"
+        elif len(parts) == 3:  # Handle "YYYY-MM-DD" case
+            date_format = "%Y-%m-%d"
+
+        try:
+            date_obj = datetime.strptime(date_str, date_format)
+            return date_obj.strftime(date_format)
+        except ValueError as e:
+            logger.error(f"error converting date string: {e}")
+            return None
+    return None
 
 
 class Legislation:
@@ -123,6 +163,7 @@ class Legislation:
             except Exception as e:
                 logger.error(f"error fetching data from {url}: {e}")
                 throw_error(f"error fetching data from {url}: {e}")
+                return
 
     def _to_json(
         self,
@@ -136,23 +177,16 @@ class Legislation:
         valid,
     ):
         return {
-            "query": {"search_terms": []},
             "id": _encode_url(identifier),
             "title": title,
             "identifier": identifier,
             "publisher": publisher,
-            "language": language,
-            "format": format,
-            "description": description,
-            "date_issued": datetime.strptime(modified, "%Y-%m-%d").strftime(
-                "%Y-%m-%d"
-            ),
-            "date_modified": datetime.strptime(modified, "%Y-%m-%d").strftime(
-                "%Y-%m-%d"
-            ),
-            "date_valid": datetime.strptime(valid, "%Y-%m-%d").strftime(
-                "%Y-%m-%d"
-            ),
+            "language": language if language is not None else "eng",
+            "format": format if format is not None else "",
+            "description": description if description is not None else "",
+            "date_issued": _convert_to_date_string(modified),
+            "date_modified": _convert_to_date_string(modified),
+            "date_valid": _convert_to_date_string(valid),
             "type": "Legislation",
             "score": 0,
         }
