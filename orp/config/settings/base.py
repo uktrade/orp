@@ -106,7 +106,6 @@ if DATABASE_URL := env("DATABASE_URL", default=None):
             **dj_database_url.parse(
                 DATABASE_URL,
                 engine="postgresql",
-                conn_max_age=0,
             ),
             "ENGINE": "django.db.backends.postgresql",
         }

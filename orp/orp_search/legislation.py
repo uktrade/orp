@@ -2,9 +2,16 @@ import base64
 import logging
 import xml.etree.ElementTree as ET  # nosec BXXX
 
+from typing import Optional
+
 import requests  # type: ignore
 
 from orp_search.config import SearchDocumentConfig
+from orp_search.construction_legislation import (  # noqa: E501
+    construction_legislation_dataframe,
+)
+from orp_search.utils.date import convert_date_string_to_obj
+from orp_search.utils.documents import insert_or_update_document
 
 logger = logging.getLogger(__name__)
 
@@ -14,140 +21,130 @@ def _encode_url(url):
     return encoded_bytes.decode("utf-8")
 
 
+def _get_url_data(config, url):
+    try:
+        response = requests.get(url, timeout=config.timeout)  # nosec BXXX
+        if response.status_code == 200:
+            return response.text
+
+        # If the status code is not 200, log the error
+        logger.error(
+            f"error fetching legislation data "
+            f"[{response.status_code}]: {response.reason}"
+        )
+        return None
+    except requests.exceptions.RequestException as e:
+        logger.error(f"error fetching legislation data: {e}")
+        return e
+
+
+def _get_text_from_element(element: Optional[ET.Element]) -> Optional[str]:
+    return element.text if element is not None else None
+
+
 class Legislation:
     def __init__(self):
-        self.search_url = "https://www.legislation.gov.uk/search"
-
-    def search(self, config: SearchDocumentConfig):
-        logger.info("searching legislation...")
-
-        logger.info(
-            f"final_search_expression terms: {config.final_search_expression}"
-        )
-
-        # List of search terms
-        headers = {"Accept": "application/atom+xml"}
-        params = {
-            "lang": "en",
-            "title": config.final_search_expression,
-            "text": config.final_search_expression,
-            "results-count": 20,
-        }
-
-        # Register namespaces
-        ET.register_namespace("", "http://www.w3.org/2005/Atom")
-        ET.register_namespace(
-            "leg", "http://www.legislation.gov.uk/namespaces/legislation"
-        )
-        ET.register_namespace(
-            "openSearch", "http://a9.com/-/spec/opensearch/1.1/"
-        )
-
-        # Namespace dictionary
-        ns = {
-            "": "http://www.w3.org/2005/Atom",
+        # Define the XML namespaces
+        self._namespaces = {
             "leg": "http://www.legislation.gov.uk/namespaces/legislation",
+            "dc": "http://purl.org/dc/elements/1.1/",
+            "dct": "http://purl.org/dc/terms/",
+            "atom": "http://www.w3.org/2005/Atom",
             "ukm": "http://www.legislation.gov.uk/namespaces/metadata",
-            "theme": "http://www.legislation.gov.uk/namespaces/theme",
-            "openSearch": "http://a9.com/-/spec/opensearch/1.1/",
         }
 
-        def _do_request():
-            # Get search results and parse XML data (root)
-            response = requests.get(
-                self.search_url,
-                params=params,
-                headers=headers,
-                timeout=config.timeout,
+    def build_cache(self, config: SearchDocumentConfig):
+        logger.info("building legislation cache...")
+        dataset = construction_legislation_dataframe()
+
+        # For each row, get the URL from the column named
+        # 'URI to Extract XML Data'
+        # and store the XML data in a list
+        for index, row in dataset.iterrows():
+            url = row["URI to Extract XML Data"]
+            logger.info(
+                f"fetching data from page {index + 1} / "
+                f"{len(dataset)}: {url}..."
             )
-            if response.status_code == 200:
-                root = ET.fromstring(
-                    response.content.decode("utf-8")
-                )  # nosec BXXX
-            else:
-                root = None
 
             try:
-                # Extract pagination values
-                page_data = {
-                    "page": (
-                        root.find(".//leg:page", ns).text
-                        if root.find(".//leg:page", ns) is not None
-                        else None
-                    ),
-                    "morePages": (
-                        root.find(".//leg:morePages", ns).text
-                        if root.find(".//leg:morePages", ns) is not None
-                        else None
-                    ),
-                }
+                data = _get_url_data(config, url)
 
-                logger.info(f"legislation page data: {page_data}")
-                return root, page_data
+                if data is None:
+                    logger.error(
+                        f"error fetching data from {url}. no data returned"
+                    )
+                    raise Exception(
+                        f"error fetching data from {url}. no data returned"
+                    )
+
+                if data:
+                    logger.info(f"parsing data from {url}...")
+                    root = ET.fromstring(data)  # nosec BXXX
+                    identifier = _get_text_from_element(
+                        root.find(".//dc:identifier", self._namespaces)
+                    )  # nosec BXXX
+                    title = _get_text_from_element(
+                        root.find(".//dc:title", self._namespaces)
+                    )  # nosec BXXX
+                    description = _get_text_from_element(
+                        root.find(".//dc:description", self._namespaces)
+                    )  # nosec BXXX
+                    format = _get_text_from_element(
+                        root.find(".//dc:format", self._namespaces)
+                    )  # nosec BXXX
+                    language = _get_text_from_element(
+                        root.find(".//dc:language", self._namespaces)
+                    )  # nosec BXXX
+                    publisher = _get_text_from_element(
+                        root.find(".//dc:publisher", self._namespaces)
+                    )  # nosec BXXX
+                    modified = _get_text_from_element(
+                        root.find(".//dc:modified", self._namespaces)
+                    )  # nosec BXXX
+                    valid = _get_text_from_element(
+                        root.find(".//dct:valid", self._namespaces)
+                    )  # nosec BXXX
+
+                    document_json = self._to_json(
+                        description,
+                        format,
+                        identifier,
+                        language,
+                        modified,
+                        publisher,
+                        title,
+                        valid,
+                    )
+
+                    # Insert or update the document
+                    insert_or_update_document(document_json)
             except Exception as e:
-                logger.error(f"error fetching legislation: {e}")
-                return None, None
+                logger.error(f"error fetching data from {url}: {e}")
+                raise e
 
-        root, page_data = _do_request()
-
-        if not root:
-            return []
-
-        all_entries = []
-
-        def _extract_entries(root):
-            # Extract entries
-            entries = []
-            for entry in root.findall("entry", ns):
-                entry_id = (
-                    entry.find("id", ns).text
-                    if entry.find("id", ns) is not None
-                    else None
-                )
-                title = (
-                    entry.find("title", ns).text
-                    if entry.find("title", ns) is not None
-                    else None
-                )
-                updated = (
-                    entry.find("updated", ns).text
-                    if entry.find("updated", ns) is not None
-                    else None
-                )
-                published = (
-                    entry.find("published", ns).text
-                    if entry.find("published", ns) is not None
-                    else "N/A"
-                )  # Placeholder if missing
-                summary = (
-                    entry.find("summary", ns).text
-                    if entry.find("summary", ns) is not None
-                    else "N/A"
-                )  # Placeholder if missing
-                entries.append(
-                    {
-                        "id": _encode_url(entry_id),
-                        "title": title,
-                        "date_modified": updated if updated else published,
-                        "publisher": "Legislation",
-                        "description": summary,
-                        "type": "Legislation",
-                    }
-                )
-            return entries
-
-        all_entries += _extract_entries(root)
-
-        morePages = int(page_data["morePages"])
-        if morePages > 1:
-            logger.info(f"legislation more pages: {morePages}")
-
-            # Get remaining pages
-            for page in range(2, morePages + 1):
-                params["page"] = page
-                root, _ = _do_request()
-                results = _extract_entries(root)
-                all_entries += results
-
-        logger.info(f"legislation total results: {len(all_entries)}")
-        return all_entries
+    def _to_json(
+        self,
+        description,
+        format,
+        identifier,
+        language,
+        modified,
+        publisher,
+        title,
+        valid,
+    ):
+        return {
+            "id": _encode_url(identifier),
+            "title": title,
+            "identifier": identifier,
+            "publisher": publisher,
+            "language": language if language is not None else "eng",
+            "format": format if format is not None else "",
+            "description": description if description is not None else "",
+            "date_issued": convert_date_string_to_obj(modified),
+            "date_modified": convert_date_string_to_obj(modified),
+            "date_valid": convert_date_string_to_obj(valid),
+            "type": "Legislation",
+            "score": 0,
+        }
