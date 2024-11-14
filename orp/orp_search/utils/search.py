@@ -61,28 +61,32 @@ def _search_database(
 ) -> QuerySet[DataResponseModel]:
     # Sanatize the query string
     query_str = sanitize_input(config.search_query)
+    logger.info(f"sanitized search query: {query_str}")
 
     # Generate query object
     query_objs = _create_search_query(query_str)
+    logger.info(f"search query objects: {query_objs}")
 
     # Search across specific fields
-    vector = SearchVector("title", "description")
+    vector = SearchVector("title", "description", "regulatory_topics")
 
     # Filter results based on document types if provided
     queryset = DataResponseModel.objects.annotate(search=vector).filter(
         search=query_objs,
-        **(
-            {"type__in": config.document_types}
-            if config.document_types
-            else {}
-        ),
+        # **(
+        #     {"type__in": config.document_types}
+        #     if config.document_types
+        #     else {}
+        # ),
     )
+    logger.info(f"search results: {queryset}")
 
-    # Sort results based on the sort_by parameter
-    if config.sort_by == "recent":
+    # Sort results based on the sort_by parameter (default)
+    if config.sort_by is None or config.sort_by == "recent":
         return queryset.order_by("-date_modified")
 
-    if config.sort_by == "relevance":
+    if config.sort_by is not None and config.sort_by == "relevance":
+        # Calculate the score for each document
         calculate_score(config, queryset)
         return queryset.order_by("score")
 
@@ -91,7 +95,7 @@ def search(context: dict, request: HttpRequest) -> dict:
     logger.info("received search request: %s", request)
     start_time = time.time()
 
-    search_query = request.GET.get("search", "")
+    search_query = request.GET.get("query", "")
     document_types = request.GET.get("document_type", "").lower().split(",")
     offset = request.GET.get("page", "1")
     offset = int(offset) if offset.isdigit() else 1

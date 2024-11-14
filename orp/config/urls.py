@@ -1,5 +1,8 @@
 """orp URL configuration."""
 
+import logging
+import time
+
 import orp_search.views as orp_search_views
 
 from orp_search.config import SearchDocumentConfig
@@ -15,6 +18,8 @@ from django.contrib import admin
 from django.urls import include, path
 
 import core.views as core_views
+
+urls_logger = logging.getLogger(__name__)
 
 
 # Serializers define the API representation.
@@ -56,26 +61,43 @@ class DataResponseSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class DataResponseViewSet(viewsets.ModelViewSet):
-    serializer_class = DataResponseSerializer
-
-    def list(self, request, *args, **kwargs):
-        # Assuming `search` is a function that
-        # processes the request and returns data
+    @action(detail=False, methods=["get"], url_path="search")
+    def search(self, request, *args, **kwargs):
         context = {
             "service_name": settings.SERVICE_NAME_SEARCH,
         }
-        response_data = search(context, request)
 
-        # Return the response
-        return Response(response_data, status=status.HTTP_200_OK)
+        try:
+            response_data = search(context, request)
+
+            # Create a json object from context but exclude paginator
+            response_data = {
+                "results": response_data["results"],
+                "results_count": response_data["results_count"],
+                "is_paginated": response_data["is_paginated"],
+                "results_total_count": response_data["results_total_count"],
+                "results_page_total": response_data["results_page_total"],
+                "current_page": response_data["current_page"],
+                "start_index": response_data["start_index"],
+                "end_index": response_data["end_index"],
+            }
+
+            # Return the response
+            return Response(response_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                data={"message": f"error searching: {e}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class RebuildCacheViewSet(viewsets.ViewSet):
-    @action(detail=False, methods=["post"], url_path="cache")
+    @action(detail=False, methods=["post"], url_path="rebuildcache")
     def rebuild_cache(self, request, *args, **kwargs):
         from orp_search.legislation import Legislation
         from orp_search.public_gateway import PublicGateway
 
+        tx_begin = time.time()
         try:
             clear_all_documents()
             config = SearchDocumentConfig(search_query="", timeout=10)
@@ -87,15 +109,24 @@ class RebuildCacheViewSet(viewsets.ViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+        tx_end = time.time()
+        urls_logger.info(
+            f"time taken to rebuild cache: "
+            f"{round(tx_end - tx_begin, 2)} seconds"
+        )
         return Response(
-            data={"message": "rebuilt cache"}, status=status.HTTP_200_OK
+            data={
+                "message": "rebuilt cache",
+                "duration": round(tx_end - tx_begin, 2),
+            },
+            status=status.HTTP_200_OK,
         )
 
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
-router.register(r"dataresults", DataResponseViewSet, basename="dataresponse")
-router.register(r"rebuild", RebuildCacheViewSet, basename="cache")
+router.register(r"v1", DataResponseViewSet, basename="search")
+router.register(r"v1", RebuildCacheViewSet, basename="rebuildcache")
 
 urlpatterns = [
     path("", include(router.urls)),

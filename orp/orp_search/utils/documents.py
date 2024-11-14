@@ -21,18 +21,25 @@ def insert_or_update_document(document_json):
         logger.info("creating document...")
         logger.debug(f"document: {document_json}")
         # Try to create a new document
-        document = DataResponseModel.objects.create(**document_json)
+        document = DataResponseModel(**document_json)
+        document.full_clean()
+        document.save()
     except Exception as e:
         logger.error(f"error creating document: {document_json}")
         logger.error(f"error: {e}")
         logger.info("document already exists, updating...")
 
         # If a duplicate key error occurs, update the existing document
-        document = DataResponseModel.objects.get(pk=document_json["id"])
-        for key, value in document_json.items():
-            setattr(document, key, value)
-        document.save()
-        logger.info(f"document updated: {document}")
+        try:
+            document = DataResponseModel.objects.get(pk=document_json["id"])
+            for key, value in document_json.items():
+                setattr(document, key, value)
+            document.save()
+            logger.info(f"document updated: {document}")
+        except Exception as e:
+            logger.error(f"error updating document: {document_json}")
+            logger.error(f"error: {e}")
+            throw_error(f"error updating document: {document_json}")
 
 
 def calculate_score(config, queryset: QuerySet):

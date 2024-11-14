@@ -1,27 +1,26 @@
 import json
 import logging
 
-from datetime import datetime
-
 import requests  # type: ignore
 
+from orp_search.utils.date import convert_date_string_to_obj
 from orp_search.utils.documents import insert_or_update_document
 
 logger = logging.getLogger(__name__)
 
 
-def _normalize_date(date_str):
-    if date_str is None:
-        return None
-
-    # If the date is in YYYY format, add "-01-01"
-    if len(date_str) == 4:
-        return f"{date_str}-01-01"
-    # If the date is in YYYY-MM format, add "-01"
-    elif len(date_str) == 7:
-        return f"{date_str}-01"
-    # Otherwise, assume the date is already in YYYY-MM-DD format
-    return datetime.strptime(date_str, "%Y-%m-%d").strftime("%Y-%m-%d")
+# def _normalize_date(date_str):
+#     if date_str is None:
+#         return None
+#
+#     # If the date is in YYYY format, add "-01-01"
+#     if len(date_str) == 4:
+#         return f"{date_str}-01-01"
+#     # If the date is in YYYY-MM format, add "-01"
+#     elif len(date_str) == 7:
+#         return f"{date_str}-01"
+#     # Otherwise, assume the date is already in YYYY-MM-DD format
+#     return datetime.strptime(date_str, "%Y-%m-%d").strftime("%Y-%m-%d")
 
 
 def _build_like_conditions(field, and_terms, or_terms):
@@ -80,16 +79,33 @@ class PublicGateway:
             # Now you can use `data` as a usual Python dictionary
             # Convert each row into DataResponseModel object
             total_documents = len(data.get("uk_regulatory_documents"))
-            count = 0
+            inserted_document_count = 0
             for row in data.get("uk_regulatory_documents"):
                 logger.info(
-                    f"inserting or updating document {count} /"
-                    f"({total_documents})..."
+                    f"inserting or updating document "
+                    f"{inserted_document_count} / ({total_documents})..."
                 )
+
+                # Normalize the date fields
+                row["date_issued"] = convert_date_string_to_obj(
+                    row.get("date_issued")
+                )
+                row["date_modified"] = convert_date_string_to_obj(
+                    row.get("date_modified")
+                )
+                row["date_valid"] = convert_date_string_to_obj(
+                    row.get("date_valid")
+                )
+                row["id"] = row.get("identifier")
+
                 insert_or_update_document(row)
-                count += 1
+                inserted_document_count += 1
+            return response.status_code, inserted_document_count
         else:
             logger.error(
                 f"error fetching data from orpd: {response.status_code}"
             )
-            return
+
+            raise Exception(
+                f"error fetching data from orpd: {response.status_code}"
+            )

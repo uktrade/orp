@@ -60,9 +60,23 @@ def paginate(
             f"{round(end_time - start_time, 2)} seconds"
         )
 
+    # Convert paginated_documents into a list of json objects
+    paginated_documents_json = []
+    for paginated_document in paginated_documents:
+        paginated_documents_json.append(
+            {
+                "id": paginated_document.id,
+                "title": paginated_document.title,
+                "publisher": paginated_document.publisher,
+                "description": paginated_document.description,
+                "type": paginated_document.type,
+                "date_modified": paginated_document.date_modified,
+            }
+        )
+
     start_time = time.time()
     context["paginator"] = paginator
-    context["results"] = paginated_documents
+    context["results"] = paginated_documents_json
     context["results_count"] = len(paginated_documents)
     context["is_paginated"] = paginator.num_pages > 1
     context["results_total_count"] = paginator.count
