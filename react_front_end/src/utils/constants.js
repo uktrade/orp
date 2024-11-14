@@ -1,6 +1,6 @@
 const DATA_API_URL = "https://data.api.trade.gov.uk/v1/"
 const DATASET = "orp-regulations"
-const VERSION = "v1.0.0" // latest causes a redirect which adds latency
+const VERSION = "v1.0.1" // latest causes a redirect which adds latency
 const FORMAT = "json"
 // export const S3_QUERY = buildQuery(filters)
 // export const ENCODED_S3_QUERY = encodeURI(S3_QUERY)
@@ -20,7 +20,7 @@ export const DOCUMENT_TYPES = [
   },
   {
     name: "Standards",
-    label: "British Standards",
+    label: "Standards",
   },
 ]
 
