@@ -92,7 +92,7 @@ class DataResponseViewSet(viewsets.ModelViewSet):
 
 
 class RebuildCacheViewSet(viewsets.ViewSet):
-    @action(detail=False, methods=["post"], url_path="rebuildcache")
+    @action(detail=False, methods=["post"], url_path="rebuild")
     def rebuild_cache(self, request, *args, **kwargs):
         from orp_search.legislation import Legislation
         from orp_search.public_gateway import PublicGateway
@@ -126,10 +126,10 @@ class RebuildCacheViewSet(viewsets.ViewSet):
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
 router.register(r"v1", DataResponseViewSet, basename="search")
-router.register(r"v1", RebuildCacheViewSet, basename="rebuildcache")
+router.register(r"v1", RebuildCacheViewSet, basename="rebuild")
 
 urlpatterns = [
-    path("", include(router.urls)),
+    path("api/", include(router.urls)),
     path("", orp_search_views.search_react, name="search_react"),
     path("nojs/", orp_search_views.search_django, name="search_django"),
     # If we choose to have a start page with green button, this is it:

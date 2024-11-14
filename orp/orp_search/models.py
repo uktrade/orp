@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 class DataResponseModel(models.Model):
     title = models.TextField(null=True, blank=True)
-    identifier = models.URLField(unique=True)
+    identifier = models.TextField(null=True, blank=True)
     publisher = models.TextField(null=True, blank=True)
     language = models.TextField(null=True, blank=True)
     format = models.TextField(null=True, blank=True)
