@@ -137,3 +137,13 @@ def search(context: dict, request: HttpRequest) -> dict:
     )
 
     return context
+
+
+def get_publisher_names():
+    publishers = DataResponseModel.objects.values("publisher").distinct()
+
+    publishers_list = []
+    for publisher in publishers:
+        publishers_list.append(publisher.publisher)
+
+    return publishers_list
