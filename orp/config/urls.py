@@ -6,9 +6,9 @@ import time
 import orp_search.views as orp_search_views
 
 from orp_search.config import SearchDocumentConfig
-from orp_search.models import DataResponseModel
+from orp_search.models import DataResponseModel, logger
 from orp_search.utils.documents import clear_all_documents
-from orp_search.utils.search import search
+from orp_search.utils.search import get_publisher_names, search
 from rest_framework import routers, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -123,10 +123,29 @@ class RebuildCacheViewSet(viewsets.ViewSet):
         )
 
 
+class PublishersViewSet(viewsets.ViewSet):
+    @action(detail=False, methods=["get"], url_path="publishers")
+    def publishers(self, request, *args, **kwargs):
+        try:
+            publishers = get_publisher_names()
+            logger.info(f"publishers: {publishers}")
+
+            return Response(
+                data={"results": publishers},
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            return Response(
+                data={"message": f"error fetching publishers: {e}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
 router.register(r"v1", DataResponseViewSet, basename="search")
-router.register(r"v1", RebuildCacheViewSet, basename="rebuild")
+router.register(r"v1/cache", RebuildCacheViewSet, basename="rebuild")
+router.register(r"v1/retrieve", PublishersViewSet, basename="publishers")
 
 urlpatterns = [
     path("api/", include(router.urls)),
