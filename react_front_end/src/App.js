@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { useQueryParams } from "./hooks/useQueryParams"
-import { fetchData } from "./utils/fetch-ords"
+import { fetchData } from "./utils/fetch-drf"
 import { DOCUMENT_TYPES, PUBLISHERS } from "./utils/constants"
 
 import { Search } from "./components/Search"
@@ -23,9 +23,6 @@ function App() {
   const [pageQuery, setPageQuery] = useQueryParams("page", [1])
   const [data, setData] = useState([])
   const [isLoading, setIsLoading] = useState(true)
-
-  // Get results count and memoize it
-  const resultsCount = useMemo(() => data.length, [data])
 
   // Memoize the initial checked state for document types and publishers
   const initialDocumentTypeCheckedState = useMemo(
@@ -178,7 +175,12 @@ function App() {
       </div>
       <div className="govuk-grid-column-two-thirds">
         <div className="orp-flex orp-flex--space-between">
-          <ResultsCount totalResults={resultsCount} isLoading={isLoading} />
+          <ResultsCount
+            isLoading={isLoading}
+            start={data.start_index}
+            end={data.end_index}
+            totalResults={data.results_total_count}
+          />
           <p className="govuk-body govuk-!-margin-bottom-0">
             <a
               href=""
@@ -201,13 +203,13 @@ function App() {
         )}
         <SortSelect sortQuery={sortQuery} setSortQuery={setSortQuery} />
         <hr className="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
-        {data.length === 0 && !isLoading ? (
+        {data.results_total_count === 0 && !isLoading ? (
           <NoResultsContent />
         ) : (
-          <Results results={data} isLoading={isLoading} searchQuery={searchQuery} />
+          <Results results={data.results} isLoading={isLoading} searchQuery={searchQuery} />
         )}
 
-        <Pagination pageQuery={pageQuery} setPageQuery={setPageQuery} />
+        <Pagination pageData={data} pageQuery={pageQuery} setPageQuery={setPageQuery} />
       </div>
     </div>
   )

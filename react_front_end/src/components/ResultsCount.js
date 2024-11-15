@@ -1,7 +1,7 @@
-function ResultsCount({ totalResults, isLoading }) {
+function ResultsCount({ isLoading, start, end, totalResults }) {
   return (
     <p className="govuk-body govuk-!-font-weight-bold govuk-!-margin-bottom-0">
-      {isLoading ? "Loading..." : totalResults ? `${totalResults} results` : "No results found"}
+      {isLoading ? "Loading..." : totalResults ? `${start} to ${end} of ${totalResults} results` : "No results found"}
     </p>
   )
 }
