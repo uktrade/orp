@@ -79,6 +79,8 @@ function App() {
 
   const handleSearchSubmit = useCallback(() => {
     setSearchQuery([searchInput])
+    // setPageQuery([1])
+
     const filterParams = {
       ...(searchInput.length > 0 && { search: searchInput }),
       ...(docTypeQuery.length > 0 && { document_type: docTypeQuery }),
@@ -88,7 +90,7 @@ function App() {
     }
 
     fetchDataWithLoading(filterParams)
-  }, [searchInput, docTypeQuery, publisherQuery, sortQuery, pageQuery])
+  }, [searchInput, docTypeQuery, publisherQuery, sortQuery])
 
   useEffect(() => {
     const handler = setTimeout(() => {
