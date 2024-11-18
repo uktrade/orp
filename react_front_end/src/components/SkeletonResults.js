@@ -1,7 +1,7 @@
 function SkeletonResults() {
   return (
     <ul className="govuk-list skeleton-wrapper">
-      {Array.from({ length: 5 }).map((_, index) => (
+      {Array.from({ length: 10 }).map((_, index) => (
         <li key={index}>
           <div className="skeleton-type"></div>
           <div className="skeleton-title"></div>

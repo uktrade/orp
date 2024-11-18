@@ -59,7 +59,7 @@ class PublicGateway:
         """
         self._base_url = (
             "https://data.api.trade.gov.uk/v1/datasets/orp-regulations"
-            "/versions/v1.0.0/data"
+            "/versions/v1.0.1/data"
         )
 
     def build_cache(self, config):
