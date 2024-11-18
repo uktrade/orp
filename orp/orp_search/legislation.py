@@ -11,7 +11,10 @@ from orp_search.construction_legislation import (  # noqa: E501
     construction_legislation_dataframe,
 )
 from orp_search.utils.date import convert_date_string_to_obj
-from orp_search.utils.documents import insert_or_update_document
+from orp_search.utils.documents import (  # noqa: E501
+    generate_short_uuid,
+    insert_or_update_document,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +138,7 @@ class Legislation:
         valid,
     ):
         return {
-            "id": _encode_url(identifier),
+            "id": generate_short_uuid(),
             "title": title,
             "identifier": identifier,
             "publisher": publisher,

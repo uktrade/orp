@@ -1,4 +1,3 @@
-import base64
 import csv
 import logging
 
@@ -11,7 +10,7 @@ from orp_search.utils.search import search
 
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 
 logger = logging.getLogger(__name__)
@@ -27,19 +26,8 @@ def document(request: HttpRequest, id) -> HttpResponse:
         "service_name": settings.SERVICE_NAME_SEARCH,
     }
 
-    def _decode_url(encoded_url):
-        decoded_bytes = base64.urlsafe_b64decode(encoded_url.encode("utf-8"))
-        return decoded_bytes.decode("utf-8")
-
     # Extract the id parameter from the request
     document_id = id
-
-    # Decode id to see if it's a url ?
-    try:
-        decoded_url = _decode_url(document_id)
-        return redirect(decoded_url)
-    except Exception:
-        logger.info("document id is not a url")
 
     logger.info("document id: %s", document_id)
     if not document_id:

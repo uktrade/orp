@@ -1,4 +1,6 @@
+import base64
 import re
+import uuid
 
 from numpy.f2py.auxfuncs import throw_error
 from orp_search.models import DataResponseModel, logger
@@ -81,3 +83,14 @@ def calculate_score(config, queryset: QuerySet):
             combined_content.count(term.lower()) for term in search_query
         )
         document.save()
+
+
+def generate_short_uuid():
+    # Generate a UUID
+    uid = uuid.uuid4()
+    # Encode it to base64
+    uid_b64 = base64.urlsafe_b64encode(uid.bytes).rstrip(b"=").decode("ascii")
+    return uid_b64[
+        :22
+    ]  # Shorten as needed, typically more than 22 characters are
+    # unnecessary and remain unique.
