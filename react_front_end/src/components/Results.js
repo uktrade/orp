@@ -1,7 +1,7 @@
 import { SkeletonResults } from "./SkeletonResults"
 
 function Results({ results, isLoading, searchQuery }) {
-  // console.log("Results", results)
+  console.log("Results", results)
 
   if (isLoading) {
     return <SkeletonResults />
@@ -17,8 +17,8 @@ function Results({ results, isLoading, searchQuery }) {
   return results ? (
     <div className="govuk-summary-list orp-search-results">
       {results.map((result) => {
-        // const { id, type, title, description, publisher, date_modified, regulatory_topics } = result
-        const { id, type, title, description, publisher, date_modified } = result
+        const { id, type, title, description, publisher, date_modified, regulatory_topics } = result
+        // const { id, type, title, description, publisher, date_modified } = result
 
         // Check if the search term appears within the first 200 characters
         const searchWords = searchQuery.join("|")
@@ -49,8 +49,6 @@ function Results({ results, isLoading, searchQuery }) {
           year: "numeric",
         })
 
-        // const regulatory_topics_array = regulatory_topics.split("\n")
-
         return (
           <div className="govuk-summary-list__row--no-border" key={id}>
             <span className="govuk-caption-m">{type}</span>
@@ -62,13 +60,23 @@ function Results({ results, isLoading, searchQuery }) {
             <p className="govuk-body">{highlightedDescription}</p>
             <p className="govuk-body-s orp-secondary-text-colour govuk-!-margin-bottom-2">Published by: {publisher}</p>
             <p className="govuk-body-s orp-secondary-text-colour">Last updated: {govukDate}</p>
-            {/* <ul className="govuk-list orp-topics-list">
-              {regulatory_topics_array.map((regulatory_topic, index) => (
-                <li key={index} className="govuk-body-s orp-secondary-text-colour">
-                  {regulatory_topic}
-                </li>
-              ))}
-            </ul> */}
+            {regulatory_topics && regulatory_topics.length > 0 ? (
+              <ul className="govuk-list orp-topics-list">
+                {regulatory_topics.map((regulatory_topic, index) => {
+                  const highlightedTopic = searchQuery.includes(regulatory_topic) ? (
+                    <span dangerouslySetInnerHTML={highlight(regulatory_topic)} />
+                  ) : (
+                    regulatory_topic
+                  )
+
+                  return (
+                    <li key={index} className="govuk-body-s orp-secondary-text-colour">
+                      {highlightedTopic}
+                    </li>
+                  )
+                })}
+              </ul>
+            ) : null}
             <hr className="govuk-section-break govuk-section-break--l govuk-section-break--visible" />
           </div>
         )
