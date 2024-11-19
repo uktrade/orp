@@ -1,4 +1,4 @@
-function Pagination({ pageQuery, setPageQuery }) {
+function Pagination({ pageData, pageQuery, setPageQuery }) {
   const handlePreviousPage = (e) => {
     e.preventDefault()
     setPageQuery([parseInt(pageQuery[0]) - 1])
@@ -9,34 +9,23 @@ function Pagination({ pageQuery, setPageQuery }) {
     setPageQuery([parseInt(pageQuery[0]) + 1])
   }
 
-  // Data I will need fot the pagination
-  // results.has_previous
-  // results.previous_page_number
-  // results.paginator.page_range
-  // results.number
-  // results.paginator.num_pages
-  // results.has_next
-  // results.next_page_number
-  const results = {
-    has_previous: true,
-    previous_page_number: 1,
-    paginator: {
-      page_range: [1, 2, 3, 4, 5],
-      num_pages: 5,
-    },
-    number: 1,
-    has_next: true,
-    next_page_number: 2,
-  }
+  const { current_page, is_paginated, results_page_total } = pageData
 
-  return (
+  // Generate page range array from results_page_total
+  const page_range = Array.from({ length: results_page_total }, (_, i) => i + 1)
+
+  const isPreviousPage = current_page - 1 >= 1
+  const isNextPage = current_page + 1 <= results_page_total
+
+  return is_paginated ? (
     <nav className="govuk-pagination" role="navigation" aria-label="Pagination">
-      {results.has_previous && (
+      {isPreviousPage ? (
         <div className="govuk-pagination__prev">
           <a
             className="govuk-link govuk-pagination__link govuk-link--no-visited-state"
             href="#"
             onClick={handlePreviousPage}
+            role="button"
             aria-label="Previous page"
           >
             <svg
@@ -55,25 +44,58 @@ function Pagination({ pageQuery, setPageQuery }) {
             </span>
           </a>
         </div>
-      )}
+      ) : null}
       <ul className="govuk-pagination__list">
-        {results.paginator.page_range.map((page_number) => (
-          <li key={page_number} className="govuk-pagination__item">
-            <a
-              className={`govuk-link govuk-pagination__link ${results.number === page_number ? "govuk-pagination__link--current" : ""}`}
-              href="#"
-              onClick={(e) => {
-                e.preventDefault()
-                setPageQuery([page_number])
-              }}
-              aria-current={results.number === page_number ? "page" : undefined}
-            >
-              {page_number}
-            </a>
-          </li>
-        ))}
+        {page_range.map((page_number) => {
+          if (page_number === current_page) {
+            return (
+              <li key={page_number} className="govuk-pagination__item govuk-pagination__item--current">
+                <a
+                  className="govuk-link govuk-pagination__link govuk-link--no-visited-state"
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setPageQuery([page_number])
+                  }}
+                  role="button"
+                  aria-current={current_page === page_number ? "page" : undefined}
+                >
+                  {page_number}
+                </a>
+              </li>
+            )
+          } else if (
+            page_number === 1 ||
+            page_number === results_page_total ||
+            page_number === current_page - 1 ||
+            page_number === current_page + 1
+          ) {
+            return (
+              <li key={page_number} className="govuk-pagination__item">
+                <a
+                  className="govuk-link govuk-pagination__link"
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setPageQuery([page_number])
+                  }}
+                  role="button"
+                  aria-label="Next page"
+                >
+                  {page_number}
+                </a>
+              </li>
+            )
+          } else if (page_number === current_page - 2 || page_number === current_page + 2) {
+            return (
+              <li key={page_number} className="govuk-pagination__item govuk-pagination__item--ellipses">
+                &hellip;
+              </li>
+            )
+          }
+        })}
       </ul>
-      {results.has_next && (
+      {isNextPage ? (
         <div className="govuk-pagination__next">
           <a
             className="govuk-link govuk-pagination__link govuk-link--no-visited-state"
@@ -97,9 +119,9 @@ function Pagination({ pageQuery, setPageQuery }) {
             </svg>
           </a>
         </div>
-      )}
+      ) : null}
     </nav>
-  )
+  ) : null
 }
 
 export { Pagination }
