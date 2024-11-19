@@ -1,4 +1,5 @@
 import { SkeletonResults } from "./SkeletonResults"
+import { formatDateToGovukStyle } from "../utils/date"
 
 function Results({ results, isLoading, searchQuery }) {
   // console.log("Results", results)
@@ -24,16 +25,6 @@ function Results({ results, isLoading, searchQuery }) {
     }
   }
 
-  // This needs to be in a utils file
-  const formatDate = (dateString) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    })
-  }
-
   const renderRegulatoryTopics = (topics, searchQuery) => {
     return topics.map((topic, index) => {
       const highlightedTopic = topic.toLowerCase().includes(searchQuery[0].toLowerCase()) ? (
@@ -53,7 +44,7 @@ function Results({ results, isLoading, searchQuery }) {
   return results ? (
     <div className="govuk-summary-list orp-search-results">
       {results.map((result) => {
-        const { id, type, title, description, publisher, date_modified, regulatory_topics } = result
+        const { id, type, title, description, publisher, date_modified, date_valid, regulatory_topics } = result
 
         // Check if the search term appears within the first 200 characters
         const searchWords = searchQuery.join("|")
@@ -68,7 +59,9 @@ function Results({ results, isLoading, searchQuery }) {
           ""
         )
 
-        const govukDate = formatDate(date_modified)
+        // Format the date to the GOV.UK style
+        // We're now using the date_valid field instead of date_modified
+        const govukDate = date_valid ? formatDateToGovukStyle(date_valid) : "Unknown"
 
         return (
           <div className="govuk-summary-list__row--no-border" key={id}>

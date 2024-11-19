@@ -45,7 +45,7 @@ class RegulationSearchForm(forms.Form):
         choices=[
             ("legislation", "Legislation"),
             ("guidance", "Guidance"),
-            ("standard", "British Standard"),
+            ("standard", "Standards"),
         ],
         # widget=forms.CheckboxSelectMultiple(
         #     attrs={

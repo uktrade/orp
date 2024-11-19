@@ -20,12 +20,13 @@
 
   &::-webkit-scrollbar-thumb {
     border-radius: 6px;
-    background-color: rgba(0, 0, 0, .5);
+    background-color: govuk-colour("dark-grey");
     box-shadow: 0 0 1px rgba(255, 255, 255, .5);
   }
 
   &::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    border-radius: 6px;
+    background: govuk-colour("light-grey");
   }
 
   &::-webkit-scrollbar-thumb:hover {
@@ -37,7 +38,7 @@
   }
 
   &::-webkit-scrollbar-corner {
-    background: #f1f1f1;
+    background: govuk-colour("light-grey");
   }
 
   &::-webkit-scrollbar-button {
