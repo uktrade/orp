@@ -26,27 +26,21 @@ def document(request: HttpRequest, id) -> HttpResponse:
         "service_name": settings.SERVICE_NAME_SEARCH,
     }
 
-    # Extract the id parameter from the request
-    document_id = id
-
-    logger.info("document id: %s", document_id)
-    if not document_id:
-        context["error"] = "no document id provided"
+    if not id:
+        context["error"] = "id parameter is required"
         return render(request, template_name="document.html", context=context)
 
-    # Create a SearchDocumentConfig instance and set the id parameter
-    config = SearchDocumentConfig(search_query="", id=document_id)
-
-    # Use the PublicGateway class to fetch the details
+    # Create a search configuration object with the provided id
+    config = SearchDocumentConfig(search_query="", id=id)
 
     try:
         queryset = search_database(config)
         context["result"] = serialize("json", queryset)
-        return render(request, template_name="document.html", context=context)
     except Exception as e:
         logger.error("error fetching details: %s", e)
         context["error"] = f"error fetching details: {e}"
-        return render(request, template_name="document.html", context=context)
+
+    return render(request, template_name="document.html", context=context)
 
 
 @require_http_methods(["GET"])
