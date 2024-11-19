@@ -13,15 +13,15 @@ export const URL = `${DATA_API_URL}`
 // These should come from the API/Django backend, but for now they are hardcoded
 export const DOCUMENT_TYPES = [
   {
-    name: "Legislation",
+    name: "legislation",
     label: "Legislation",
   },
   {
-    name: "Guidance",
+    name: "guidance",
     label: "Guidance",
   },
   {
-    name: "Standards",
+    name: "standards",
     label: "Standards",
   },
 ]

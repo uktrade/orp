@@ -23,6 +23,7 @@ function App() {
   const [pageQuery, setPageQuery] = useQueryParams("page", [1])
   const [data, setData] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isSearchSubmitted, setIsSearchSubmitted] = useState(false)
 
   // Memoize the initial checked state for document types and publishers
   const initialDocumentTypeCheckedState = useMemo(
@@ -78,8 +79,9 @@ function App() {
   }
 
   const handleSearchSubmit = useCallback(() => {
+    setIsSearchSubmitted(true)
     setSearchQuery([searchInput])
-    // setPageQuery([1])
+    setPageQuery([1])
 
     const filterParams = {
       ...(searchInput.length > 0 && { search: searchInput }),
@@ -90,9 +92,14 @@ function App() {
     }
 
     fetchDataWithLoading(filterParams)
-  }, [searchInput, docTypeQuery, publisherQuery, sortQuery])
+  }, [searchInput, docTypeQuery, publisherQuery, sortQuery, setPageQuery])
 
   useEffect(() => {
+    if (isSearchSubmitted) {
+      setIsSearchSubmitted(false)
+      return
+    }
+
     const handler = setTimeout(() => {
       // This version is to send to the Django backend
       // const queryString = new URLSearchParams({

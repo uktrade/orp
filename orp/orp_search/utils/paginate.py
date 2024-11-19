@@ -71,6 +71,7 @@ def paginate(
                 "description": paginated_document.description,
                 "type": paginated_document.type,
                 "date_modified": paginated_document.date_modified,
+                "date_valid": paginated_document.date_valid,
                 "regulatory_topics": paginated_document.regulatory_topics,
             }
         )
