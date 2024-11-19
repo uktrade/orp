@@ -56,9 +56,20 @@ def _create_search_query(search_string):
     return preprocess_query
 
 
-def _search_database(
+def search_database(
     config: SearchDocumentConfig,
 ) -> QuerySet[DataResponseModel]:
+    """
+    Search the database for documents based on the search query
+
+    :param config: The search configuration object
+    :return: A QuerySet of DataResponseModel objects
+    """
+
+    # If an id is provided, return the document with that id
+    if config.id:
+        return DataResponseModel.objects.filter(id=config.id)
+
     # Sanatize the query string
     query_str = sanitize_input(config.search_query)
     logger.info(f"sanitized search query: {query_str}")
@@ -125,7 +136,7 @@ def search(context: dict, request: HttpRequest) -> dict:
     config.print_to_log()
 
     # Search across specific fields
-    results = _search_database(config)
+    results = search_database(config)
 
     # convert search_results into json
     pag_start_time = time.time()

@@ -5,10 +5,10 @@ import pandas as pd
 
 from orp_search.config import SearchDocumentConfig
 from orp_search.models import DataResponseModel
-from orp_search.public_gateway import PublicGateway
-from orp_search.utils.search import search
+from orp_search.utils.search import search, search_database
 
 from django.conf import settings
+from django.core.serializers import serialize
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
@@ -38,22 +38,10 @@ def document(request: HttpRequest, id) -> HttpResponse:
     config = SearchDocumentConfig(search_query="", id=document_id)
 
     # Use the PublicGateway class to fetch the details
-    public_gateway = PublicGateway()
+
     try:
-        search_result = public_gateway.search(config)
-        # logger.info("search result: %s", search_result)
-
-        if "regulatory_topics" in search_result:
-            search_result["regulatory_topics"] = str(
-                search_result["regulatory_topics"]
-            ).split("\n")
-
-        if "related_legislation" in search_result:
-            search_result["related_legislation"] = str(
-                search_result["related_legislation"]
-            ).split("\n")
-
-        context["result"] = search_result
+        queryset = search_database(config)
+        context["result"] = serialize("json", queryset)
         return render(request, template_name="document.html", context=context)
     except Exception as e:
         logger.error("error fetching details: %s", e)
