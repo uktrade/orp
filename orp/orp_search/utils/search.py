@@ -73,13 +73,20 @@ def _search_database(
     # Filter results based on document types if provided
     queryset = DataResponseModel.objects.annotate(search=vector).filter(
         search=query_objs,
-        # **(
-        #     {"type__in": config.document_types}
-        #     if config.document_types
-        #     else {}
-        # ),
+        **(
+            {
+                "type__in": [
+                    doc_type.lower() for doc_type in config.document_types
+                ]
+            }
+            if config.document_types
+            else {}
+        ),
     )
-    logger.info(f"search results: {queryset}")
+
+    # Filter by publisher
+    if config.publisher_names:
+        queryset = queryset.filter(publisher__in=config.publisher_names)
 
     # Sort results based on the sort_by parameter (default)
     if config.sort_by is None or config.sort_by == "recent":
