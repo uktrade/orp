@@ -9,7 +9,7 @@ from orp_search.utils.paginate import paginate
 from orp_search.utils.terms import sanitize_input
 
 from django.contrib.postgres.search import SearchQuery, SearchVector
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 from django.http import HttpRequest
 
 logger = logging.getLogger(__name__)
@@ -84,16 +84,18 @@ def search_database(
     # Filter results based on document types if provided
     queryset = DataResponseModel.objects.annotate(search=vector).filter(
         search=query_objs,
-        **(
-            {
-                "type__in": [
-                    doc_type.lower() for doc_type in config.document_types
-                ]
-            }
-            if config.document_types
-            else {}
-        ),
     )
+
+    # Filter by document types
+    if config.document_types:
+        # Start with an empty Q object
+        query = Q()
+        # Loop through the document types and add a Q object for each one
+        for doc_type in config.document_types:
+            query |= Q(type__icontains=doc_type.lower())
+
+        # Filter the queryset using the complex Q object
+        queryset = queryset.filter(query)
 
     # Filter by publisher
     if config.publisher_names:
@@ -101,7 +103,7 @@ def search_database(
 
     # Sort results based on the sort_by parameter (default)
     if config.sort_by is None or config.sort_by == "recent":
-        return queryset.order_by("-date_modified")
+        return queryset.order_by("-sort_date")
 
     if config.sort_by is not None and config.sort_by == "relevance":
         # Calculate the score for each document
@@ -114,7 +116,7 @@ def search(context: dict, request: HttpRequest) -> dict:
     start_time = time.time()
 
     search_query = request.GET.get("query", "")
-    document_types = request.GET.get("document_type", "").lower().split(",")
+    document_types = request.GET.getlist("document_type", [])
     offset = request.GET.get("page", "1")
     offset = int(offset) if offset.isdigit() else 1
     limit = request.GET.get("limit", "10")
