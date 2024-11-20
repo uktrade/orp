@@ -1,14 +1,6 @@
-const DATA_API_URL = "http://localhost:8081/api/v1/search/"
-// const DATA_API_URL = "https://data.api.trade.gov.uk/v1/"
-// const DATASET = "orp-regulations"
-// const VERSION = "v1.0.1" // latest causes a redirect which adds latency
-// const FORMAT = "json"
-// export const S3_QUERY = buildQuery(filters)
-// export const ENCODED_S3_QUERY = encodeURI(S3_QUERY)
-
-// export const DATASET_OBJECT_NAME = "uk_regulatory_documents"
-// export const URL = `${DATA_API_URL}datasets/${DATASET}/versions/${VERSION}/data?format=${FORMAT}`
-export const URL = `${DATA_API_URL}`
+const DRF_API_URL = "http://localhost:8081/api/v1"
+export const SEARCH_URL = `${DRF_API_URL}/search`
+// export const PUBLISHERS_URL = `${DRF_API_URL}/retrieve/publishers/`
 
 // These should come from the API/Django backend, but for now they are hardcoded
 export const DOCUMENT_TYPES = [
@@ -21,7 +13,7 @@ export const DOCUMENT_TYPES = [
     label: "Guidance",
   },
   {
-    name: "standards",
+    name: "standard",
     label: "Standards",
   },
 ]

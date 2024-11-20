@@ -1,26 +1,25 @@
-import { URL, PUBLISHERS } from "./constants"
+import { SEARCH_URL, PUBLISHERS } from "./constants"
 
 function buildQuery(filters) {
   const { search, document_type, publisher, sort, page } = filters
-  let query = ""
 
-  if (search && search.length > 2) {
-    query += `${search}`
-  }
+  console.log("Search/filter data from React: ", filters)
 
-  if (page) {
-    query += `&page=${page}`
-  }
+  const searchQuery = search && search.length > 2 ? `query=${search}` : ""
+  const documentTypeQuery = document_type ? document_type.map((type) => `document_type=${type}`).join("&") : ""
+  const pageQuery = page ? `page=${page}` : ""
+
+  let query = [searchQuery, documentTypeQuery, pageQuery].filter((q) => q.length > 0).join("&")
 
   return query
 }
 
 export async function fetchData(filters) {
   const query = buildQuery(filters)
-  console.log("Searching for: ", query)
 
-  // const encodedQuery = encodeURI(query)
-  const url = `${URL}?query=${query}`
+  const url = `${SEARCH_URL}?${query}`
+
+  console.log("Fetching data: ", url)
 
   try {
     const response = await fetch(url)
