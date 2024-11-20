@@ -36,6 +36,7 @@ class SearchDocumentConfig:
         self.id = id
 
         logger.info(f"document_types from request: {self.document_types}")
+        logger.info(f"publisher_names from request: {self.publisher_names}")
 
     def validate(self):
         """

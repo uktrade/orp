@@ -90,24 +90,20 @@ def search_database(
 
     # Filter by document types
     if config.document_types:
-        # Start with an empty Q object
         query = Q()
+
         # Loop through the document types and add a Q object for each one
         for doc_type in config.document_types:
             query |= Q(type__icontains=doc_type)
-
-        # Filter the queryset using the complex Q object
         queryset = queryset.filter(query)
 
     # Filter by publisher
     if config.publisher_names:
-        # Start with an empty Q object
         query = Q()
+
         # Loop through the document types and add a Q object for each one
         for publisher in config.publisher_names:
-            query |= Q(type__icontains=publisher)
-
-        # Filter the queryset using the complex Q object
+            query |= Q(publisher__icontains=publisher)
         queryset = queryset.filter(query)
 
     # Sort results based on the sort_by parameter (default)
@@ -118,6 +114,8 @@ def search_database(
         # Calculate the score for each document
         calculate_score(config, queryset)
         return queryset.order_by("score")
+
+    return queryset
 
 
 def search(context: dict, request: HttpRequest) -> dict:
