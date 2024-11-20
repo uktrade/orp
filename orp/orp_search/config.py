@@ -25,13 +25,19 @@ class SearchDocumentConfig:
                         request.
         """
         self.search_query = search_query
-        self.document_types = [doc_type.lower() for doc_type in document_types]
+        self.document_types = (
+            None
+            if document_types is None
+            else [doc_type.lower() for doc_type in document_types]
+        )
         self.timeout = None if timeout is None else int(timeout)
         self.limit = limit
         self.offset = offset
-        self.publisher_names = [
-            pub_name.lower() for pub_name in publisher_names
-        ]
+        self.publisher_names = (
+            None
+            if publisher_names is None
+            else [pub_name.lower() for pub_name in publisher_names]
+        )
         self.sort_by = sort_by
         self.id = id
 
