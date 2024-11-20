@@ -9,7 +9,7 @@ from orp_search.utils.paginate import paginate
 from orp_search.utils.terms import sanitize_input
 
 from django.contrib.postgres.search import SearchQuery, SearchVector
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 from django.http import HttpRequest
 
 logger = logging.getLogger(__name__)
@@ -56,9 +56,20 @@ def _create_search_query(search_string):
     return preprocess_query
 
 
-def _search_database(
+def search_database(
     config: SearchDocumentConfig,
 ) -> QuerySet[DataResponseModel]:
+    """
+    Search the database for documents based on the search query
+
+    :param config: The search configuration object
+    :return: A QuerySet of DataResponseModel objects
+    """
+
+    # If an id is provided, return the document with that id
+    if config.id:
+        return DataResponseModel.objects.filter(id=config.id)
+
     # Sanatize the query string
     query_str = sanitize_input(config.search_query)
     logger.info(f"sanitized search query: {query_str}")
@@ -70,25 +81,41 @@ def _search_database(
     # Search across specific fields
     vector = SearchVector("title", "description", "regulatory_topics")
 
-    # Filter results based on document types if provided
-    queryset = DataResponseModel.objects.annotate(search=vector).filter(
-        search=query_objs,
-        # **(
-        #     {"type__in": config.document_types}
-        #     if config.document_types
-        #     else {}
-        # ),
-    )
-    logger.info(f"search results: {queryset}")
+    if query_objs:
+        queryset = DataResponseModel.objects.annotate(search=vector).filter(
+            search=query_objs,
+        )
+    else:
+        queryset = DataResponseModel.objects.annotate(search=vector)
+
+    # Filter by document types
+    if config.document_types:
+        query = Q()
+
+        # Loop through the document types and add a Q object for each one
+        for doc_type in config.document_types:
+            query |= Q(type__icontains=doc_type)
+        queryset = queryset.filter(query)
+
+    # Filter by publisher
+    if config.publisher_names:
+        query = Q()
+
+        # Loop through the document types and add a Q object for each one
+        for publisher in config.publisher_names:
+            query |= Q(publisher__icontains=publisher)
+        queryset = queryset.filter(query)
 
     # Sort results based on the sort_by parameter (default)
     if config.sort_by is None or config.sort_by == "recent":
-        return queryset.order_by("-date_modified")
+        return queryset.order_by("-sort_date")
 
     if config.sort_by is not None and config.sort_by == "relevance":
         # Calculate the score for each document
         calculate_score(config, queryset)
         return queryset.order_by("score")
+
+    return queryset
 
 
 def search(context: dict, request: HttpRequest) -> dict:
@@ -96,12 +123,12 @@ def search(context: dict, request: HttpRequest) -> dict:
     start_time = time.time()
 
     search_query = request.GET.get("query", "")
-    document_types = request.GET.get("document_type", "").lower().split(",")
+    document_types = request.GET.getlist("document_type", [])
     offset = request.GET.get("page", "1")
     offset = int(offset) if offset.isdigit() else 1
     limit = request.GET.get("limit", "10")
     limit = int(limit) if limit.isdigit() else 10
-    publisher = request.GET.getlist("publisher", None)
+    publishers = request.GET.getlist("publisher", [])
     sort_by = request.GET.get("sort", None)
 
     # Get the search results from the Data API using PublicGateway class
@@ -110,7 +137,7 @@ def search(context: dict, request: HttpRequest) -> dict:
         document_types,
         limit=limit,
         offset=offset,
-        publisher_names=publisher,
+        publisher_names=publishers,
         sort_by=sort_by,
     )
 
@@ -118,7 +145,7 @@ def search(context: dict, request: HttpRequest) -> dict:
     config.print_to_log()
 
     # Search across specific fields
-    results = _search_database(config)
+    results = search_database(config)
 
     # convert search_results into json
     pag_start_time = time.time()
@@ -140,10 +167,16 @@ def search(context: dict, request: HttpRequest) -> dict:
 
 
 def get_publisher_names():
-    publishers = DataResponseModel.objects.values("publisher").distinct()
-
+    logger.info("getting publisher names...")
     publishers_list = []
-    for publisher in publishers:
-        publishers_list.append(publisher.publisher)
 
+    try:
+        publishers_list = DataResponseModel.objects.values_list(
+            "publisher", flat=True
+        ).distinct()
+    except Exception as e:
+        logger.error(f"error getting publisher names: {e}")
+        logger.info("returning empty list of publishers")
+
+    logger.info(f"publishers found: {publishers_list}")
     return publishers_list

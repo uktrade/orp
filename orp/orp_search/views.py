@@ -1,4 +1,3 @@
-import base64
 import csv
 import logging
 
@@ -6,12 +5,12 @@ import pandas as pd
 
 from orp_search.config import SearchDocumentConfig
 from orp_search.models import DataResponseModel
-from orp_search.public_gateway import PublicGateway
-from orp_search.utils.search import search
+from orp_search.utils.search import search, search_database
 
 from django.conf import settings
+from django.core.serializers import serialize
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 
 logger = logging.getLogger(__name__)
@@ -27,50 +26,21 @@ def document(request: HttpRequest, id) -> HttpResponse:
         "service_name": settings.SERVICE_NAME_SEARCH,
     }
 
-    def _decode_url(encoded_url):
-        decoded_bytes = base64.urlsafe_b64decode(encoded_url.encode("utf-8"))
-        return decoded_bytes.decode("utf-8")
-
-    # Extract the id parameter from the request
-    document_id = id
-
-    # Decode id to see if it's a url ?
-    try:
-        decoded_url = _decode_url(document_id)
-        return redirect(decoded_url)
-    except Exception:
-        logger.info("document id is not a url")
-
-    logger.info("document id: %s", document_id)
-    if not document_id:
-        context["error"] = "no document id provided"
+    if not id:
+        context["error"] = "id parameter is required"
         return render(request, template_name="document.html", context=context)
 
-    # Create a SearchDocumentConfig instance and set the id parameter
-    config = SearchDocumentConfig(search_query="", id=document_id)
+    # Create a search configuration object with the provided id
+    config = SearchDocumentConfig(search_query="", id=id)
 
-    # Use the PublicGateway class to fetch the details
-    public_gateway = PublicGateway()
     try:
-        search_result = public_gateway.search(config)
-        # logger.info("search result: %s", search_result)
-
-        if "regulatory_topics" in search_result:
-            search_result["regulatory_topics"] = str(
-                search_result["regulatory_topics"]
-            ).split("\n")
-
-        if "related_legislation" in search_result:
-            search_result["related_legislation"] = str(
-                search_result["related_legislation"]
-            ).split("\n")
-
-        context["result"] = search_result
-        return render(request, template_name="document.html", context=context)
+        queryset = search_database(config)
+        context["result"] = serialize("json", queryset)
     except Exception as e:
         logger.error("error fetching details: %s", e)
         context["error"] = f"error fetching details: {e}"
-        return render(request, template_name="document.html", context=context)
+
+    return render(request, template_name="document.html", context=context)
 
 
 @require_http_methods(["GET"])

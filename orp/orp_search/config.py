@@ -25,13 +25,18 @@ class SearchDocumentConfig:
                         request.
         """
         self.search_query = search_query
-        self.document_types = document_types
+        self.document_types = [doc_type.lower() for doc_type in document_types]
         self.timeout = None if timeout is None else int(timeout)
         self.limit = limit
         self.offset = offset
-        self.publisher_names = publisher_names
+        self.publisher_names = [
+            pub_name.lower() for pub_name in publisher_names
+        ]
         self.sort_by = sort_by
         self.id = id
+
+        logger.info(f"document_types from request: {self.document_types}")
+        logger.info(f"publisher_names from request: {self.publisher_names}")
 
     def validate(self):
         """
