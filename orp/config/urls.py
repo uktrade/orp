@@ -6,7 +6,7 @@ import time
 import orp_search.views as orp_search_views
 
 from orp_search.config import SearchDocumentConfig
-from orp_search.models import DataResponseModel, logger
+from orp_search.models import DataResponseModel
 from orp_search.utils.documents import clear_all_documents
 from orp_search.utils.search import get_publisher_names, search
 from rest_framework import routers, serializers, status, viewsets
@@ -128,10 +128,14 @@ class PublishersViewSet(viewsets.ViewSet):
     def publishers(self, request, *args, **kwargs):
         try:
             publishers = get_publisher_names()
-            logger.info(f"publishers: {publishers}")
+
+            results = [
+                {"name": item["publisher"], "key": item["publisher_id"]}
+                for item in publishers
+            ]
 
             return Response(
-                data={"results": publishers},
+                data={"results": results},
                 status=status.HTTP_200_OK,
             )
         except Exception as e:

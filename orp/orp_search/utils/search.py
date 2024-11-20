@@ -81,10 +81,33 @@ def search_database(
     # Search across specific fields
     vector = SearchVector("title", "description", "regulatory_topics")
 
+    queryset = DataResponseModel.objects.all()
+
     if query_objs:
-        queryset = DataResponseModel.objects.annotate(search=vector).filter(
-            search=query_objs,
+        # Treat the query for partial and full-text search
+        query_chunks = query_str.split()
+        search_vector = SearchVector(
+            "title", "description", "regulatory_topics"
         )
+        queryset = queryset.annotate(search=search_vector)
+
+        # Creating a combined SearchQuery object from chunks
+        search_queries = [
+            SearchQuery(chunk, search_type="plain") for chunk in query_chunks
+        ]
+        combined_query = search_queries[0]
+        for sq in search_queries[1:]:
+            combined_query |= sq
+
+        partial_matches = Q()
+        for chunk in query_chunks:
+            partial_matches |= (
+                Q(title__icontains=chunk)
+                | Q(description__icontains=chunk)
+                | Q(regulatory_topics__icontains=chunk)
+            )
+
+        queryset = queryset.filter(partial_matches | Q(search=combined_query))
     else:
         queryset = DataResponseModel.objects.annotate(search=vector)
 
@@ -103,7 +126,7 @@ def search_database(
 
         # Loop through the document types and add a Q object for each one
         for publisher in config.publisher_names:
-            query |= Q(publisher__icontains=publisher)
+            query |= Q(publisher_id__icontains=publisher)
         queryset = queryset.filter(query)
 
     # Sort results based on the sort_by parameter (default)
@@ -171,9 +194,11 @@ def get_publisher_names():
     publishers_list = []
 
     try:
-        publishers_list = DataResponseModel.objects.values_list(
-            "publisher", flat=True
+        publishers_list = DataResponseModel.objects.values(
+            "publisher",
+            "publisher_id",
         ).distinct()
+
     except Exception as e:
         logger.error(f"error getting publisher names: {e}")
         logger.info("returning empty list of publishers")

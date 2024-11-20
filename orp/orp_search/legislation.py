@@ -1,5 +1,6 @@
 import base64
 import logging
+import re
 import xml.etree.ElementTree as ET  # nosec BXXX
 
 from typing import Optional
@@ -142,6 +143,13 @@ class Legislation:
             "title": title,
             "identifier": identifier,
             "publisher": publisher,
+            "publisher_id": (
+                None
+                if publisher is None
+                else re.sub(
+                    r"[^a-zA-Z0-9]", "", publisher.replace(" ", "").lower()
+                )
+            ),
             "language": language if language is not None else "eng",
             "format": format if format is not None else "",
             "description": description if description is not None else "",
