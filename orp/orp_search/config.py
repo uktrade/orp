@@ -29,7 +29,9 @@ class SearchDocumentConfig:
         self.timeout = None if timeout is None else int(timeout)
         self.limit = limit
         self.offset = offset
-        self.publisher_names = publisher_names
+        self.publisher_names = [
+            pub_name.lower() for pub_name in publisher_names
+        ]
         self.sort_by = sort_by
         self.id = id
 

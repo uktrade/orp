@@ -81,10 +81,12 @@ def search_database(
     # Search across specific fields
     vector = SearchVector("title", "description", "regulatory_topics")
 
-    # Filter results based on document types if provided
-    queryset = DataResponseModel.objects.annotate(search=vector).filter(
-        search=query_objs,
-    )
+    if query_objs:
+        queryset = DataResponseModel.objects.annotate(search=vector).filter(
+            search=query_objs,
+        )
+    else:
+        queryset = DataResponseModel.objects.annotate(search=vector)
 
     # Filter by document types
     if config.document_types:
@@ -92,14 +94,21 @@ def search_database(
         query = Q()
         # Loop through the document types and add a Q object for each one
         for doc_type in config.document_types:
-            query |= Q(type__icontains=doc_type.lower())
+            query |= Q(type__icontains=doc_type)
 
         # Filter the queryset using the complex Q object
         queryset = queryset.filter(query)
 
     # Filter by publisher
     if config.publisher_names:
-        queryset = queryset.filter(publisher__in=config.publisher_names)
+        # Start with an empty Q object
+        query = Q()
+        # Loop through the document types and add a Q object for each one
+        for publisher in config.publisher_names:
+            query |= Q(type__icontains=publisher)
+
+        # Filter the queryset using the complex Q object
+        queryset = queryset.filter(query)
 
     # Sort results based on the sort_by parameter (default)
     if config.sort_by is None or config.sort_by == "recent":
@@ -121,7 +130,7 @@ def search(context: dict, request: HttpRequest) -> dict:
     offset = int(offset) if offset.isdigit() else 1
     limit = request.GET.get("limit", "10")
     limit = int(limit) if limit.isdigit() else 10
-    publisher = request.GET.getlist("publisher", None)
+    publishers = request.GET.getlist("publisher", [])
     sort_by = request.GET.get("sort", None)
 
     # Get the search results from the Data API using PublicGateway class
@@ -130,7 +139,7 @@ def search(context: dict, request: HttpRequest) -> dict:
         document_types,
         limit=limit,
         offset=offset,
-        publisher_names=publisher,
+        publisher_names=publishers,
         sort_by=sort_by,
     )
 
