@@ -15,12 +15,13 @@ import { NoResultsContent } from "./components/NoResultsContent"
 const generateCheckedState = (checkboxes, queryValues) => checkboxes.map(({ name }) => queryValues.includes(name))
 
 function App() {
-  const [searchInput, setSearchInput] = useState(useQueryParams("search")[0] || "")
-  const [searchQuery, setSearchQuery] = useQueryParams("search", [])
+  const [searchQuery, setSearchQuery] = useQueryParams("search", "")
   const [docTypeQuery, setDocTypeQuery] = useQueryParams("document_type", [])
   const [publisherQuery, setPublisherQuery] = useQueryParams("publisher", [])
-  const [sortQuery, setSortQuery] = useQueryParams("sort", ["recent"])
-  const [pageQuery, setPageQuery] = useQueryParams("page", [1])
+  const [sortQuery, setSortQuery] = useQueryParams("sort", "recent")
+  const [pageQuery, setPageQuery] = useQueryParams("page", 1)
+
+  const [searchInput, setSearchInput] = useState(searchQuery) // Set initial state to query parameter value
   const [data, setData] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSearchSubmitted, setIsSearchSubmitted] = useState(false)
@@ -80,15 +81,15 @@ function App() {
 
   const handleSearchSubmit = useCallback(() => {
     setIsSearchSubmitted(true)
-    setSearchQuery([searchInput])
-    setPageQuery([1])
+    setSearchQuery(searchInput)
+    setPageQuery(1) // Set the page to 1 when a new search is made
 
     const filterParams = {
       ...(searchInput.length > 0 && { search: searchInput }),
       ...(docTypeQuery.length > 0 && { document_type: docTypeQuery }),
       ...(publisherQuery.length > 0 && { publisher: publisherQuery }),
-      sort: sortQuery.join(","),
-      page: 1,
+      sort: sortQuery,
+      page: 1, // Set page to 1 for new search
     }
 
     fetchDataWithLoading(filterParams)
@@ -101,22 +102,12 @@ function App() {
     }
 
     const handler = setTimeout(() => {
-      // This version is to send to the Django backend
-      // const queryString = new URLSearchParams({
-      //   ...(searchQuery.length > 2 && { search: searchQuery.join(",") }),
-      //   ...(docTypeQuery.length > 0 && { document_type: docTypeQuery.join(",") }),
-      //   ...(publisherQuery.length > 0 && { publisher: publisherQuery.join(",") }),
-      //   sort: sortQuery,
-      //   page: pageQuery,
-      // }).toString()
-
-      // This version is for the S3 query
       const filterParams = {
-        ...(searchQuery.length > 0 && { search: searchQuery.join(",") }),
+        ...(searchQuery.length > 0 && { search: searchQuery }),
         ...(docTypeQuery.length > 0 && { document_type: docTypeQuery }),
         ...(publisherQuery.length > 0 && { publisher: publisherQuery }),
-        sort: sortQuery.join(","),
-        page: pageQuery.join(","),
+        sort: sortQuery,
+        page: pageQuery,
       }
 
       fetchDataWithLoading(filterParams)
@@ -125,7 +116,7 @@ function App() {
     return () => {
       clearTimeout(handler)
     }
-  }, [docTypeQuery, publisherQuery, sortQuery, pageQuery])
+  }, [searchQuery, docTypeQuery, publisherQuery, sortQuery, pageQuery])
 
   return (
     <div className="govuk-grid-row search-form">
@@ -170,11 +161,11 @@ function App() {
           <a
             id="download-csv-link"
             href={`download_csv/?${new URLSearchParams({
-              search: searchQuery.join(","),
+              search: searchQuery,
               document_type: docTypeQuery.join(","),
               publisher: publisherQuery.join(","),
-              sort: sortQuery.join(","),
-              page: pageQuery.join(","),
+              sort: sortQuery,
+              page: pageQuery,
             }).toString()}`}
             className="govuk-link govuk-link--no-visited-state govuk-!-float-right"
           >

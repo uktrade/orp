@@ -9,29 +9,35 @@ function Results({ results, isLoading, searchQuery }) {
   }
 
   const highlight = (text) => {
-    const searchWords = searchQuery.join("|")
-    const regex = new RegExp(searchWords, "gi")
+    const regex = new RegExp(searchQuery, "gi")
     const highlightedText = text.replace(regex, (match) => `<mark class="orp-marked-text">${match}</mark>`)
     return { __html: highlightedText }
   }
 
-  const truncateDescription = (description, matchIndex) => {
+  const truncateAndHighlightDescription = (description) => {
+    const regex = new RegExp(searchQuery, "gi")
+    const matchIndex = description.search(regex)
+
+    let truncatedDescription
     if (matchIndex === -1 || matchIndex <= 200) {
-      return description.length > 200 ? description.substring(0, 200) + "..." : description
+      truncatedDescription = description.length > 200 ? description.substring(0, 200) + "..." : description
     } else {
       const start = 0 // Always start from the beginning
       const end = Math.min(description.length, matchIndex + 150) // Include some context after the match
-      return description.substring(start, end) + "..."
+      truncatedDescription = description.substring(start, end) + "..."
     }
+
+    return <span dangerouslySetInnerHTML={highlight(truncatedDescription)} />
   }
 
   const renderRegulatoryTopics = (topics, searchQuery) => {
     return topics.map((topic, index) => {
-      const highlightedTopic = topic.toLowerCase().includes(searchQuery[0].toLowerCase()) ? (
-        <span dangerouslySetInnerHTML={highlight(topic)} />
-      ) : (
-        topic
-      )
+      const highlightedTopic =
+        searchQuery.length && topic.toLowerCase().includes(searchQuery.toLowerCase()) ? (
+          <span dangerouslySetInnerHTML={highlight(topic)} />
+        ) : (
+          topic
+        )
 
       return (
         <li key={index} className="govuk-body-s orp-secondary-text-colour">
@@ -46,18 +52,8 @@ function Results({ results, isLoading, searchQuery }) {
       {results.map((result) => {
         const { id, type, title, description, publisher, date_modified, date_valid, regulatory_topics } = result
 
-        // Check if the search term appears within the first 200 characters
-        const searchWords = searchQuery.join("|")
-        const regex = new RegExp(searchWords, "gi")
-        const matchIndex = description.search(regex)
-
-        const truncatedDescription = truncateDescription(description, matchIndex)
         // const highlightedTitle = title ? <span dangerouslySetInnerHTML={highlight(title)} /> : ""
-        const highlightedDescription = description ? (
-          <span dangerouslySetInnerHTML={highlight(truncatedDescription)} />
-        ) : (
-          ""
-        )
+        const highlightedDescription = description ? truncateAndHighlightDescription(description) : ""
 
         // Format the date to the GOV.UK style
         // We're now using the date_valid field instead of date_modified

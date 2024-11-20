@@ -1,12 +1,12 @@
 function Pagination({ pageData, pageQuery, setPageQuery }) {
   const handlePreviousPage = (e) => {
     e.preventDefault()
-    setPageQuery([parseInt(pageQuery[0]) - 1])
+    setPageQuery([parseInt(pageQuery) - 1])
   }
 
   const handleNextPage = (e) => {
     e.preventDefault()
-    setPageQuery([parseInt(pageQuery[0]) + 1])
+    setPageQuery([parseInt(pageQuery) + 1])
   }
 
   const { current_page, is_paginated, results_page_total } = pageData

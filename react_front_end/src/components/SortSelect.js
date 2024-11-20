@@ -12,7 +12,7 @@ function SortSelect({ sortQuery, setSortQuery }) {
           </label>
           <select
             className="govuk-select"
-            value={sortQuery[0]}
+            value={sortQuery}
             onChange={handleSortChange}
             id="sort-select"
             aria-label="Sort by"
