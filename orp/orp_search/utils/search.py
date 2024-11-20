@@ -158,10 +158,16 @@ def search(context: dict, request: HttpRequest) -> dict:
 
 
 def get_publisher_names():
-    publishers = DataResponseModel.objects.values("publisher").distinct()
-
+    logger.info("getting publisher names...")
     publishers_list = []
-    for publisher in publishers:
-        publishers_list.append(publisher.publisher)
 
+    try:
+        publishers_list = DataResponseModel.objects.values_list(
+            "publisher", flat=True
+        ).distinct()
+    except Exception as e:
+        logger.error(f"error getting publisher names: {e}")
+        logger.info("returning empty list of publishers")
+
+    logger.info(f"publishers found: {publishers_list}")
     return publishers_list

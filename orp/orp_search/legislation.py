@@ -147,7 +147,8 @@ class Legislation:
             "description": description if description is not None else "",
             "date_issued": convert_date_string_to_obj(modified),
             "date_modified": convert_date_string_to_obj(modified),
-            "date_valid": convert_date_string_to_obj(valid),
+            "date_valid": valid,
+            "sort_date": convert_date_string_to_obj(valid),
             "type": "Legislation",
             "score": 0,
         }
