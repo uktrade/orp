@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 
 import requests  # type: ignore
 
@@ -10,20 +11,6 @@ from orp_search.utils.documents import (  # noqa: E501
 )
 
 logger = logging.getLogger(__name__)
-
-
-# def _normalize_date(date_str):
-#     if date_str is None:
-#         return None
-#
-#     # If the date is in YYYY format, add "-01-01"
-#     if len(date_str) == 4:
-#         return f"{date_str}-01-01"
-#     # If the date is in YYYY-MM format, add "-01"
-#     elif len(date_str) == 7:
-#         return f"{date_str}-01"
-#     # Otherwise, assume the date is already in YYYY-MM-DD format
-#     return datetime.strptime(date_str, "%Y-%m-%d").strftime("%Y-%m-%d")
 
 
 def _build_like_conditions(field, and_terms, or_terms):
@@ -100,6 +87,16 @@ class PublicGateway:
                     row.get("date_valid")
                 )
                 row["id"] = (generate_short_uuid(),)
+
+                row["publisher_id"] = (
+                    None
+                    if row["publisher"] is None
+                    else re.sub(
+                        r"[^a-zA-Z0-9]",
+                        "",
+                        row["publisher"].replace(" ", "").lower(),
+                    )
+                )
 
                 insert_or_update_document(row)
                 inserted_document_count += 1

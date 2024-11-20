@@ -126,7 +126,7 @@ def search_database(
 
         # Loop through the document types and add a Q object for each one
         for publisher in config.publisher_names:
-            query |= Q(publisher__icontains=publisher)
+            query |= Q(publisher_id__icontains=publisher)
         queryset = queryset.filter(query)
 
     # Sort results based on the sort_by parameter (default)
@@ -194,9 +194,11 @@ def get_publisher_names():
     publishers_list = []
 
     try:
-        publishers_list = DataResponseModel.objects.values_list(
-            "publisher", flat=True
+        publishers_list = DataResponseModel.objects.values(
+            "publisher",
+            "publisher_id",
         ).distinct()
+
     except Exception as e:
         logger.error(f"error getting publisher names: {e}")
         logger.info("returning empty list of publishers")

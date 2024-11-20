@@ -11,6 +11,7 @@ class DataResponseModel(models.Model):
     title = models.TextField(null=True, blank=True)
     identifier = models.TextField(null=True, blank=True)
     publisher = models.TextField(null=True, blank=True)
+    publisher_id = models.TextField(null=True, blank=True)
     language = models.TextField(null=True, blank=True)
     format = models.TextField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
