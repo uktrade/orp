@@ -34,18 +34,6 @@ def paginate(
         start_time = time.time()
 
         for paginated_document in paginated_documents:
-            # if hasattr(paginated_document, "description"):
-            #     description = paginated_document.description
-            #     if description:
-            #         paginated_document.description = (
-            #             (
-            #                 description[:100] + "..."
-            #                 if len(description) > 100
-            #                 else description
-            #             )
-            #             .lstrip(".")
-            #             .capitalize()
-            #         )
             if hasattr(paginated_document, "regulatory_topics"):
                 regulatory_topics = paginated_document.regulatory_topics
                 if regulatory_topics:
