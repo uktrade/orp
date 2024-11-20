@@ -81,10 +81,33 @@ def search_database(
     # Search across specific fields
     vector = SearchVector("title", "description", "regulatory_topics")
 
+    queryset = DataResponseModel.objects.all()
+
     if query_objs:
-        queryset = DataResponseModel.objects.annotate(search=vector).filter(
-            search=query_objs,
+        # Treat the query for partial and full-text search
+        query_chunks = query_str.split()
+        search_vector = SearchVector(
+            "title", "description", "regulatory_topics"
         )
+        queryset = queryset.annotate(search=search_vector)
+
+        # Creating a combined SearchQuery object from chunks
+        search_queries = [
+            SearchQuery(chunk, search_type="plain") for chunk in query_chunks
+        ]
+        combined_query = search_queries[0]
+        for sq in search_queries[1:]:
+            combined_query |= sq
+
+        partial_matches = Q()
+        for chunk in query_chunks:
+            partial_matches |= (
+                Q(title__icontains=chunk)
+                | Q(description__icontains=chunk)
+                | Q(regulatory_topics__icontains=chunk)
+            )
+
+        queryset = queryset.filter(partial_matches | Q(search=combined_query))
     else:
         queryset = DataResponseModel.objects.annotate(search=vector)
 
