@@ -86,7 +86,7 @@ class PublicGateway:
                 row["date_valid"] = convert_date_string_to_obj(
                     row.get("date_valid")
                 )
-                row["id"] = (generate_short_uuid(),)
+                row["id"] = generate_short_uuid()
 
                 row["publisher_id"] = (
                     None
