@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { useQueryParams } from "./hooks/useQueryParams"
 import { fetchData } from "./utils/fetch-drf"
-import { DOCUMENT_TYPES, PUBLISHERS } from "./utils/constants"
+import { DOCUMENT_TYPES, PUBLISHERS_URL } from "./utils/constants"
 
 import { Search } from "./components/Search"
 import { CheckboxFilter } from "./components/CheckboxFilter"
@@ -12,30 +12,48 @@ import { ResultsCount } from "./components/ResultsCount"
 import { SortSelect } from "./components/SortSelect"
 import { NoResultsContent } from "./components/NoResultsContent"
 
-const generateCheckedState = (checkboxes, queryValues) => checkboxes.map(({ name }) => queryValues.includes(name))
+const generateCheckedState = (checkboxes, queryValues) => {
+  return checkboxes.map(({ name }) => queryValues.includes(name))
+}
 
 function App() {
-  const [searchQuery, setSearchQuery] = useQueryParams("search", "")
+  const [searchQuery, setSearchQuery] = useQueryParams("search", [])
   const [docTypeQuery, setDocTypeQuery] = useQueryParams("document_type", [])
   const [publisherQuery, setPublisherQuery] = useQueryParams("publisher", [])
-  const [sortQuery, setSortQuery] = useQueryParams("sort", "recent")
-  const [pageQuery, setPageQuery] = useQueryParams("page", 1)
+  const [sortQuery, setSortQuery] = useQueryParams("sort", ["recent"])
+  const [pageQuery, setPageQuery] = useQueryParams("page", [1])
 
-  const [searchInput, setSearchInput] = useState(searchQuery) // Set initial state to query parameter value
+  const [searchInput, setSearchInput] = useState(searchQuery[0]) // Set initial state to query parameter value
   const [data, setData] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSearchSubmitted, setIsSearchSubmitted] = useState(false)
+  const [publishers, setPublishers] = useState([]) // Add publishers state
+  const [publisherCheckedState, setPublisherCheckedState] = useState([])
+
+  useEffect(() => {
+    const fetchPublishers = async () => {
+      try {
+        const response = await fetch(PUBLISHERS_URL)
+        if (!response.ok) {
+          throw new Error("Network response was not ok")
+        }
+        const data = await response.json()
+        setPublishers(data.results)
+        setPublisherCheckedState(generateCheckedState(data.results, publisherQuery))
+      } catch (error) {
+        console.error("There was a problem with fetching the publishers:", error)
+      }
+    }
+
+    fetchPublishers()
+  }, [])
 
   // Memoize the initial checked state for document types and publishers
   const initialDocumentTypeCheckedState = useMemo(
     () => generateCheckedState(DOCUMENT_TYPES, docTypeQuery),
     [docTypeQuery],
   )
-  const initialPublisherCheckedState = useMemo(() => generateCheckedState(PUBLISHERS, publisherQuery), [publisherQuery])
-
-  // Set initial checked state as array of booleans for checkboxes based on query params
   const [documentTypeCheckedState, setDocumentTypeCheckedState] = useState(initialDocumentTypeCheckedState)
-  const [publisherCheckedState, setPublisherCheckedState] = useState(initialPublisherCheckedState)
 
   // Memoize the handleSearchChange function
   const handleSearchChange = useCallback(
@@ -55,7 +73,7 @@ function App() {
     if (filterName === "docType") {
       updateQueryAndState(docTypeQuery, setDocTypeQuery, setDocumentTypeCheckedState, DOCUMENT_TYPES)
     } else if (filterName === "publisher") {
-      updateQueryAndState(publisherQuery, setPublisherQuery, setPublisherCheckedState, PUBLISHERS)
+      updateQueryAndState(publisherQuery, setPublisherQuery, setPublisherCheckedState, publishers)
     }
   }
 
@@ -64,7 +82,7 @@ function App() {
     setDocTypeQuery([])
     setPublisherQuery([])
     setDocumentTypeCheckedState(generateCheckedState(DOCUMENT_TYPES, []))
-    setPublisherCheckedState(generateCheckedState(PUBLISHERS, []))
+    setPublisherCheckedState(generateCheckedState(publishers, []))
   }
 
   const fetchDataWithLoading = async (queryString) => {
@@ -81,15 +99,15 @@ function App() {
 
   const handleSearchSubmit = useCallback(() => {
     setIsSearchSubmitted(true)
-    setSearchQuery(searchInput)
-    setPageQuery(1) // Set the page to 1 when a new search is made
+    setSearchQuery([searchInput])
+    setPageQuery([1]) // Set the page to 1 when a new search is made
 
     const filterParams = {
       ...(searchInput.length > 0 && { search: searchInput }),
       ...(docTypeQuery.length > 0 && { document_type: docTypeQuery }),
       ...(publisherQuery.length > 0 && { publisher: publisherQuery }),
-      sort: sortQuery,
-      page: 1, // Set page to 1 for new search
+      sort: sortQuery.join(","),
+      page: [1], // Set page to 1 for new search
     }
 
     fetchDataWithLoading(filterParams)
@@ -103,11 +121,11 @@ function App() {
 
     const handler = setTimeout(() => {
       const filterParams = {
-        ...(searchQuery.length > 0 && { search: searchQuery }),
+        ...(searchQuery.length > 0 && { search: searchQuery.join(",") }),
         ...(docTypeQuery.length > 0 && { document_type: docTypeQuery }),
         ...(publisherQuery.length > 0 && { publisher: publisherQuery }),
-        sort: sortQuery,
-        page: pageQuery,
+        sort: sortQuery.join(","),
+        page: pageQuery.join(","),
       }
 
       fetchDataWithLoading(filterParams)
@@ -146,14 +164,18 @@ function App() {
             <legend className="govuk-fieldset__legend govuk-fieldset__legend--m">
               <h2 className="govuk-fieldset__heading">Published by</h2>
             </legend>
-            <CheckboxFilter
-              checkboxData={PUBLISHERS}
-              checkedState={publisherCheckedState}
-              setCheckedState={setPublisherCheckedState}
-              setQueryParams={setPublisherQuery}
-              withSearch={true}
-              setIsLoading={setIsLoading}
-            />
+            {publishers ? (
+              <CheckboxFilter
+                checkboxData={publishers}
+                checkedState={publisherCheckedState}
+                setCheckedState={setPublisherCheckedState}
+                setQueryParams={setPublisherQuery}
+                withSearch={true}
+                setIsLoading={setIsLoading}
+              />
+            ) : (
+              <p>Loading publishers...</p>
+            )}
           </fieldset>
         </div>
         <hr className="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
@@ -161,11 +183,11 @@ function App() {
           <a
             id="download-csv-link"
             href={`download_csv/?${new URLSearchParams({
-              search: searchQuery,
+              search: searchQuery.join(","),
               document_type: docTypeQuery.join(","),
               publisher: publisherQuery.join(","),
-              sort: sortQuery,
-              page: pageQuery,
+              sort: sortQuery.join(","),
+              page: pageQuery.join(","),
             }).toString()}`}
             className="govuk-link govuk-link--no-visited-state govuk-!-float-right"
           >
@@ -197,19 +219,20 @@ function App() {
             documentTypeCheckedState={documentTypeCheckedState}
             publisherCheckedState={publisherCheckedState}
             removeFilter={handleDeleteFilter}
+            publishers={publishers}
           />
         ) : (
           <hr className="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
         )}
-        <SortSelect sortQuery={sortQuery} setSortQuery={setSortQuery} />
+        <SortSelect sortQuery={sortQuery[0]} setSortQuery={setSortQuery} />
         <hr className="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
         {data.results_total_count === 0 && !isLoading ? (
           <NoResultsContent />
         ) : (
-          <Results results={data.results} isLoading={isLoading} searchQuery={searchQuery} />
+          <Results results={data.results} isLoading={isLoading} searchQuery={searchQuery[0]} />
         )}
 
-        <Pagination pageData={data} pageQuery={pageQuery} setPageQuery={setPageQuery} />
+        <Pagination pageData={data} pageQuery={pageQuery[0]} setPageQuery={setPageQuery} />
       </div>
     </div>
   )
