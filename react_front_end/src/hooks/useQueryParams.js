@@ -1,5 +1,8 @@
 import { useState } from "react"
 
+// Custom hook to get and set query parameters
+// Always expects, and returns an array of values
+
 const getQuery = () => {
   if (typeof window !== "undefined") {
     return new URLSearchParams(window.location.search)
@@ -8,13 +11,11 @@ const getQuery = () => {
 }
 
 const getQueryStringVal = (key) => {
-  const values = getQuery().getAll(key)
-  return values.length > 1 ? values : values[0] || ""
+  return getQuery().getAll(key)
 }
 
 const useQueryParams = (key, defaultVal = []) => {
-  const initialQuery = getQueryStringVal(key)
-  const [query, setQuery] = useState(initialQuery.length ? initialQuery : defaultVal)
+  const [query, setQuery] = useState(getQueryStringVal(key).length ? getQueryStringVal(key) : defaultVal)
 
   const updateUrl = (newVals) => {
     setQuery(newVals)
@@ -25,21 +26,13 @@ const useQueryParams = (key, defaultVal = []) => {
     query.delete(key)
 
     // Set new values for the key
-    if (Array.isArray(newVals)) {
-      newVals.forEach((val) => {
-        if (typeof val === "string" && val.trim() !== "") {
-          query.append(key, val)
-        } else if (typeof val === "number") {
-          query.append(key, val.toString())
-        }
-      })
-    } else {
-      if (typeof newVals === "string" && newVals.trim() !== "") {
-        query.append(key, newVals)
-      } else if (typeof newVals === "number") {
-        query.append(key, newVals.toString())
+    newVals.map((val) => {
+      if (typeof val === "string" && val.trim() !== "") {
+        query.append(key, val)
+      } else if (typeof val === "number") {
+        query.append(key, val.toString())
       }
-    }
+    })
 
     if (typeof window !== "undefined") {
       const { protocol, pathname, host } = window.location

@@ -1,9 +1,7 @@
 import { SkeletonResults } from "./SkeletonResults"
 import { formatDateToGovukStyle } from "../utils/date"
 
-function Results({ results, isLoading, searchQuery }) {
-  // console.log("Results", results)
-
+function Results({ results, isLoading, searchQuery = "" }) {
   if (isLoading) {
     return <SkeletonResults />
   }

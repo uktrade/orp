@@ -9,7 +9,7 @@ from orp_search.utils.paginate import paginate
 from orp_search.utils.terms import sanitize_input
 
 from django.contrib.postgres.search import SearchQuery, SearchVector
-from django.db.models import Q, QuerySet
+from django.db.models import F, Func, Q, QuerySet
 from django.http import HttpRequest
 
 logger = logging.getLogger(__name__)
@@ -189,15 +189,27 @@ def search(context: dict, request: HttpRequest) -> dict:
     return context
 
 
+class Trim(Func):
+    function = "TRIM"
+    template = "%(function)s(%(expressions)s)"
+
+
 def get_publisher_names():
     logger.info("getting publisher names...")
     publishers_list = []
 
     try:
-        publishers_list = DataResponseModel.objects.values(
-            "publisher",
-            "publisher_id",
-        ).distinct()
+        publishers_list = (
+            DataResponseModel.objects.annotate(
+                trimmed_publisher=Trim(F("publisher")),
+                trimmed_publisher_id=Trim(F("publisher_id")),
+            )
+            .values(
+                "trimmed_publisher",
+                "trimmed_publisher_id",
+            )
+            .distinct()
+        )
 
     except Exception as e:
         logger.error(f"error getting publisher names: {e}")

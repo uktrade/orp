@@ -100,7 +100,7 @@ class RebuildCacheViewSet(viewsets.ViewSet):
         tx_begin = time.time()
         try:
             clear_all_documents()
-            config = SearchDocumentConfig(search_query="", timeout=10)
+            config = SearchDocumentConfig(search_query="", timeout=20)
             Legislation().build_cache(config)
             PublicGateway().build_cache(config)
         except Exception as e:
@@ -130,7 +130,10 @@ class PublishersViewSet(viewsets.ViewSet):
             publishers = get_publisher_names()
 
             results = [
-                {"name": item["publisher"], "key": item["publisher_id"]}
+                {
+                    "label": item["trimmed_publisher"],
+                    "name": item["trimmed_publisher_id"],
+                }
                 for item in publishers
             ]
 
