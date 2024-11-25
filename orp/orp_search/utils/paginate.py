@@ -60,7 +60,7 @@ def paginate(
     """
     start_time = time.time()
 
-    logger.info("paginating documents...")
+    logger.debug("paginating documents...")
     paginator = Paginator(results, config.limit)
     try:
         paginated_documents = paginator.page(config.offset)
@@ -70,7 +70,7 @@ def paginate(
         paginated_documents = paginator.page(paginator.num_pages)
 
     end_time = time.time()
-    logger.info(
+    logger.debug(
         f"time taken to paginate (before description +/ regulatory topics):"
         f" {round(end_time - start_time, 2)} seconds"
     )
@@ -88,7 +88,7 @@ def paginate(
                     ).split("\n")
 
         end_time = time.time()
-        logger.info(
+        logger.debug(
             f"time taken to paginate "
             f"(after description +/ regulatory topics): "
             f"{round(end_time - start_time, 2)} seconds"
@@ -121,7 +121,8 @@ def paginate(
     context["start_index"] = paginated_documents.start_index()
     context["end_index"] = paginated_documents.end_index()
     end_time = time.time()
-    logger.info(
+
+    logger.debug(
         f"time taken to paginate (after adding to context): "
         f"{round(end_time - start_time, 2)} seconds"
     )
