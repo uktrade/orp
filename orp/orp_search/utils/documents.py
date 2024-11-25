@@ -86,7 +86,12 @@ def calculate_score(config, queryset: QuerySet):
 
 
 def generate_short_uuid():
-    # Generate a UUID
+    """
+    Generates a short, URL-safe UUID.
+
+    Returns:
+        str: A URL-safe base64 encoded UUID truncated to 22 characters.
+    """
     uid = uuid.uuid4()
     # Encode it to base64
     uid_b64 = base64.urlsafe_b64encode(uid.bytes).rstrip(b"=").decode("ascii")

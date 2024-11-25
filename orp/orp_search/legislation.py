@@ -1,4 +1,3 @@
-import base64
 import logging
 import re
 import xml.etree.ElementTree as ET  # nosec BXXX
@@ -20,12 +19,23 @@ from orp_search.utils.documents import (  # noqa: E501
 logger = logging.getLogger(__name__)
 
 
-def _encode_url(url):
-    encoded_bytes = base64.urlsafe_b64encode(url.encode("utf-8"))
-    return encoded_bytes.decode("utf-8")
-
-
 def _get_url_data(config, url):
+    """
+    Fetch data from a given URL and return the response text if successful,
+    otherwise log the error.
+
+    Parameters:
+    - config: Configuration object that includes the request timeout.
+    - url: String representing the URL to request.
+
+    Returns:
+    - Response text if the status code is 200.
+    - None if the response status code is not 200, or if there is an exception
+        during the request.
+
+    Logs:
+    - Error messages for request failures and non-200 response codes.
+    """
     try:
         response = requests.get(url, timeout=config.timeout)  # nosec BXXX
         if response.status_code == 200:
@@ -43,11 +53,36 @@ def _get_url_data(config, url):
 
 
 def _get_text_from_element(element: Optional[ET.Element]) -> Optional[str]:
+    """
+    Extracts and returns the text content from an XML element if it exists.
+
+    This function checks if the provided XML element is not None.
+    If the element is available, it returns the text content of that element.
+    If the element is None, it returns None.
+
+    Parameters:
+        element (Optional[ET.Element]):
+            The XML element from which to extract the text.
+
+    Returns:
+        Optional[str]:
+            The text content of the element if it exists, otherwise None.
+    """
     return element.text if element is not None else None
 
 
 class Legislation:
     def __init__(self):
+        """
+        Initializes the class instance and defines the XML namespaces.
+
+        Attributes:
+            _namespaces (dict):
+                A dictionary containing XML namespaces with their
+                corresponding URLs. These namespaces are used to
+                refer to elements in XML documents adhering to
+                different XML schemas.
+        """
         # Define the XML namespaces
         self._namespaces = {
             "leg": "http://www.legislation.gov.uk/namespaces/legislation",
@@ -58,6 +93,31 @@ class Legislation:
         }
 
     def build_cache(self, config: SearchDocumentConfig):
+        """
+        Builds a cache of legislation documents by retrieving XML data from
+        URLs specified in a DataFrame.
+
+        Parameters:
+        config (SearchDocumentConfig): Configuration object for searching
+        documents.
+
+        Raises:
+        Exception: If there's an error fetching data from the URL or no data
+        is returned.
+
+        Functionality:
+        1. Logs the start of the caching process.
+        2. Loads legislation data into a DataFrame.
+        3. Iterates over each row in the DataFrame to fetch XML data from
+            specified URLs.
+        4. Extracts and parses XML data, logging relevant informational
+            and error messages.
+        5. Extracts specific fields (identifier, title, description, etc.)
+            from the parsed XML data.
+        6. Converts the extracted data to JSON format.
+        7. Inserts or updates the document in the cache.
+        8. Logs errors and re-raises them if data retrieval fails.
+        """
         logger.info("building legislation cache...")
         dataset = construction_legislation_dataframe()
 
@@ -138,6 +198,22 @@ class Legislation:
         title,
         valid,
     ):
+        """
+        Converts given parameters into a JSON-like dictionary format.
+
+        Arguments:
+        description (str): Description of the item.
+        format (str): Format of the item.
+        identifier (str): Unique identifier for the item.
+        language (str): Language in which the item is available.
+        modified (str): The date when the item was last modified.
+        publisher (str): The publisher of the item.
+        title (str): The title of the item.
+        valid (str): The date until which the item is considered valid.
+
+        Returns:
+        dict: A dictionary containing the item details in a structured format.
+        """
         return {
             "id": generate_short_uuid(),
             "title": title,

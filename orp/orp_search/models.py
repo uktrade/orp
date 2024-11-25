@@ -1,13 +1,57 @@
 import logging
 
-from django.core.exceptions import ValidationError
-from django.core.validators import URLValidator
 from django.db import models
 
 logger = logging.getLogger(__name__)
 
 
 class DataResponseModel(models.Model):
+    """
+    DataResponseModel
+
+    A Django model representing various metadata fields related to data
+    responses.
+
+    Attributes:
+        title: Title of the data response.
+        identifier: Unique identifier for the data response.
+        publisher: Entity that published the data response.
+        publisher_id: Unique ID of the publisher.
+        language: Language in which the data response is published.
+        format: Format of the data response.
+        description: Brief description of the data response.
+        date_issued: Date when the data response was issued.
+        date_modified: Date when the data response was last modified.
+        date_valid: Validity date of the data response as text.
+        sort_date: Date used for sorting the data responses.
+        audience: Intended audience for the data response.
+        coverage: Coverage details of the data response.
+        subject: Subject matter of the data response.
+        type: Type of the data response.
+        license: Licensing information of the data response.
+        regulatory_topics: Topics covered by the data response.
+        status: Current status of the data response.
+        date_uploaded_to_orp: Date when the data response was uploaded to ORP.
+        has_format: Format details that the data response has.
+        is_format_of:
+            Indicates if the data response is a format of another resource.
+        has_version: Version details that the data response has.
+        is_version_of:
+            Indicates if the data response is a version of another resource.
+        references: References cited in the data response.
+        is_referenced_by:
+            Indicates if the data response is referenced by another resource.
+        has_part: Part details that the data response has.
+        is_part_of:
+            Indicates if the data response is a part of another resource.
+        is_replaced_by:
+            Indicates if the data response is replaced by another resource.
+        replaces: Indicates if the data response replaces another resource.
+        related_legislation: Related legislation details for the data response.
+        id: Primary key of the data response.
+        score: Score associated with the data response, default is 0.
+    """
+
     title = models.TextField(null=True, blank=True)
     identifier = models.TextField(null=True, blank=True)
     publisher = models.TextField(null=True, blank=True)
@@ -40,18 +84,3 @@ class DataResponseModel(models.Model):
     related_legislation = models.TextField(null=True, blank=True)
     id = models.TextField(primary_key=True)
     score = models.IntegerField(null=True, blank=True, default=0)
-
-    def __str__(self):
-        return self.title
-
-    def clean(self):
-        """
-        Validate the id field to check if it's a URL or not.
-        """
-        url_validator = URLValidator()
-        try:
-            url_validator(self.id)
-        except ValidationError:
-            # It's not a URL, which is acceptable as it's a
-            # CharField that supports both
-            pass
