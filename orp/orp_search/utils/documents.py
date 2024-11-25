@@ -9,10 +9,10 @@ from django.db.models import QuerySet
 
 
 def clear_all_documents():
-    logger.info("clearing all documents from table...")
+    logger.debug("clearing all documents from table...")
     try:
         DataResponseModel.objects.all().delete()
-        logger.info("documents cleared from table")
+        logger.debug("documents cleared from table")
     except Exception as e:
         logger.error(f"error clearing documents: {e}")
         throw_error(f"error clearing documents: {e}")
@@ -20,16 +20,15 @@ def clear_all_documents():
 
 def insert_or_update_document(document_json):
     try:
-        logger.info("creating document...")
+        logger.debug("creating document...")
         logger.debug(f"document: {document_json}")
-        # Try to create a new document
         document = DataResponseModel(**document_json)
         document.full_clean()
         document.save()
     except Exception as e:
         logger.error(f"error creating document: {document_json}")
         logger.error(f"error: {e}")
-        logger.info("document already exists, updating...")
+        logger.debug("document already exists, updating...")
 
         # If a duplicate key error occurs, update the existing document
         try:
@@ -37,7 +36,7 @@ def insert_or_update_document(document_json):
             for key, value in document_json.items():
                 setattr(document, key, value)
             document.save()
-            logger.info(f"document updated: {document}")
+            logger.debug(f"document updated: {document}")
         except Exception as e:
             logger.error(f"error updating document: {document_json}")
             logger.error(f"error: {e}")
@@ -86,8 +85,14 @@ def calculate_score(config, queryset: QuerySet):
 
 
 def generate_short_uuid():
-    # Generate a UUID
+    """
+    Generates a short, URL-safe UUID.
+
+    Returns:
+        str: A URL-safe base64 encoded UUID truncated to 22 characters.
+    """
     uid = uuid.uuid4()
+
     # Encode it to base64
     uid_b64 = base64.urlsafe_b64encode(uid.bytes).rstrip(b"=").decode("ascii")
     return uid_b64[

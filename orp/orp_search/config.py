@@ -16,13 +16,41 @@ class SearchDocumentConfig:
         id=None,
     ):
         """
-        Initializes a new instance of the class.
+        Initializes the SearchRequest object with the given parameters.
 
-        :param searchTerms: A comma-separated string of search terms.
-        :param documentTypes: Optional. A list of document types
-                              to filter the search.
-        :param timeout: Optional. The timeout in seconds for the search
-                        request.
+        Args:
+            search_query (str): The search query string.
+            document_types (Optional[List[str]]):
+                A list of document types to filter by. Defaults to None.
+            timeout (Optional[int]):
+                The timeout value for the request in seconds. Defaults to None.
+            limit (int):
+                The maximum number of search results to return. Defaults to 10.
+            offset (int):
+                The starting position of the search results. Defaults to 1.
+            publisher_names (Optional[List[str]]):
+                A list of publisher names to filter by. Defaults to None.
+            sort_by (Optional[str]):
+                The field by which to sort the search results. Defaults to
+                None.
+            id (Optional[str]):
+                An optional identifier for the search request. Defaults to
+                None.
+
+        Attributes:
+            search_query (str): The search query string.
+            document_types (Optional[List[str]]):
+                A list of document types to filter by.
+            timeout (Optional[int]):
+                The timeout value for the request in seconds.
+            limit (int): The maximum number of search results to return.
+            offset (int): The starting position of the search results.
+            publisher_names (Optional[List[str]]):
+                A list of publisher names to filter by.
+            sort_by (Optional[str]):
+                The field by which to sort the search results.
+            id (Optional[str]):
+                An optional identifier for the search request.
         """
         self.search_query = search_query
         self.document_types = (
@@ -46,17 +74,20 @@ class SearchDocumentConfig:
 
     def validate(self):
         """
+        Validates the constraints defined for offset, limit,
+        and sort_by attributes.
 
-        Validates the presence of search terms.
-
-        Checks if the 'searchTerms' attribute exists and is non-empty. Logs
-        an error message and returns False if 'searchTerms' is missing or
-        empty.
-
-        Returns
-        -------
+        Returns:
         bool
-            True if 'searchTerms' is present and non-empty, False otherwise.
+            True if all constraints are satisfied, False otherwise.
+
+        Notes:
+        - The offset must be a non-negative integer.
+        - The limit must be a non-negative integer.
+        - The sort_by attribute, if specified, must be either
+            'recent' or 'relevance'.
+
+        Errors are logged if any of the constraints are violated.
         """
         if self.offset < 0:
             logger.error("offset must be a positive integer")
@@ -73,6 +104,21 @@ class SearchDocumentConfig:
         return True
 
     def print_to_log(self):
+        """
+
+        Logs the current state of various search parameters.
+
+        Logs the following attributes:
+        - search_query: The search query string.
+        - document_types: The list of document types being searched.
+        - timeout: The timeout value for the search query.
+        - limit: The maximum number of results to return.
+        - offset: The starting point from which results are returned.
+        - publisher_names: The list of publisher names to filter the search.
+        - sort_by: The criteria for sorting the search results.
+        - id: The unique identifier for the search query.
+
+        """
         logger.info(f"search_query: {self.search_query}")
         logger.info(f"document_types: {self.document_types}")
         logger.info(f"timeout: {self.timeout}")

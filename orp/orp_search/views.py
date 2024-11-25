@@ -18,7 +18,8 @@ logger = logging.getLogger(__name__)
 
 @require_http_methods(["GET"])
 def document(request: HttpRequest, id) -> HttpResponse:
-    """Document details view.
+    """
+    Document details view.
 
     Handles the GET request to fetch details based on the provided id.
     """
@@ -45,6 +46,28 @@ def document(request: HttpRequest, id) -> HttpResponse:
 
 @require_http_methods(["GET"])
 def download_search_csv(request: HttpRequest) -> HttpResponse:
+    """
+    Handles the download of search results as a CSV file.
+
+    This view function is restricted to the GET HTTP method.
+    It accepts several query
+
+    parameters to configure the search:
+    - `search`: A string to search within the documents.
+    - `document_type`:
+        A list of document types to filter the search results.
+    - `publisher`: A list of publishers to filter the search results.
+    - `sort`: A field name to sort the search results.
+
+    The function constructs a `SearchDocumentConfig` object using the
+    received query parameters and performs a search using this
+    configuration. `DataResponseModel` objects from the search results
+    are retrieved and compiled into a list of dictionaries, which is
+    then converted into a DataFrame for demonstration purposes.
+    Finally, the ataFrame is written into a CSV file and returned as
+    an HTTP response with the appropriate content type and file
+    attachment headers.
+    """
     search_query = request.GET.get("search", "")
     document_types = request.GET.getlist("document_type", "")
     publishers = request.GET.getlist("publisher", None)
@@ -95,7 +118,8 @@ def download_search_csv(request: HttpRequest) -> HttpResponse:
 
 @require_http_methods(["GET"])
 def search_django(request: HttpRequest):
-    """Search view.
+    """
+    Search view.
 
     Renders the Django based search page.
     """
@@ -109,7 +133,8 @@ def search_django(request: HttpRequest):
 
 @require_http_methods(["GET"])
 def search_react(request: HttpRequest) -> HttpResponse:
-    """Search view.
+    """
+    Search view.
 
     Renders the React based search page.
     """
