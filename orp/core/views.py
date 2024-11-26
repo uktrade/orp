@@ -2,14 +2,11 @@ from django.conf import settings
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_http_methods, require_safe
 
-from .cookies import (
-    analytics_form_initial_mapping,
-    get_analytics_consent,
-    set_analytics_consent_cookie,
-)
-from .forms import CookiePageConsentForm
+from .cookies import get_ga_cookie_preference, set_ga_cookie_policy
+from .forms import CookiePreferenceForm
 from .healthcheck import application_service_health
 
 
@@ -81,32 +78,29 @@ def accessibility_statement(request: HttpRequest) -> HttpResponse:
 
 @require_http_methods(["GET", "POST"])
 def cookies(request: HttpRequest) -> HttpResponse:
-    """Cookies.
+    """Cookie policy page view.
 
     Returns the cookies page. If the request method is POST, the analytics
     consent cookie is set and the user is redirected back to the cookies page.
     """
     context = {
         "service_name": settings.SERVICE_NAME,
-        "analytics_cookie_name": settings.ANALYTICS_CONSENT_NAME,
+        "cookie_preference_name": settings.COOKIE_ACCEPTED_GA_NAME,
     }
     if request.method == "POST":
-        form = CookiePageConsentForm(request.POST)
+        form = CookiePreferenceForm(request.POST)
         if form.is_valid():
-            analytics_consent = form.cleaned_data[
-                settings.ANALYTICS_CONSENT_NAME
-            ]
-            context[settings.ANALYTICS_CONSENT_NAME] = analytics_consent
+            preference = form.cleaned_data["cookie_preference"]
             response = redirect(reverse("cookies"))
-            set_analytics_consent_cookie(response, analytics_consent)
+            set_ga_cookie_policy(response, preference)
             response[
                 "Location"
-            ] += f"?{settings.ANALYTICS_CONSENT_NAME}={analytics_consent}"
+            ] += f"?{settings.COOKIE_ACCEPTED_GA_NAME}={preference}"
             return response
     else:
-        analytics_consent = get_analytics_consent(request)
-        form = CookiePageConsentForm(
-            initial=analytics_form_initial_mapping(analytics_consent)
+        preferences_value = get_ga_cookie_preference(request)
+        form = CookiePreferenceForm(
+            initial={"cookie_preference": preferences_value}
         )
     context["form"] = form
     return render(request, template_name="cookies.html", context=context)
@@ -114,20 +108,28 @@ def cookies(request: HttpRequest) -> HttpResponse:
 
 @require_http_methods(["GET"])
 def set_cookie_banner_preference(request) -> HttpResponseRedirect:
-    """Set cookie banner preference.
+    """Set cookie preferences banner.
 
-    Sets analytics cookie preference and redirects to the current page.
-    The redirect URL includes the `cookie_preferences` query parameter.
-    This parameter is used to display a confirmation message banner.
+    Sets the user Google Analytics (GA) cookie preference and then redirects
+    to the current page. The redirect URL includes the `hide_banner`
+    query parameter. This parameter is used to display a confirmation message
+    banner.
     """
-    analytics_consent = request.GET.get(settings.ANALYTICS_CONSENT_NAME)
-    current_page = request.GET.get("current_page") or "/"
-    separator = "?" if "?" not in current_page else "#"
+    preference = request.GET.get(settings.COOKIE_ACCEPTED_GA_NAME, "false")
+    current_page = request.GET.get("current_page")
+    if not url_has_allowed_host_and_scheme(
+        url=current_page,
+        allowed_hosts={request.get_host()}.union(settings.ALLOWED_HOSTS),
+        require_https=request.is_secure(),
+    ):
+        current_page = "/"
+    separator = "?" if "?" not in current_page else "&"
     current_page = (
-        f"{current_page}{separator}cookie_preferences={analytics_consent}"
+        f"{current_page}{separator}hide_banner=true"
+        f"&{settings.COOKIE_ACCEPTED_GA_NAME}={preference}"
     )
     response = redirect(current_page)
-    set_analytics_consent_cookie(response, analytics_consent)
+    set_ga_cookie_policy(response, preference)
     return response
 
 
@@ -138,5 +140,11 @@ def hide_cookie_banner(request) -> HttpResponseRedirect:
     Redirects to the current page without any query parameters,
     effectively hiding the cookie banner.
     """
-    current_page = request.GET.get("current_page") or "/"
+    current_page = request.GET.get("current_page")
+    if not url_has_allowed_host_and_scheme(
+        url=current_page,
+        allowed_hosts={request.get_host()}.union(settings.ALLOWED_HOSTS),
+        require_https=request.is_secure(),
+    ):
+        current_page = "/"
     return redirect(current_page)

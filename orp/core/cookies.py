@@ -2,35 +2,28 @@ from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 
 
-def set_analytics_consent_cookie(
-    response: HttpResponse, analytics_consent: bool
-) -> None:
-    """Set analytics consent cookie.
+def set_ga_cookie_policy(response: HttpResponse, preference: str) -> None:
+    """Set Google Analytics (GA) policy.
 
-    Sets the analytics consent cookie on the response object.
+    Sets the cookies that are required for Google Tag Manager (GTM) to
+    function correctly.
     """
     response.set_cookie(
-        settings.ANALYTICS_CONSENT_NAME,
-        value=str(analytics_consent),
+        key=settings.COOKIE_ACCEPTED_GA_NAME,
+        value=preference,
+        max_age=365 * 24 * 60 * 60,
+    )
+    response.set_cookie(
+        key=settings.COOKIE_PREFERENCES_SET_NAME,
+        value="true",
         max_age=365 * 24 * 60 * 60,
     )
 
 
-def get_analytics_consent(request: HttpRequest) -> bool:
-    """Get analytics consent.
+def get_ga_cookie_preference(request: HttpRequest) -> str:
+    """Get Google Analytics (GA) cookie preference.
 
-    Returns the analytics consent boolean value from the request object.
+    Returns value of the GA cookie preference if it exists, otherwise
+    returns "false".
     """
-    analytics_consent = request.COOKIES.get(
-        settings.ANALYTICS_CONSENT_NAME, None
-    )
-    return True if analytics_consent == "True" else False
-
-
-def analytics_form_initial_mapping(analytics_consent: bool) -> dict:
-    """Analytics mapping.
-
-    Returns a dictionary with the analytics consent value, which is used to
-    initialise the analytics cookie form.
-    """
-    return {settings.ANALYTICS_CONSENT_NAME: analytics_consent}
+    return request.COOKIES.get(settings.COOKIE_ACCEPTED_GA_NAME, "false")

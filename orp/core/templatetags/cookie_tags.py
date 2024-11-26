@@ -15,23 +15,25 @@ def render_cookie_banner(context) -> str:
     is not rendered.
     """
     request = context["request"]
-    if settings.ANALYTICS_CONSENT_NAME not in request.COOKIES:
+    if settings.COOKIE_PREFERENCES_SET_NAME not in request.COOKIES:
         return render_to_string(
             "cookie_banner.html",
             {
                 "service_name": settings.SERVICE_NAME,
-                "analytics_cookie_name": settings.ANALYTICS_CONSENT_NAME,
+                "cookie_preference_name": settings.COOKIE_ACCEPTED_GA_NAME,
                 "request": request,
                 "show_cookie_banner": True,
                 "show_confirmation_message": False,
             },
         )
-    elif "cookie_preferences" in request.GET:
+    elif "hide_banner" in request.GET:
         return render_to_string(
             "cookie_banner.html",
             {
                 "service_name": settings.SERVICE_NAME,
-                "cookie_preferences": request.GET.get("cookie_preferences"),
+                "cookie_preference": request.GET.get(
+                    settings.COOKIE_ACCEPTED_GA_NAME
+                ),
                 "request": request,
                 "show_cookie_banner": False,
                 "show_confirmation_message": True,
