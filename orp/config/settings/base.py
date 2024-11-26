@@ -20,6 +20,7 @@ from typing import Any
 import dj_database_url
 import environ
 
+from celery.schedules import crontab
 from django_log_formatter_asim import ASIMFormatter
 
 # Define the root directory (i.e. <repo-root>)
@@ -260,3 +261,14 @@ COOKIE_ACCEPTED_GA_NAME: str = "accepted_ga_cookies"
 GOOGLE_ANALYTICS_TAG_MANAGER_ID = env(
     "GOOGLE_ANALYTICS_TAG_MANAGER_ID", default=None
 )
+
+# Celery settings
+# Used for cache rebuild
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERY_BEAT_SCHEDULE = {
+    "rebuild-cache-everyday-1am": {
+        "task": "orp.orp_search.cache.rebuild.rebuild_cache_task",
+        "schedule": crontab(hour="1", minute="0"),
+    },
+}
