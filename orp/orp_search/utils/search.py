@@ -15,7 +15,7 @@ from django.http import HttpRequest
 logger = logging.getLogger(__name__)
 
 
-def _create_search_query(search_string):
+def create_search_query(search_string):
     """
     Create a search query from a search string with AND/OR operators
 
@@ -49,9 +49,9 @@ def _create_search_query(search_string):
                 preprocess_query = search_query
             else:
                 if current_operator == "&":
-                    preprocess_query &= search_query
+                    preprocess_query.__and__(search_query)
                 elif current_operator == "|":
-                    preprocess_query |= search_query
+                    preprocess_query.__or__(search_query)
 
     return preprocess_query
 
@@ -75,7 +75,7 @@ def search_database(
     logger.debug(f"sanitized search query: {query_str}")
 
     # Generate query object
-    query_objs = _create_search_query(query_str)
+    query_objs = create_search_query(query_str)
     logger.debug(f"search query objects: {query_objs}")
 
     # Search across specific fields

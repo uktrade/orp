@@ -9,6 +9,16 @@ from django.db.models import QuerySet
 
 
 def clear_all_documents():
+    """
+    Clears all documents from the 'DataResponseModel' table in the database.
+
+    Logs the process of clearing the documents and handles any exceptions
+    that may occur. If an error occurs, it logs the error message and
+    raises an error.
+
+    Raises:
+        CustomError: If there is an error while clearing the documents.
+    """
     logger.debug("clearing all documents from table...")
     try:
         DataResponseModel.objects.all().delete()
@@ -19,6 +29,28 @@ def clear_all_documents():
 
 
 def insert_or_update_document(document_json):
+    """
+    Inserts or updates a database document based on the given JSON data.
+
+    The function first attempts to create a new document using the
+    provided JSON data.
+
+    If the document already exists (detected through an exception),
+    it catches the error and tries to update the existing document instead.
+
+    Args:
+        document_json (dict): A dictionary containing the data for the
+        document to be inserted or updated.
+
+    Raises:
+        Exception: If an error occurs during either the insert or update
+        operation, the error is logged and re-raised.
+
+    Logs:
+        Logs detailed debug messages for each step, including the document
+        being inserted, any errors encountered, and the outcome of the update
+        operation.
+    """
     try:
         logger.debug("creating document...")
         logger.debug(f"document: {document_json}")
@@ -45,12 +77,15 @@ def insert_or_update_document(document_json):
 
 def calculate_score(config, queryset: QuerySet):
     """
-    Calculate the score of a search result based on the number of
-    search terms found in the title and description.
+    Calculate the search relevance score for each document in the queryset.
 
-    :param search_terms: A list of search terms to look for in the
-                         search result.
-    :return: The score based on the number of search terms found.
+    Args:
+        config: Configuration object containing the search query settings.
+        queryset: QuerySet of documents to be scored.
+
+    The function tokenizes the search query, filters out "AND" and "OR",
+    and computes the score for each document based on the frequency of
+    search terms in the document's title and description.
     """
 
     def _extract_terms(search_query):
