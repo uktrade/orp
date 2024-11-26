@@ -10,7 +10,7 @@ from rest_framework import status
 logger = logging.getLogger(__name__)
 
 
-def rebuild_cache():
+def cache():
     """
     Rebuilds cache for Legislation and PublicGateway.
 
