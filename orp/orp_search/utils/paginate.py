@@ -12,9 +12,55 @@ logger = logging.getLogger(__name__)
 def paginate(
     context: dict, config: SearchDocumentConfig, results: QuerySet
 ) -> dict:
+    """
+    Paginates the given query set and updates the context with
+    pagination details.
+
+    Parameters:
+    - context (dict):
+        The context dictionary to be updated with pagination details.
+    - config (SearchDocumentConfig):
+        Configuration object containing limit and offset for pagination.
+    - results (QuerySet): The query set of documents to be paginated.
+
+    Returns:
+    - dict:
+        The updated context dictionary containing pagination information and
+        paginated documents.
+
+    Logs the time taken for the pagination process in different stages:
+    1. Time taken to paginate the documents.
+    2. Time taken to process regulatory topics for each document.
+    3. Time taken to update the context with pagination details.
+
+    Handles pagination exceptions:
+    - If the page is not an integer, defaults to the first page.
+    - If the page is empty, defaults to the last page.
+
+    Converts the paginated documents into a list of JSON objects with keys:
+    - "id"
+    - "title"
+    - "publisher"
+    - "description"
+    - "type"
+    - "date_modified"
+    - "date_valid"
+    - "regulatory_topics"
+
+    Updates the context with:
+    - Paginator object.
+    - Paginated documents in JSON format.
+    - Total number of results in the current page.
+    - Boolean to indicate if pagination is needed.
+    - Total number of results.
+    - Total number of pages.
+    - Current page number.
+    - Start index of the results in the current page.
+    - End index of the results in the current page.
+    """
     start_time = time.time()
 
-    logger.info("paginating documents...")
+    logger.debug("paginating documents...")
     paginator = Paginator(results, config.limit)
     try:
         paginated_documents = paginator.page(config.offset)
@@ -24,7 +70,7 @@ def paginate(
         paginated_documents = paginator.page(paginator.num_pages)
 
     end_time = time.time()
-    logger.info(
+    logger.debug(
         f"time taken to paginate (before description +/ regulatory topics):"
         f" {round(end_time - start_time, 2)} seconds"
     )
@@ -42,7 +88,7 @@ def paginate(
                     ).split("\n")
 
         end_time = time.time()
-        logger.info(
+        logger.debug(
             f"time taken to paginate "
             f"(after description +/ regulatory topics): "
             f"{round(end_time - start_time, 2)} seconds"
@@ -75,7 +121,8 @@ def paginate(
     context["start_index"] = paginated_documents.start_index()
     context["end_index"] = paginated_documents.end_index()
     end_time = time.time()
-    logger.info(
+
+    logger.debug(
         f"time taken to paginate (after adding to context): "
         f"{round(end_time - start_time, 2)} seconds"
     )

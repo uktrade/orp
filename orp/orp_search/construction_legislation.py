@@ -1936,6 +1936,12 @@ https://www.legislation.gov.uk/wsi/2024/742/data.xml,http://www.legislation.gov.
 
 
 def construction_legislation_dataframe():
+    """
+    Reads CSV data from a predefined string, converts the data into a Pandas DataFrame, and returns the resulting DataFrame.
+
+    Returns:
+        pandas.DataFrame: The dataframe containing the CSV data.
+    """
     # Use StringIO to simulate reading from a file
     csv_data = StringIO(_csv_text)
 

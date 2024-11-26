@@ -15,7 +15,7 @@ from django.http import HttpRequest
 logger = logging.getLogger(__name__)
 
 
-def _create_search_query(search_string):
+def create_search_query(search_string):
     """
     Create a search query from a search string with AND/OR operators
 
@@ -49,9 +49,9 @@ def _create_search_query(search_string):
                 preprocess_query = search_query
             else:
                 if current_operator == "&":
-                    preprocess_query &= search_query
+                    preprocess_query.__and__(search_query)
                 elif current_operator == "|":
-                    preprocess_query |= search_query
+                    preprocess_query.__or__(search_query)
 
     return preprocess_query
 
@@ -72,11 +72,11 @@ def search_database(
 
     # Sanatize the query string
     query_str = sanitize_input(config.search_query)
-    logger.info(f"sanitized search query: {query_str}")
+    logger.debug(f"sanitized search query: {query_str}")
 
     # Generate query object
-    query_objs = _create_search_query(query_str)
-    logger.info(f"search query objects: {query_objs}")
+    query_objs = create_search_query(query_str)
+    logger.debug(f"search query objects: {query_objs}")
 
     # Search across specific fields
     vector = SearchVector("title", "description", "regulatory_topics")
@@ -142,7 +142,7 @@ def search_database(
 
 
 def search(context: dict, request: HttpRequest) -> dict:
-    logger.info("received search request: %s", request)
+    logger.debug("received search request: %s", request)
     start_time = time.time()
 
     search_query = request.GET.get("query", "")
@@ -175,13 +175,13 @@ def search(context: dict, request: HttpRequest) -> dict:
     context = paginate(context, config, results)
     pag_end_time = time.time()
 
-    logger.info(
+    logger.debug(
         f"time taken to paginate (called from views.py): "
         f"{round(pag_end_time - pag_start_time, 2)} seconds"
     )
 
     end_time = time.time()
-    logger.info(
+    logger.debug(
         f"time taken to search and produce response: "
         f"{round(end_time - start_time, 2)} seconds"
     )
@@ -195,7 +195,7 @@ class Trim(Func):
 
 
 def get_publisher_names():
-    logger.info("getting publisher names...")
+    logger.debug("getting publisher names...")
     publishers_list = []
 
     try:
@@ -213,7 +213,7 @@ def get_publisher_names():
 
     except Exception as e:
         logger.error(f"error getting publisher names: {e}")
-        logger.info("returning empty list of publishers")
+        logger.debug("returning empty list of publishers")
 
-    logger.info(f"publishers found: {publishers_list}")
+    logger.debug(f"publishers found: {publishers_list}")
     return publishers_list
