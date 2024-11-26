@@ -44,12 +44,14 @@ Navigate a browser to:
     http://localhost:8081
 
 ## Local development environment
+
 While the `docker-compose` configuration is the quickest way to get started, it
 can also be useful to create a development environment on your local machine.
 However, your mileage may vary depending on your operating system. The following
 instructions are for OSX.
 
 ### Prerequisites
+
 As we are using python package `psycopg-c`, you need the PostgreSQL client
 development headers (e.g. the `libpq-dev` package) installed on your system.
 On Mac you can run the following command to install `libpq`:
@@ -74,6 +76,7 @@ On Mac you can run the following command to install `libpq`:
   you'll require including `engine`, `build` and `compose`.
 
 ### Install Poetry
+
 We use [Poetry](https://python-poetry.org/) to manage dependencies. Follow the
 guidance in the [official documentation](https://python-poetry.org/docs/). On
 OSX, run the following commands to install Poetry:
@@ -99,7 +102,6 @@ With your Poetry shell active:
 > Code quality checks are also performed when pushing your code to origin
 > but pre-commit hooks catch issues early and will improve Developer Experience.
 
-
 ### Update database tables
 
 > To update local database tables, you need to set the `DATABASE_URL` environment variable. You can set it in the terminal or in the `.env` file.
@@ -113,7 +115,3 @@ With your Poetry shell active:
 > If you want to migrate a single app then navigate /orp/orp and use the following command:
 
     $ poetry run python manage.py migrate <app_name>
-
-
-
-poetry add boto3 awswrangler

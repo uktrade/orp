@@ -14,13 +14,13 @@
       </div>
     </div>
     <div class="govuk-button-group">
-      <a href="{% url 'set-cookie-banner-preference' %}?{{analytics_cookie_name}}=True&current_page={{ request.path|urlencode }}"
-        class="govuk-button" data-module="govuk-button">
-        Accept analytics cookies
+      <a href="{% url 'set-cookie-banner-preference' %}?{{cookie_preference_name}}=true&current_page={{ request.path|urlencode }}"
+          class="govuk-button" data-module="govuk-button">
+          Accept analytics cookies
       </a>
-      <a href="{% url 'set-cookie-banner-preference' %}?{{analytics_cookie_name}}=False&current_page={{ request.path|urlencode }}"
-        class="govuk-button" data-module="govuk-button">
-        Reject analytics cookies
+      <a href="{% url 'set-cookie-banner-preference' %}?{{cookie_preference_name}}=false&current_page={{ request.path|urlencode }}"
+          class="govuk-button" data-module="govuk-button">
+          Reject analytics cookies
       </a>
       <a class="govuk-link" href="/cookies">View cookies</a>
     </div>
@@ -34,7 +34,7 @@
     <div class="govuk-grid-row">
       <div class="govuk-grid-column-two-thirds">
         <div class="govuk-cookie-banner__content">
-          <p class="govuk-body">You've {% if cookie_preferences == 'True' %} accepted {% else %}
+          <p class="govuk-body">You've {% if cookie_preference == 'true' %} accepted {% else %}
             rejected {% endif %} additional cookies. You can <a class="govuk-link" href="/cookies">change your cookie
               settings</a> at any time.
           </p>

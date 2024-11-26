@@ -6,7 +6,7 @@
 {% block body_content %}
 <div class="govuk-width-container">
     <main class="govuk-main-wrapper govuk-main-wrapper--l" id="main-content" role="main">
-        {% if analytics_cookie_name in request.GET %}
+        {% if cookie_preference_name in request.GET %}
         <div class="govuk-notification-banner govuk-notification-banner--success" role="alert"
             aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
             <div class="govuk-notification-banner__header">
@@ -47,12 +47,22 @@
                     </thead>
                     <tbody class="govuk-table__body">
                         <tr class="govuk-table__row">
-                            <th class="govuk-table__header govuk-!-width-one-quarter app-!-vertical-align-top"
-                                scope="row">
-                                {{analytics_cookie_name}}
+                            <th class="govuk-table__header govuk-!-width-one-quarter app-!-vertical-align-top" scope="row">
+                                accepted_ga_cookies
                             </th>
                             <td class="govuk-table__cell app-!-vertical-align-top">
-                                Saves your analytics cookie consent settings
+                                Saves your cookie consent settings.
+                            </td>
+                            <td class="govuk-table__cell app-!-vertical-align-top govuk-!-width-one-quarter">
+                                1 year
+                            </td>
+                        </tr>
+                        <tr class="govuk-table__row">
+                            <th class="govuk-table__header govuk-!-width-one-quarter app-!-vertical-align-top" scope="row">
+                                cookie_preferences_set
+                            </th>
+                            <td class="govuk-table__cell app-!-vertical-align-top">
+                                Lets us know that you've saved your cookie consent settings.
                             </td>
                             <td class="govuk-table__cell app-!-vertical-align-top govuk-!-width-one-quarter">
                                 1 year
@@ -70,25 +80,12 @@
                                 1 year
                             </td>
                         </tr>
-                        <tr class="govuk-table__row">
-                            <th class="govuk-table__header govuk-!-width-one-quarter app-!-vertical-align-top"
-                                scope="row">
-                                session
-                            </th>
-                            <td class="govuk-table__cell app-!-vertical-align-top">
-                                Used to keep you signed in when publishing a report
-                            </td>
-                            <td class="govuk-table__cell app-!-vertical-align-top govuk-!-width-one-quarter">
-                                20 hours
-                            </td>
-                        </tr>
                     </tbody>
                 </table>
 
                 <h2 class="govuk-heading-l">Analytics cookies (optional)</h2>
                 <p class="govuk-body">
-                    With your permission, we use Google Analytics to collect data about how you use Check when large
-                    businesses pay their suppliers. This information helps us to improve our service.
+                    With your permission, we use Google Analytics to collect data about how you use {{service_name}}. This information helps us to improve our service.
                 </p>
                 <div class="govuk-inset-text">
                     Google is not allowed to use or share our analytics data with anyone.
@@ -148,26 +145,30 @@
                         </tr>
                     </tbody>
                 </table>
-
                 <h2 class="govuk-heading-l">Change your cookie settings</h2>
                 <form method="post" novalidate>
                     {% csrf_token %}
                     <div class="govuk-form-group">
                         <fieldset class="govuk-fieldset">
                             <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
-                                {{ form.analytics_consent.label }}
+                                {{ form.cookie_preference.label }}
                             </legend>
-                            <div class="govuk-radios" data-module="govuk-radios">
-                                {% for value, text in form.analytics_consent.field.choices %}
-                                <div class="govuk-radios__item">
-                                    <input class="govuk-radios__input" id="analytics-consent-{{ value }}"
-                                        name="{{ form.analytics_consent.name }}" type="radio" value="{{ value }}"
-                                        {% if form.analytics_consent.value == value %}checked{% endif %}>
-                                    <label class="govuk-label govuk-radios__label" for="analytics-consent-{{ value }}">
-                                        {{ text }}
-                                    </label>
-                                </div>
-                                {% endfor %}
+                            <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios">
+                                {% with field=form.cookie_preference %}
+                                    {% for choice in field.field.widget.choices %}
+                                    <div class="govuk-radios__item">
+                                        <input class="govuk-radios__input"
+                                               id="cookie-preference-{{ forloop.counter }}"
+                                               name="{{ field.html_name }}"
+                                               type="radio"
+                                               value="{{ choice.0 }}"
+                                               {% if field.value == choice.0 %}checked{% endif %}>
+                                        <label class="govuk-label govuk-radios__label" for="cookie-preference-{{ forloop.counter }}">
+                                            {{ choice.1 }}
+                                        </label>
+                                    </div>
+                                    {% endfor %}
+                                {% endwith %}
                             </div>
                         </fieldset>
                     </div>
@@ -175,6 +176,7 @@
                         Save cookie settings
                     </button>
                 </form>
+
             </div>
         </div>
     </main>

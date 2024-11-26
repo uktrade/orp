@@ -1,20 +1,21 @@
 from django import forms
 
 
-class CookiePageConsentForm(forms.Form):
-    """Consent Form.
+class CookiePreferenceForm(forms.Form):
+    """Cookie page preference form.
 
-    Radio Select Form for setting analytics cookie consent in the cookies page.
+    Radio Select Form for setting Google Analytics (GA) consent cookies. This
+    form is rendered in the cookies page.
+
+    Note: We want to set the value of the GA cookie to "true" or "false" rather
+    than a boolean values so that the GTM script can read the value correctly.
     """
 
-    ANALYTICS_CHOICES = [
-        (True, "Yes"),
-        (False, "No"),
-    ]
-    analytics_consent = forms.ChoiceField(
-        choices=ANALYTICS_CHOICES,
+    cookie_preference = forms.ChoiceField(
         label="Do you want to accept analytics cookies?",
-        widget=forms.RadioSelect(),
+        choices=(("true", "Yes"), ("false", "No")),
+        widget=forms.RadioSelect,
+        required=False,
     )
 
 
