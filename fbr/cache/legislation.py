@@ -1,3 +1,6 @@
+# isort: skip_file
+# fmt: off
+
 import logging
 import re
 import xml.etree.ElementTree as ET  # nosec BXXX
@@ -6,12 +9,13 @@ from typing import Optional
 
 import requests  # type: ignore
 
-from search.config import SearchDocumentConfig
-from search.construction_legislation import (  # noqa: E501
-    construction_legislation_dataframe,
-)
-from search.utils.date import convert_date_string_to_obj
-from search.utils.documents import (  # noqa: E501
+from construction_legislation import (  # noqa: E501
+    construction_legislation_dataframe
+)  # noqa: E501
+
+from fbr.search.config import SearchDocumentConfig
+from fbr.search.utils.date import convert_date_string_to_obj
+from fbr.search.utils.documents import (  # noqa: E501
     generate_short_uuid,
     insert_or_update_document,
 )

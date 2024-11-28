@@ -4,8 +4,8 @@ import re
 
 import requests  # type: ignore
 
-from search.utils.date import convert_date_string_to_obj
-from search.utils.documents import (  # noqa: E501
+from fbr.search.utils.date import convert_date_string_to_obj
+from fbr.search.utils.documents import (  # noqa: E501
     generate_short_uuid,
     insert_or_update_document,
 )

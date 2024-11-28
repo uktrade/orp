@@ -11,13 +11,13 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 
-import core.views as core_views
-import search.views as search_views
+import fbr.core.views as core_views
+import fbr.search.views as search_views
 
-from search.config import SearchDocumentConfig
-from search.models import DataResponseModel
-from search.utils.documents import clear_all_documents
-from search.utils.search import get_publisher_names, search
+from fbr.search.config import SearchDocumentConfig
+from fbr.search.models import DataResponseModel
+from fbr.search.utils.documents import clear_all_documents
+from fbr.search.utils.search import get_publisher_names, search
 
 urls_logger = logging.getLogger(__name__)
 
@@ -94,8 +94,8 @@ class DataResponseViewSet(viewsets.ModelViewSet):
 class RebuildCacheViewSet(viewsets.ViewSet):
     @action(detail=False, methods=["post"], url_path="rebuild")
     def rebuild_cache(self, request, *args, **kwargs):
-        from search.legislation import Legislation
-        from search.public_gateway import PublicGateway
+        from fbr.cache.legislation import Legislation
+        from fbr.cache.public_gateway import PublicGateway
 
         tx_begin = time.time()
         try:
