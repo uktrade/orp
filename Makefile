@@ -1,5 +1,5 @@
 SHELL := /bin/sh
-APPLICATION_NAME="ORP"
+APPLICATION_NAME="Find business regulations"
 
 # Colour coding for output
 COLOUR_NONE=\033[0m
@@ -14,19 +14,19 @@ help: # List commands and their descriptions
 database: # Create a postgres database for the project
 	@echo "$(COLOUR_GREEN)Initialising database...$(COLOUR_NONE)"
 	docker compose up --force-recreate --remove-orphans -d db
-	docker compose exec db createdb -h localhost -U postgres -T template0 orp
+	docker compose exec db createdb -h localhost -U postgres -T template0 fbr
 	docker compose stop db
 	@echo "$(COLOUR_GREEN)Done$(COLOUR_NONE)"
 
 drop-database: # Delete project's postgres database
-	@echo "$(COLOUR_RED)Drop database orp$(COLOUR_NONE)"
+	@echo "$(COLOUR_RED)Drop database fbr$(COLOUR_NONE)"
 	@read -p "Are you sure? " -n 1 -r; \
 		if [[ $$REPLY =~ ^[Yy] ]]; \
 		then \
 		  	echo ""; \
-			echo "$(COLOUR_RED)Dropping database orp$(COLOUR_NONE)"; \
+			echo "$(COLOUR_RED)Dropping database fbr$(COLOUR_NONE)"; \
 			docker compose up --force-recreate --remove-orphans -d db; \
-			docker compose exec db dropdb -h localhost -U postgres orp; \
+			docker compose exec db dropdb -h localhost -U postgres fbr; \
 			docker compose stop db; \
 			echo "$(COLOUR_GREEN)Done$(COLOUR_NONE)"; \
 		else \
@@ -38,10 +38,10 @@ build: # Build docker containers for local execution
 	docker compose build
 
 collectstatic: # Run Django collectstatic
-	docker compose run --rm web poetry run python orp/manage.py collectstatic --noinput
+	docker compose run --rm web poetry run python fbr/manage.py collectstatic --noinput
 
 admin: # Create a superuser
-	docker compose exec web poetry run python orp/manage.py createsuperuser --username admin --email admin@localhost
+	docker compose exec web poetry run python fbr/manage.py createsuperuser --username admin --email admin@localhost
 
 first-use: # Initialise for local execution
 	@echo "$(COLOUR_GREEN)Preparing for first use$(COLOUR_NONE)"
@@ -75,13 +75,13 @@ stop: # Stop running containers without removing them
 	docker compose stop
 
 .SILENT: clean
-clean: # Remove all orp containers and images
+clean: # Remove all fbr containers and images
 	docker compose stop
 	for i in $$(docker ps -a | awk '$$0!~/IMAGE/ { print $$1 }') ; do \
 		echo "Removing container $$i" ; \
 		docker rm $$i ; \
 	done
-	for j in $$(docker images | grep 'none\|local_deployment\|orp-web' | awk '{ print $$3; }') ; do \
+	for j in $$(docker images | grep 'none\|local_deployment\|fbr-web' | awk '{ print $$3; }') ; do \
 		echo "Removing image $$j" ; \
 		docker image rm -f $$j ; \
 	done
@@ -90,27 +90,27 @@ logs: # View container logs
 	docker compose logs -f -t
 
 test: # Run tests
-	pytest orp/tests --cov-report term
+	pytest fbr/tests --cov-report term
 
 bdd: # Run BDD tests
-	HEADLESS_MODE=false SLOW_MO_MS=500 behave ./orp/tests/bdd/features/ --tags=LOCAL
+	HEADLESS_MODE=false SLOW_MO_MS=500 behave ./fbr/tests/bdd/features/ --tags=LOCAL
 
 django-shell: # Run a Django shell (on  container)
-	docker compose run web poetry run python orp/manage.py shell
+	docker compose run web poetry run python fbr/manage.py shell
 
 django-shell-local: # Run a Django shell (local django instance)
-	DATABASE_URL=postgres://postgres:postgres@localhost:5432/orp \
+	DATABASE_URL=postgres://postgres:postgres@localhost:5432/fbr \
 		DEBUG=True \
 		DJANGO_ADMIN=False \
 		DJANGO_SECRET_KEY=walls-have-ears \
 		DJANGO_SETTINGS_MODULE=config.settings.local \
-		poetry run python orp/manage.py shell
+		poetry run python fbr/manage.py shell
 
 migrate: # Run Django migrate
-	docker compose run --rm web poetry run python orp/manage.py migrate --noinput
+	docker compose run --rm web poetry run python fbr/manage.py migrate --noinput
 
 migrations: # Run Django makemigrations
-	docker compose run --rm web poetry run python orp/manage.py makemigrations --noinput
+	docker compose run --rm web poetry run python fbr/manage.py makemigrations --noinput
 
 lint: # Run all linting
 	make black

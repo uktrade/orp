@@ -17,7 +17,10 @@ def home(request: HttpRequest) -> HttpResponse:
     If we're in prod, redirect to the GOV.UK page, otherwise render a dev home
     page.
     """
-    if request.META.get("HTTP_HOST") == "orp.uktrade.digital":
+    if (
+        request.META.get("HTTP_HOST")
+        == "find-business-regulations.uktrade.digital"
+    ):
         return HttpResponse(
             content="Redirecting to GOV.UK",
             status=302,

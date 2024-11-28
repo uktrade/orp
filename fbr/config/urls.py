@@ -1,4 +1,4 @@
-"""orp URL configuration."""
+"""Find business regulations URL configuration."""
 
 import logging
 import time

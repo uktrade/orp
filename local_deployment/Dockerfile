@@ -32,8 +32,8 @@ RUN apt install -y curl && \
   curl -sL https://deb.nodesource.com/setup_20.x | bash - && \
   apt install -y nodejs
 
-WORKDIR /orp
-COPY . /orp
+WORKDIR /app
+COPY . /app
 
 # Install poetry and project dependencies
 RUN pip install poetry==1.8.3 && \
