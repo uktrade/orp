@@ -1,10 +1,10 @@
 import logging
 import time
 
-from orp_search.config import SearchDocumentConfig
-
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import QuerySet
+
+from search.config import SearchDocumentConfig
 
 logger = logging.getLogger(__name__)
 

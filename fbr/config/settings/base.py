@@ -57,7 +57,7 @@ DJANGO_APPS = [
 
 LOCAL_APPS = [
     "core",
-    "orp_search",
+    "search",
 ]
 
 THIRD_PARTY_APPS: list = [

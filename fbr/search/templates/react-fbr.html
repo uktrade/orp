@@ -21,7 +21,7 @@
 
 {% comment %}
 To pass small amounts of data from the Django view to the React app,
-we use the following template tags passed in from orp_search/views.py:
+we use the following template tags passed in from search/views.py:
 {{ publishers|json_script:"publishers" }}
 {% endcomment %}
 {% block body_content %}
@@ -30,7 +30,7 @@ we use the following template tags passed in from orp_search/views.py:
 <div class="govuk-width-container">
   <main class="govuk-main-wrapper" id="main-content" role="main">
     {% include "intro.html" %}
-    <div id="orp-react-app"></div>
+    <div id="find-business-regulations-react-app"></div>
   </main>
 </div>
 {% endblock %}
