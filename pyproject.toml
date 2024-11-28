@@ -30,6 +30,7 @@ utils = "^1.0.2"
 celery = {extras = ["redis"], version = "^5.4.0"}
 kombu = {extras = ["redis"], version = "^5.4.2"}
 boto3 = "^1.35.71"
+django-celery-beat = "^2.7.0"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.7.1"
