@@ -4,7 +4,6 @@ version = "0.1.0"
 description = "Find business regulations"
 authors = ["Greg Barnes <greg.barnes@digital.trade.gov.uk>"]
 readme = "README.md"
-packages = [{ include = "fbr" }]
 
 [tool.poetry.dependencies]
 python-environ = "^0.4.54"
