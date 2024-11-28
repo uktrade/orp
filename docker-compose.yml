@@ -1,4 +1,4 @@
-# ORP docker-compose configuration.
+# Find business regulations docker-compose configuration.
 volumes:
   postgres_data:
     driver: local
@@ -8,7 +8,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=orp
+      - POSTGRES_DB=fbr
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     ports:
@@ -32,9 +32,9 @@ services:
     #   db:
     #     condition: service_healthy
     volumes:
-      - .:/orp
+      - .:/app
     networks:
       - proxynet
 networks:
   proxynet:
-    name: orp_network
+    name: fbr_network

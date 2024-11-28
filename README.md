@@ -1,8 +1,8 @@
-# Open Regulation Platform (ORP)
+# Find business regulations
 
 ## Introduction
 
-The Open Regulation Platform (ORP) will provide a searchable and filterable list of UK regulations and legislation.
+The Find business regulations will provide a searchable and filterable list of UK regulations and legislation.
 
 ## Getting Started
 
@@ -11,8 +11,8 @@ to run the application and required `PostgreSQL` in a containerised environment.
 Most of the actions required to run and manage the application are encapsulated
 in the `Makefile`. First, in a working directory run:
 
-    $ git clone git@github.com:uktrade/orp.git
-    $ cd orp
+    $ git clone git@github.com:uktrade/find-business-regulations.git
+    $ cd find-business-regulations
 
 The docker compose configuration requires that a `local.env` file is present.
 An example file is provided in the repository. Create one like this:
@@ -106,12 +106,12 @@ With your Poetry shell active:
 
 > To update local database tables, you need to set the `DATABASE_URL` environment variable. You can set it in the terminal or in the `.env` file.
 
-    <!-- pragma: allowlist secret --> $ export DATABASE_URL=postgres://postgres:postgres@localhost:5432/orp
+    <!-- pragma: allowlist secret --> $ export DATABASE_URL=postgres://postgres:postgres@localhost:5432/fbr
 
-> If you want to migrate all apps then navigate /orp/orp and use the following command:
+> If you want to migrate all apps then navigate /find-business-regulations/fbr and use the following command:
 
     $ poetry run python manage.py migrate
 
-> If you want to migrate a single app then navigate /orp/orp and use the following command:
+> If you want to migrate a single app then navigate /find-business-regulations/fbr and use the following command:
 
     $ poetry run python manage.py migrate <app_name>

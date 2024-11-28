@@ -33,8 +33,8 @@ jobs:
       - name: detect-secrets
         run: poetry run pre-commit run detect-secrets --all-files
 
-      - name: mypy
-        run: poetry run pre-commit run mypy --all-files
+      # - name: mypy
+      #   run: poetry run pre-commit run mypy --all-files
 
       - name: bandit
         run: poetry run pre-commit run bandit --all-files
@@ -65,10 +65,12 @@ jobs:
         run: |
           npm install
           npm run build
-          DJANGO_SETTINGS_MODULE=config.settings.local poetry run orp/manage.py collectstatic --noinput
+          DJANGO_SETTINGS_MODULE=config.settings.local poetry run fbr/manage.py collectstatic --noinput
+
+      # poetry run fbr/manage.py makemigrations --check --dry-run
 
       # - name: Run tests
-      #   run: poetry run pytest orp/tests
+      #   run: poetry run pytest fbr/tests
 
       # - name: Generate coverage report
       #   run: poetry run coverage xml

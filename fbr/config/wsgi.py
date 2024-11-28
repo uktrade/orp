@@ -1,5 +1,5 @@
 """
-WSGI config for orp project.
+WSGI config for Find business regulations project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

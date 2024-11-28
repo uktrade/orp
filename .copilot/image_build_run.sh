@@ -8,4 +8,4 @@ export BUILD_STEP='True'
 export COPILOT_ENVIRONMENT_NAME='build'
 export DJANGO_SETTINGS_MODULE="config.settings.base"
 
-poetry run python orp/manage.py collectstatic --noinput
+poetry run python fbr/manage.py collectstatic --noinput

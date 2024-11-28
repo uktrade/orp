@@ -3,7 +3,7 @@ from django.apps import AppConfig
 
 class SearchConfig(AppConfig):
     """
-    Configuration class for the ORP Search application.
+    Configuration class for the Find business regulations Search application.
 
     Attributes:
         name (str): The full Python path to the application.
@@ -14,5 +14,5 @@ class SearchConfig(AppConfig):
     """
 
     name = "orp_search"
-    verbose_name = "ORP application functionality"
+    verbose_name = "Find business regulations application functionality"
     default_auto_field = "django.db.models.BigAutoField"

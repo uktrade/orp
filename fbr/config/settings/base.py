@@ -1,4 +1,4 @@
-"""Django base settings for orp project.
+"""Django base settings for Find business regulations project.
 
 Environment:
 We use django-environ but do not read a `.env` file. Locally we provide
@@ -25,8 +25,8 @@ from django_log_formatter_asim import ASIMFormatter
 # Define the root directory (i.e. <repo-root>)
 root = environ.Path(__file__) - 4  # i.e. Repository root
 SITE_ROOT = Path(root())
-# Define the project base directory (i.e. <repo-root>/orp)
-BASE_DIR: Path = Path(root(), "orp")
+# Define the project base directory (i.e. <repo-root>/fbr)
+BASE_DIR: Path = Path(root(), "fbr")
 
 # Get environment variables
 env = environ.Env(
@@ -34,7 +34,9 @@ env = environ.Env(
 )
 
 # Must be provided by the environment
-SECRET_KEY = env("DJANGO_SECRET_KEY", default="orp-secret-key")
+SECRET_KEY = env(
+    "DJANGO_SECRET_KEY", default="find-business-regulations-secret-key"
+)
 
 DEBUG = env("DEBUG", default=False)
 DJANGO_ADMIN = env("DJANGO_ADMIN", default=False)
@@ -225,14 +227,14 @@ LOGGING["root"]["handlers"] = ["asim"]
 LOGGING["loggers"]["django"]["handlers"] = ["asim"]
 
 # ------------------------------------------------------------------------------
-# The Open Regulation Platform Zone - specific ORP service settings.
+# The Find business regulations zone - specific service settings.
 # ------------------------------------------------------------------------------
 
 # Service
 
-SERVICE_NAME: str = "Open Regulation Platform"
-SERVICE_NAME_SEARCH: str = "Open Regulation Platform"
-CONTACT_EMAIL: str = "paymentpracticesreporting@businessandtrade.gov.uk"
+SERVICE_NAME: str = "Find business regulations"
+SERVICE_NAME_SEARCH: str = "Find business regulations"
+CONTACT_EMAIL: str = "findbusinessregulations@businessandtrade.gov.uk"
 
 # Cookies
 ANALYTICS_CONSENT_NAME: str = "analytics_consent"
@@ -246,9 +248,9 @@ ANALYTICS_CONSENT_NAME: str = "analytics_consent"
 # HOSTNAME
 HOSTNAME_MAP = {
     "local": "http://localhost:8081",
-    "dev": "https://dev.orp.uktrade.digital/",
-    "staging": "https://staging.orp.uktrade.digital/",
-    "prod": "https://orp.uktrade.digital/",
+    "dev": "https://dev.find-business-regulations.uktrade.digital/",
+    "staging": "https://staging.find-business-regulations.uktrade.digital/",
+    "prod": "https://find-business-regulations.uktrade.digital/",
 }
 
 HOSTNAME = HOSTNAME_MAP.get(ENVIRONMENT.lower(), HOSTNAME_MAP["prod"])
