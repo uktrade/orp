@@ -2,18 +2,18 @@ import unittest
 
 from unittest.mock import MagicMock, call, patch
 
-from orp_search.utils.search import create_search_query
+from search.utils.search import create_search_query
 
 
 class TestCreateSearchQuery(unittest.TestCase):
 
-    @patch("orp_search.utils.search.SearchQuery", autospec=True)
+    @patch("search.utils.search.SearchQuery", autospec=True)
     def test_single_word_query(self, mock_search_query):
         result = create_search_query("test")
         mock_search_query.assert_called_with("test", search_type="plain")
         self.assertEqual(result, mock_search_query.return_value)
 
-    @patch("orp_search.utils.search.SearchQuery", autospec=True)
+    @patch("search.utils.search.SearchQuery", autospec=True)
     def test_implicit_and_search_operator_query(self, mock_search_query):
         # Mock SearchQuery instances
         mock_query1 = MagicMock(name="MockQuery1")
@@ -35,7 +35,7 @@ class TestCreateSearchQuery(unittest.TestCase):
         # Assert the AND operation was applied
         mock_query1.__and__.assert_called_once_with(mock_query2)
 
-    @patch("orp_search.utils.search.SearchQuery", autospec=True)
+    @patch("search.utils.search.SearchQuery", autospec=True)
     def test_multiple_implicit_and_search_operator_query(
         self, mock_search_query
     ):
@@ -61,7 +61,7 @@ class TestCreateSearchQuery(unittest.TestCase):
         # Assert the AND operation was applied
         mock_query1.__and__.assert_called_with(mock_query3)
 
-    @patch("orp_search.utils.search.SearchQuery", autospec=True)
+    @patch("search.utils.search.SearchQuery", autospec=True)
     def test_and_search_operator_query(self, mock_search_query):
         # Mock SearchQuery instances
         mock_query1 = MagicMock(name="MockQuery1")
@@ -83,7 +83,7 @@ class TestCreateSearchQuery(unittest.TestCase):
         # Assert the AND operation was applied
         mock_query1.__and__.assert_called_once_with(mock_query2)
 
-    @patch("orp_search.utils.search.SearchQuery", autospec=True)
+    @patch("search.utils.search.SearchQuery", autospec=True)
     def test_multiple_and_search_operator_query(self, mock_search_query):
         # Mock SearchQuery instances
         mock_query1 = MagicMock(name="MockQuery1")
@@ -107,7 +107,7 @@ class TestCreateSearchQuery(unittest.TestCase):
         # Assert the AND operation was applied
         mock_query1.__and__.assert_called_with(mock_query3)
 
-    @patch("orp_search.utils.search.SearchQuery", autospec=True)
+    @patch("search.utils.search.SearchQuery", autospec=True)
     def test_or_search_operator_query(self, mock_search_query):
         # Mock SearchQuery instances
         mock_query1 = MagicMock(name="MockQuery1")
@@ -129,7 +129,7 @@ class TestCreateSearchQuery(unittest.TestCase):
         # Assert the AND operation was applied
         mock_query1.__or__.assert_called_once_with(mock_query2)
 
-    @patch("orp_search.utils.search.SearchQuery", autospec=True)
+    @patch("search.utils.search.SearchQuery", autospec=True)
     def test_multple_or_search_operator_query(self, mock_search_query):
         # Mock SearchQuery instances
         mock_query1 = MagicMock(name="MockQuery1")
@@ -153,7 +153,7 @@ class TestCreateSearchQuery(unittest.TestCase):
         # Assert the AND operation was applied
         mock_query1.__or__.assert_called_with(mock_query3)
 
-    @patch("orp_search.utils.search.SearchQuery", autospec=True)
+    @patch("search.utils.search.SearchQuery", autospec=True)
     def test_multiple_or_search_operator_query(self, mock_search_query):
         # Mock SearchQuery instances
         mock_query1 = MagicMock(name="MockQuery1")
@@ -177,7 +177,7 @@ class TestCreateSearchQuery(unittest.TestCase):
         # Assert the AND operation was applied
         mock_query1.__or__.assert_called_with(mock_query3)
 
-    @patch("orp_search.utils.search.SearchQuery", autospec=True)
+    @patch("search.utils.search.SearchQuery", autospec=True)
     def test_phrase_search_query(self, mock_search_query):
         result = create_search_query('"test trial"')
         mock_search_query.assert_called_with(
@@ -185,7 +185,7 @@ class TestCreateSearchQuery(unittest.TestCase):
         )
         self.assertEqual(result, mock_search_query.return_value)
 
-    @patch("orp_search.utils.search.SearchQuery", autospec=True)
+    @patch("search.utils.search.SearchQuery", autospec=True)
     def test_and_multiple_single_single_phrase_search_query(
         self, mock_search_query
     ):
@@ -221,7 +221,7 @@ class TestCreateSearchQuery(unittest.TestCase):
         # Assert the AND operation was applied
         mock_query1.__and__.assert_called_with(mock_query5)
 
-    @patch("orp_search.utils.search.SearchQuery", autospec=True)
+    @patch("search.utils.search.SearchQuery", autospec=True)
     def test_single_or_and_search_operator_query(self, mock_search_query):
         # Mock SearchQuery instances
         mock_query1 = MagicMock(name="MockQuery1")

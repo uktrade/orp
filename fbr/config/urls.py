@@ -3,12 +3,6 @@
 import logging
 import time
 
-import orp_search.views as orp_search_views
-
-from orp_search.config import SearchDocumentConfig
-from orp_search.models import DataResponseModel
-from orp_search.utils.documents import clear_all_documents
-from orp_search.utils.search import get_publisher_names, search
 from rest_framework import routers, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -18,6 +12,12 @@ from django.contrib import admin
 from django.urls import include, path
 
 import core.views as core_views
+import search.views as search_views
+
+from search.config import SearchDocumentConfig
+from search.models import DataResponseModel
+from search.utils.documents import clear_all_documents
+from search.utils.search import get_publisher_names, search
 
 urls_logger = logging.getLogger(__name__)
 
@@ -94,8 +94,8 @@ class DataResponseViewSet(viewsets.ModelViewSet):
 class RebuildCacheViewSet(viewsets.ViewSet):
     @action(detail=False, methods=["post"], url_path="rebuild")
     def rebuild_cache(self, request, *args, **kwargs):
-        from orp_search.legislation import Legislation
-        from orp_search.public_gateway import PublicGateway
+        from search.legislation import Legislation
+        from search.public_gateway import PublicGateway
 
         tx_begin = time.time()
         try:
@@ -156,16 +156,16 @@ router.register(r"v1/retrieve", PublishersViewSet, basename="publishers")
 
 urlpatterns = [
     path("api/", include(router.urls)),
-    path("", orp_search_views.search_react, name="search_react"),
-    path("nojs/", orp_search_views.search_django, name="search_django"),
+    path("", search_views.search_react, name="search_react"),
+    path("nojs/", search_views.search_django, name="search_django"),
     # If we choose to have a start page with green button, this is it:
     # path("", core_views.home, name="home"),
     path(
         "download_csv/",
-        orp_search_views.download_search_csv,
+        search_views.download_search_csv,
         name="download_csv",
     ),
-    path("document/<str:id>", orp_search_views.document, name="document"),
+    path("document/<str:id>", search_views.document, name="document"),
     path("healthcheck/", core_views.health_check, name="healthcheck"),
     path(
         "accessibility-statement/",

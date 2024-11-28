@@ -2,15 +2,15 @@ import logging
 import re
 import time
 
-from orp_search.config import SearchDocumentConfig
-from orp_search.models import DataResponseModel
-from orp_search.utils.documents import calculate_score
-from orp_search.utils.paginate import paginate
-from orp_search.utils.terms import sanitize_input
-
 from django.contrib.postgres.search import SearchQuery, SearchVector
 from django.db.models import F, Func, Q, QuerySet
 from django.http import HttpRequest
+
+from search.config import SearchDocumentConfig
+from search.models import DataResponseModel
+from search.utils.documents import calculate_score
+from search.utils.paginate import paginate
+from search.utils.terms import sanitize_input
 
 logger = logging.getLogger(__name__)
 

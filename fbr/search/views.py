@@ -3,15 +3,15 @@ import logging
 
 import pandas as pd
 
-from orp_search.config import SearchDocumentConfig
-from orp_search.models import DataResponseModel
-from orp_search.utils.search import search, search_database
-
 from django.conf import settings
 from django.core.serializers import serialize
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
+
+from search.config import SearchDocumentConfig
+from search.models import DataResponseModel
+from search.utils.search import search, search_database
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +128,7 @@ def search_django(request: HttpRequest):
     }
 
     context = search(context, request)
-    return render(request, template_name="orp.html", context=context)
+    return render(request, template_name="django-fbr.html", context=context)
 
 
 @require_http_methods(["GET"])
@@ -148,4 +148,4 @@ def search_react(request: HttpRequest) -> HttpResponse:
         },
     }
 
-    return render(request, template_name="react-orp.html", context=context)
+    return render(request, template_name="react-fbr.html", context=context)
