@@ -3,16 +3,15 @@ import logging
 
 import pandas as pd
 
-from models import DataResponseModel
-from utils.search import search, search_database
-
 from django.conf import settings
 from django.core.serializers import serialize
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 
-from config import SearchDocumentConfig
+from search.config import SearchDocumentConfig
+from search.models import DataResponseModel
+from search.utils.search import search, search_database
 
 logger = logging.getLogger(__name__)
 

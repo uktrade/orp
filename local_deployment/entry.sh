@@ -11,8 +11,5 @@ npm run build
 echo "Collecting Static Files"
 python fbr/manage.py collectstatic --noinput
 
-# echo "Check missing migrations"
-# python prompt_payments/manage.py makemigrations --check --dry-run
-
 echo "Starting server"
 python fbr/manage.py runserver 0.0.0.0:8080

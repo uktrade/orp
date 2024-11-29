@@ -1,5 +1,4 @@
 import base64
-import logging
 import re
 import uuid
 
@@ -7,9 +6,7 @@ from numpy.f2py.auxfuncs import throw_error
 
 from django.db.models import QuerySet
 
-from fbr.search.models import DataResponseModel
-
-logger = logging.getLogger(__name__)
+from search.models import DataResponseModel, logger
 
 
 def clear_all_documents():
