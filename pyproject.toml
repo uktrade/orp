@@ -31,6 +31,7 @@ celery = {extras = ["redis"], version = "^5.4.0"}
 kombu = {extras = ["redis"], version = "^5.4.2"}
 boto3 = "^1.35.71"
 django-celery-beat = "^2.7.0"
+django-environ = "^0.11.2"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.7.1"
@@ -101,3 +102,6 @@ ignore_errors = true
 [tool.flake8]
 max-line-length = 79
 max-complexity = 10
+
+[tool.poetry.scripts]
+rebuild-cache = "fbr.cache.manage_cache:rebuild_cache"

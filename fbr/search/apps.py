@@ -13,6 +13,6 @@ class SearchConfig(AppConfig):
 
     """
 
-    name = "search"
+    name = "fbr.search"
     verbose_name = "Find business regulations application functionality"
     default_auto_field = "django.db.models.BigAutoField"

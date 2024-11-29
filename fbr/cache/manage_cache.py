@@ -1,6 +1,12 @@
+# flake8: noqa
+import os
 import time
 
-from celery import shared_task
+import django
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
+
+django.setup()
 
 from fbr.cache.legislation import Legislation
 from fbr.cache.public_gateway import PublicGateway
@@ -8,7 +14,6 @@ from fbr.search.config import SearchDocumentConfig
 from fbr.search.utils.documents import clear_all_documents
 
 
-@shared_task()
 def rebuild_cache():
     try:
         start = time.time()
