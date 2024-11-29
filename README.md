@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The Find business regulations will provide a searchable and filterable list of UK regulations and legislation.
+Find business regulations will provide a searchable and filterable list of UK regulations and legislation.
 
 ## Getting Started
 
