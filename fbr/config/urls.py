@@ -1,7 +1,6 @@
 """Find business regulations URL configuration."""
 
 import logging
-import time
 
 from rest_framework import routers, serializers, status, viewsets
 from rest_framework.decorators import action
@@ -14,9 +13,7 @@ from django.urls import include, path
 import core.views as core_views
 import search.views as search_views
 
-from search.config import SearchDocumentConfig
 from search.models import DataResponseModel
-from search.utils.documents import clear_all_documents
 from search.utils.search import get_publisher_names, search
 
 urls_logger = logging.getLogger(__name__)
@@ -91,38 +88,6 @@ class DataResponseViewSet(viewsets.ModelViewSet):
             )
 
 
-class RebuildCacheViewSet(viewsets.ViewSet):
-    @action(detail=False, methods=["post"], url_path="rebuild")
-    def rebuild_cache(self, request, *args, **kwargs):
-        from search.legislation import Legislation
-        from search.public_gateway import PublicGateway
-
-        tx_begin = time.time()
-        try:
-            clear_all_documents()
-            config = SearchDocumentConfig(search_query="", timeout=20)
-            Legislation().build_cache(config)
-            PublicGateway().build_cache(config)
-        except Exception as e:
-            return Response(
-                data={"message": f"[urls] error clearing documents: {e}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-        tx_end = time.time()
-        urls_logger.info(
-            f"time taken to rebuild cache: "
-            f"{round(tx_end - tx_begin, 2)} seconds"
-        )
-        return Response(
-            data={
-                "message": "rebuilt cache",
-                "duration": round(tx_end - tx_begin, 2),
-            },
-            status=status.HTTP_200_OK,
-        )
-
-
 class PublishersViewSet(viewsets.ViewSet):
     @action(detail=False, methods=["get"], url_path="publishers")
     def publishers(self, request, *args, **kwargs):
@@ -151,7 +116,6 @@ class PublishersViewSet(viewsets.ViewSet):
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
 router.register(r"v1", DataResponseViewSet, basename="search")
-router.register(r"v1/cache", RebuildCacheViewSet, basename="rebuild")
 router.register(r"v1/retrieve", PublishersViewSet, basename="publishers")
 
 urlpatterns = [
