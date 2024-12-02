@@ -124,3 +124,18 @@ isort: # Run isort
 
 secrets-baseline: # Generate a new secrets baseline file
 	poetry run detect-secrets scan > .secrets.baseline
+
+rebuild_cache:
+	export PYTHONPATH=./fbr && \
+	export DJANGO_SETTINGS_MODULE='fbr.config.settings.local' && \
+	export DATABASE_URL=postgres://postgres:postgres@localhost:5432/fbr && \
+	poetry install && \
+	poetry run rebuild-cache
+
+setup_local: # Set up the local environment
+	@echo "$(COLOUR_GREEN)Running initial setup for local environment...$(COLOUR_NONE)"
+	$(MAKE) first-use
+	$(MAKE) start
+	$(MAKE) migrate
+	$(MAKE) rebuild_cache
+	@echo "$(COLOUR_GREEN)Local setup complete.$(COLOUR_NONE)"

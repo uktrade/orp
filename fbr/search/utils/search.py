@@ -68,7 +68,11 @@ def search_database(
 
     # If an id is provided, return the document with that id
     if config.id:
-        return DataResponseModel.objects.filter(id=config.id)
+        logger.debug(f"searching for document with id: {config.id}")
+        try:
+            return DataResponseModel.objects.get(id=config.id)
+        except DataResponseModel.DoesNotExist:
+            return DataResponseModel.objects.none()
 
     # Sanatize the query string
     query_str = sanitize_input(config.search_query)
