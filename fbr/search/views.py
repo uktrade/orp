@@ -4,7 +4,6 @@ import logging
 import pandas as pd
 
 from django.conf import settings
-from django.core.serializers import serialize
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
@@ -36,7 +35,7 @@ def document(request: HttpRequest, id) -> HttpResponse:
 
     try:
         queryset = search_database(config)
-        context["result"] = serialize("json", queryset)
+        context["result"] = queryset
     except Exception as e:
         logger.error("error fetching details: %s", e)
         context["error"] = f"error fetching details: {e}"

@@ -62,6 +62,7 @@ LOCAL_APPS = [
 
 THIRD_PARTY_APPS: list = [
     "webpack_loader",
+    "django_celery_beat",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
@@ -262,3 +263,9 @@ COOKIE_ACCEPTED_GA_NAME: str = "accepted_ga_cookies"
 GOOGLE_ANALYTICS_TAG_MANAGER_ID = env(
     "GOOGLE_ANALYTICS_TAG_MANAGER_ID", default=None
 )
+
+# Celery
+CELERY_BROKER_URL = "redis://<redis-host>:6379/0"  # TODO: actual value
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_BACKEND = "redis://<redis-host>:6379/0"

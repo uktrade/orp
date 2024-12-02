@@ -124,3 +124,10 @@ isort: # Run isort
 
 secrets-baseline: # Generate a new secrets baseline file
 	poetry run detect-secrets scan > .secrets.baseline
+
+rebuild_cache_man:
+	export PYTHONPATH=./fbr && \
+	export DJANGO_SETTINGS_MODULE='fbr.config.settings.local' && \
+	export DATABASE_URL=postgres://postgres:postgres@localhost:5432/fbr && \
+	poetry install && \
+	poetry run rebuild-cache
