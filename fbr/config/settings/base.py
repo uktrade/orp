@@ -47,6 +47,7 @@ ENVIRONMENT = env(
 
 # Application definition
 DJANGO_APPS = [
+    "django_celery_beat",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -62,7 +63,6 @@ LOCAL_APPS = [
 
 THIRD_PARTY_APPS: list = [
     "webpack_loader",
-    "django_celery_beat",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
@@ -136,6 +136,18 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",  # noqa: E501
     },
 ]
+
+REDIS_ENDPOINT = env("REDIS_ENDPOINT", default="")
+
+# Celery
+CELERY_BROKER_URL = env("REDIS_ENDPOINT", default="")
+if CELERY_BROKER_URL and CELERY_BROKER_URL.startswith("rediss://"):
+    CELERY_BROKER_URL = f"{CELERY_BROKER_URL}?ssl_cert_reqs=CERT_REQUIRED"
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
 
 # Internationalisation
 LANGUAGE_CODE = "en-gb"

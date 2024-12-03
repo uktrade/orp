@@ -1,9 +1,20 @@
+import os
+
 from celery import Celery
+from celery.schedules import crontab
+from dbt_copilot_python.celery_health_check import healthcheck
 
-app = Celery("fbr_celery")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "fbr.config.settings.local")
 
-# Load settings from Django or directly
-app.config_from_object("django.conf:settings", namespace="CELERY")
+celery_app = Celery("fbr_celery")
+celery_app.config_from_object("django.conf:settings.base", namespace="CELERY")
+celery_app.autodiscover_tasks()
 
-# Auto-discover tasks in installed apps
-app.autodiscover_tasks()
+celery_app = healthcheck.setup(celery_app)
+
+celery_app.conf.beat_schedule = {
+    "schedule-fbr-cache-task": {
+        "task": "fbr.cache.tasks.rebuild_cache",
+        "schedule": crontab(hour="1", minute="0"),
+    },
+}
