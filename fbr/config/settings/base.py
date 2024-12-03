@@ -63,7 +63,6 @@ LOCAL_APPS = [
 
 THIRD_PARTY_APPS: list = [
     "webpack_loader",
-    "django_celery_beat",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
