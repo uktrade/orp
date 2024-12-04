@@ -148,6 +148,7 @@ CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
+CELERY_RESULT_EXTENDED = True
 
 # Internationalisation
 LANGUAGE_CODE = "en-gb"
@@ -275,9 +276,3 @@ COOKIE_ACCEPTED_GA_NAME: str = "accepted_ga_cookies"
 GOOGLE_ANALYTICS_TAG_MANAGER_ID = env(
     "GOOGLE_ANALYTICS_TAG_MANAGER_ID", default=None
 )
-
-# Celery
-CELERY_BROKER_URL = "redis://<redis-host>:6379/0"  # TODO: actual value
-CELERY_ACCEPT_CONTENT = ["json"]
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_BACKEND = "redis://<redis-host>:6379/0"
