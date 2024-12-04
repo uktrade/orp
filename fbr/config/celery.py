@@ -4,10 +4,10 @@ from celery import Celery
 from celery.schedules import crontab
 from dbt_copilot_python.celery_health_check import healthcheck
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "fbr.settings")
 
 celery_app = Celery("fbr_celery")
-celery_app.config_from_object("django.conf:settings.local", namespace="CELERY")
+celery_app.config_from_object("django.conf:settings", namespace="CELERY")
 celery_app.autodiscover_tasks()
 
 celery_app = healthcheck.setup(celery_app)
