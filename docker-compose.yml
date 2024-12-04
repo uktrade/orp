@@ -2,6 +2,7 @@
 volumes:
   postgres_data:
     driver: local
+
 services:
   db:
     image: postgres:16.2
@@ -36,58 +37,6 @@ services:
     networks:
       - proxynet
 
-  redis:
-    # The version we will run when migrating to DBT Platform
-    image: redis:7.0.15
-    volumes:
-      - redis_data:/data
-    ports:
-      - "6379"
-    networks:
-      - backend
-
-  celery-worker:
-    build:
-      context: .
-      dockerfile: local_deployment/Dockerfile
-    command: celery --app=config.celery:app worker --loglevel=INFO -Q celery,mail,reports
-    environment:
-      - DJANGO_SETTINGS_MODULE
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    volumes:
-      - .:/code
-    networks:
-      - backend
-      - public
-    healthcheck:
-      test: [ "CMD-SHELL", "python -m dbt_copilot_python.celery_health_check.healthcheck" ]
-      interval: 10s
-      timeout: 5s
-      retries: 2
-      start_period: 5s
-
-  celery-beat:
-    build:
-      context: .
-      dockerfile: local_deployment/Dockerfile
-    environment:
-      - DJANGO_SETTINGS_MODULE
-    env_file:
-      - .env
-    command: celery --app=config.celery:app beat --loglevel=INFO
-    depends_on:
-      - redis
-    volumes:
-      - .:/code
-    networks:
-      - backend
-      -
 networks:
   proxynet:
     name: fbr_network
