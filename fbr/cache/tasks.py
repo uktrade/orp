@@ -8,7 +8,7 @@ from fbr.search.config import SearchDocumentConfig
 from fbr.search.utils.documents import clear_all_documents
 
 
-@shared_task(binding=True)
+@shared_task(bind=True, max_retries=3)
 def rebuild_cache():
     try:
         start = time.time()
@@ -19,4 +19,4 @@ def rebuild_cache():
         end = time.time()
         return {"message": "rebuilt cache", "duration": round(end - start, 2)}
     except Exception as e:
-        return {"message": f"error clearing documents: {e}"}
+        return {"message": f"error building cache data: {e}"}
