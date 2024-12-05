@@ -6,6 +6,7 @@ from .base import *  # noqa
 BASE_APPS = [
     "whitenoise.runserver_nostatic",  # Serve static files via WhiteNoise
     "rest_framework",
+    "fbr.cache",
 ]
 
 # REST_FRAMEWORK = {
