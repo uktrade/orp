@@ -17,7 +17,7 @@ celery_app = healthcheck.setup(celery_app)
 
 celery_app.conf.beat_schedule = {
     "schedule-fbr-cache-task": {
-        "task": "cache.tasks.rebuild_cache",
+        "task": "fbr.cache.tasks.rebuild_cache",
         "schedule": crontab(hour="1", minute="0"),
     },
 }
