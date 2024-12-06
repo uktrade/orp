@@ -1,12 +1,5 @@
 # flake8: noqa
-import os
 import time
-
-import django
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
-
-django.setup()
 
 from fbr.cache.legislation import Legislation
 from fbr.cache.public_gateway import PublicGateway
