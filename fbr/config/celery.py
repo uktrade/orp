@@ -1,10 +1,12 @@
+# flake8: noqa
+
 import os
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
 
 from celery import Celery
 from celery.schedules import crontab
 from dbt_copilot_python.celery_health_check import healthcheck
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "fbr.config.settings.local")
 
 celery_app = Celery("fbr_celery")
 
