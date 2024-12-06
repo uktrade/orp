@@ -1,15 +1,14 @@
 import time
 
-from celery import shared_task
-
+from config.celery import celery_app
 from fbr.cache.legislation import Legislation
 from fbr.cache.public_gateway import PublicGateway
 from fbr.search.config import SearchDocumentConfig
 from fbr.search.utils.documents import clear_all_documents
 
 
-@shared_task
-def rebuild_cache():
+@celery_app.task(name="fbr.cache.tasks.rebuild_cache")
+def rebuild_cache() -> None:
     """
     Rebuilds the cache for search documents across various components by
     clearing all existing documents. The process is timed, and the
@@ -28,6 +27,11 @@ def rebuild_cache():
         Legislation().build_cache(config)
         PublicGateway().build_cache(config)
         end = time.time()
-        return {"message": "rebuilt cache", "duration": round(end - start, 2)}
+        message = {
+            "message": "rebuilt cache",
+            "duration": round(end - start, 2),
+        }
+        print(message)
     except Exception as e:
-        return {"message": f"error building cache data: {e}"}
+        message = {"message": f"error building cache data: {e}"}
+        print(message)
