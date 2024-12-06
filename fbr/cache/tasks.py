@@ -8,7 +8,7 @@ from fbr.search.config import SearchDocumentConfig
 from fbr.search.utils.documents import clear_all_documents
 
 
-@shared_task(bind=True, max_retries=3)
+@shared_task
 def rebuild_cache():
     try:
         start = time.time()
