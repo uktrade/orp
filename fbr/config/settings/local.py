@@ -11,12 +11,4 @@ BASE_APPS = [
 
 USE_DEPRECATED_PYTZ = True
 
-# REST_FRAMEWORK = {
-#     # Use Django's standard `django.contrib.auth` permissions,
-#     # or allow read-only access for unauthenticated users.
-#     'DEFAULT_PERMISSION_CLASSES': [
-#         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
-#     ]
-# }
-
 INSTALLED_APPS = BASE_APPS + INSTALLED_APPS  # noqa
