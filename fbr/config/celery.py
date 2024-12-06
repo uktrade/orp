@@ -12,6 +12,8 @@ celery_app.config_from_object("fbr.config.settings.local", namespace="CELERY")
 
 celery_app.autodiscover_tasks()
 
+celery_app.conf.timezone = "Europe/London"
+
 celery_app = healthcheck.setup(celery_app)
 
 celery_app.conf.beat_schedule = {
