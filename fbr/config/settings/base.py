@@ -155,6 +155,8 @@ CELERY_TASK_TIME_LIMIT = (
 CELERY_TASK_SOFT_TIME_LIMIT = (
     270  # Optional: Grace period before forced termination
 )
+CELERY_TIMEZONE = "UTC"
+CELERY_ENABLE_UTC = True
 
 # Internationalisation
 LANGUAGE_CODE = "en-gb"
