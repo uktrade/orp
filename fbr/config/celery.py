@@ -8,7 +8,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
 
 celery_app = Celery("fbr_celery")
 
-celery_app.config_from_object("fbr.config.settings.local", namespace="CELERY")
+celery_app.config_from_object("django.conf:settings", namespace="CELERY")
 
 celery_app.autodiscover_tasks()
 
