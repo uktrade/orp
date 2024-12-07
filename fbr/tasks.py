@@ -7,7 +7,7 @@ from fbr.search.config import SearchDocumentConfig
 from fbr.search.utils.documents import clear_all_documents
 
 
-@celery_app.task(name="fbr.cache.tasks.rebuild_cache")
+@celery_app.task(name="fbr.tasks.rebuild_cache")
 def rebuild_cache() -> None:
     """
     Rebuilds the cache for search documents across various components by
