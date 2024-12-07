@@ -4,7 +4,10 @@ from celery import Celery
 from celery.schedules import crontab
 from dbt_copilot_python.celery_health_check import healthcheck
 
+import django
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
+django.setup()
 
 celery_app = Celery("fbr_celery")
 

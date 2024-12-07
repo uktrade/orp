@@ -9,6 +9,4 @@ BASE_APPS = [
     "cache",
 ]
 
-USE_DEPRECATED_PYTZ = True
-
 INSTALLED_APPS = BASE_APPS + INSTALLED_APPS  # noqa
