@@ -11,7 +11,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt update --fix-missing && \
 RUN apt install -y libffi-dev libssl-dev build-essential zlib1g-dev libpq-dev && \
   add-apt-repository ppa:deadsnakes/ppa && \
   apt update && \
-  apt install -y python3.12 python3.12-dev python3.12-distutils python3.12-venv && \
+  apt install -y python3.12 python3.12-dev python3.12-venv && \
   update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 && \
   update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1
 
