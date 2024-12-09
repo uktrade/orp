@@ -28,7 +28,7 @@ def setup_periodic_tasks(sender, **kwargs):
 def get_cache_beat_schedule():
     return {
         "schedule-fbr-cache-task": {
-            "task": "fbr.tasks.rebuild_cache",
+            "task": "fbr.cache.tasks.rebuild_cache",
             "schedule": crontab(hour="1", minute="0"),  # Runs daily at 1:00 AM
         },
     }
