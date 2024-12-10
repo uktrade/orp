@@ -139,7 +139,12 @@ setup_local: # Set up the local environment
 	@echo "$(COLOUR_GREEN)Running initial setup for local environment...$(COLOUR_NONE)"
 	$(MAKE) first-use
 	$(MAKE) start
-	#$(MAKE) migrations
 	$(MAKE) migrate
-	#$(MAKE) rebuild_cache
 	@echo "$(COLOUR_GREEN)Local setup complete.$(COLOUR_NONE)"
+
+setup_local_force_rebuild:
+	@echo "$(COLOUR_GREEN)Will run initial setup, followed by cache rebuild for local environment...$(COLOUR_NONE)"
+	$(MAKE) setup_local
+	@echo "$(COLOUR_GREEN)Manual cache rebuild (not using Celery task)...$(COLOUR_NONE)"
+	$(MAKE) rebuild_cache
+	@echo "$(COLOUR_GREEN)Cache rebuilt complete.$(COLOUR_NONE)"
