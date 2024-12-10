@@ -58,7 +58,7 @@ def create_search_query(search_string):
 
 def search_database(
     config: SearchDocumentConfig,
-) -> QuerySet[DataResponseModel]:
+):
     """
     Search the database for documents based on the search query
 

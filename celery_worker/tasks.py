@@ -27,9 +27,7 @@ def rebuild_cache():
         detailing the exception that was raised.
     """
     try:
-        os.environ.setdefault(
-            "DJANGO_SETTINGS_MODULE", "celery_worker.settings"
-        )
+        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "app.fbr.settings")
         django.setup()
 
         start = time.time()
