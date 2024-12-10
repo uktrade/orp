@@ -14,6 +14,9 @@ celery_app = Celery("fbr_celery")
 celery_app.config_from_object("django.conf:settings", namespace="CELERY")
 celery_app.autodiscover_tasks()
 
+# Disable Django Fixups
+celery_app.fixups = []
+
 celery_app = healthcheck.setup(celery_app)
 
 celery_app.conf.beat_schedule = {
