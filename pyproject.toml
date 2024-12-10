@@ -72,7 +72,7 @@ filterwarnings = [
 
 [tool.coverage.run]
 omit = [
-    "fbr/manage.py",
+    "manage.py",
     "fbr/config/*sgi.py",
     "fbr/config/urls.py",
     "fbr/config/settings/*.py",
