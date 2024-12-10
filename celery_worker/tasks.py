@@ -8,8 +8,8 @@ from app.search.config import SearchDocumentConfig
 from app.search.utils.documents import clear_all_documents
 
 
-@shared_task(bind=True)
-def rebuild_cache() -> None:
+@shared_task(name="celery_worker.tasks.rebuild_cache")
+def rebuild_cache():
     """
     Rebuilds the cache for search documents across various components by
     clearing all existing documents. The process is timed, and the

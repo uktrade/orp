@@ -60,6 +60,7 @@ DJANGO_APPS = [
     "app",
     "app.core",
     "app.search",
+    "celery_worker",
 ]
 
 THIRD_PARTY_APPS: list = [
@@ -120,7 +121,7 @@ else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": SITE_ROOT / "db.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 

@@ -62,6 +62,7 @@ first-use: # Initialise for local execution
 	@echo "$(COLOUR_GREEN)Destroy containers with 'make down'$(COLOUR_NONE)"
 
 up: # Build, (re)create and start containers
+	export DATABASE_URL=postgres://postgres:postgres@localhost:5432/fbr
 	docker compose up -d
 	@echo "$(COLOUR_GREEN)Services are up - use 'make logs' to view service logs$(COLOUR_NONE)"
 
@@ -107,10 +108,12 @@ django-shell-local: # Run a Django shell (local django instance)
 		poetry run python manage.py shell
 
 migrate: # Run Django migrate
-	docker compose run --rm web poetry run python manage.py migrate --noinput
+	export DATABASE_URL=postgres://postgres:postgres@localhost:5432/fbr && \
+	python manage.py migrate
 
 migrations: # Run Django makemigrations
-	docker compose run --rm web poetry run python manage.py makemigrations --noinput
+	export DATABASE_URL=postgres://postgres:postgres@localhost:5432/fbr && \
+	python manage.py makemigrations
 
 lint: # Run all linting
 	make black
@@ -136,6 +139,7 @@ setup_local: # Set up the local environment
 	@echo "$(COLOUR_GREEN)Running initial setup for local environment...$(COLOUR_NONE)"
 	$(MAKE) first-use
 	$(MAKE) start
-	#$(MAKE) migrate
+	#$(MAKE) migrations
+	$(MAKE) migrate
 	#$(MAKE) rebuild_cache
 	@echo "$(COLOUR_GREEN)Local setup complete.$(COLOUR_NONE)"
