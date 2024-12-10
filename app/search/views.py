@@ -32,6 +32,12 @@ def document(request: HttpRequest, id) -> HttpResponse:
     try:
         queryset = search_database(config)
         context["result"] = queryset
+        context["result"].regulatory_topics = context[
+            "result"
+        ].regulatory_topics.split("\n")
+        context["result"].related_legislation = context[
+            "result"
+        ].related_legislation.split("\n")
     except Exception as e:
         logger.error("error fetching details: %s", e)
         context["error"] = f"error fetching details: {e}"
