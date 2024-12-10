@@ -20,7 +20,7 @@ def rebuild_cache():
     try:
         start = time.time()
         clear_all_documents()
-        config = SearchDocumentConfig(search_query="", timeout=20)
+        config = SearchDocumentConfig(search_query="", timeout=3)
         Legislation().build_cache(config)
         PublicGateway().build_cache(config)
         end = time.time()
