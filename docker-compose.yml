@@ -2,6 +2,8 @@
 volumes:
   postgres_data:
     driver: local
+  redis_data:
+      driver: local
 
 services:
   db:
@@ -21,6 +23,7 @@ services:
       retries: 3
     networks:
       - proxynet
+
   web:
     build:
       context: .
@@ -36,6 +39,58 @@ services:
       - .:/app
     networks:
       - proxynet
+
+  redis:
+    image: redis
+    # Expose port so we can query it for debugging
+    ports:
+      - "6379:6379"
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: local_deployment/Dockerfile
+    command: celery --app fbr.celery_app worker --task-events --loglevel INFO
+    entrypoint: ''
+    volumes:
+      - .:/app
+    healthcheck:
+      test: [ "CMD-SHELL", "python -m dbt_copilot_python.celery_health_check.healthcheck" ]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+      start_period: 5s
+    depends_on:
+      - redis
+      - db
+    environment:
+      REDIS_ENDPOINT: redis://redis:6379
+      DEBUG: true
+      DJANGO_SETTINGS_MODULE: fbr.settings
+      RDS_POSTGRES_CREDENTIALS: '{"password":"postgres","dbname":"fbr","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"db","username":"postgres"}'
+
+  celery-beats:
+    build:
+      context: .
+      dockerfile: local_deployment/Dockerfile
+    command: celery --app fbr.celery_app beat --loglevel INFO
+    entrypoint: ''
+    volumes:
+      - .:/app
+    healthcheck:
+      test: [ "CMD-SHELL", "python -m dbt_copilot_python.celery_health_check.healthcheck" ]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+      start_period: 5s
+    depends_on:
+      - redis
+      - db
+    environment:
+      REDIS_ENDPOINT: redis://redis:6379
+      DEBUG: true
+      DJANGO_SETTINGS_MODULE: fbr.settings
+      RDS_POSTGRES_CREDENTIALS: '{"password":"postgres","dbname":"fbr","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"db","username":"postgres"}'
 
 networks:
   proxynet:

@@ -4,7 +4,7 @@ import time
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import QuerySet
 
-from search.config import SearchDocumentConfig
+from app.search.config import SearchDocumentConfig
 
 logger = logging.getLogger(__name__)
 

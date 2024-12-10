@@ -65,7 +65,7 @@ jobs:
         run: |
           npm install
           npm run build
-          DJANGO_SETTINGS_MODULE=config.settings.local poetry run fbr/manage.py collectstatic --noinput
+          DJANGO_SETTINGS_MODULE=fbr.settings poetry run fbr/manage.py collectstatic --noinput
 
       # poetry run fbr/manage.py makemigrations --check --dry-run
 

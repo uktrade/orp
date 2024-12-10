@@ -25,7 +25,7 @@ ENV PYTHONUNBUFFERED=1 \
   PYTHONDONTWRITEBYTECODE=1 \
   DEBUG=1 \
   DJANGO_ADMIN=1 \
-  DJANGO_SETTINGS_MODULE=config.settings.local
+  DJANGO_SETTINGS_MODULE=fbr.settings
 
 # Install nodejs
 RUN apt install -y curl && \

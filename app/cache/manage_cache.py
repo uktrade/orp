@@ -3,16 +3,17 @@ import os
 
 import django
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
-django.setup()
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "fbr.settings")
 
+# Initialize Django setup
+django.setup()
 
 import time
 
-from fbr.cache.legislation import Legislation
-from fbr.cache.public_gateway import PublicGateway
-from fbr.search.config import SearchDocumentConfig
-from fbr.search.utils.documents import clear_all_documents
+from app.cache.legislation import Legislation
+from app.cache.public_gateway import PublicGateway
+from app.search.config import SearchDocumentConfig
+from app.search.utils.documents import clear_all_documents
 
 
 def rebuild_cache():

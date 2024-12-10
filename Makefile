@@ -38,10 +38,10 @@ build: # Build docker containers for local execution
 	docker compose build
 
 collectstatic: # Run Django collectstatic
-	docker compose run --rm web poetry run python fbr/manage.py collectstatic --noinput
+	docker compose run --rm web poetry run python manage.py collectstatic --noinput
 
 admin: # Create a superuser
-	docker compose exec web poetry run python fbr/manage.py createsuperuser --username admin --email admin@localhost
+	docker compose exec web poetry run python manage.py createsuperuser --username admin --email admin@localhost
 
 first-use: # Initialise for local execution
 	@echo "$(COLOUR_GREEN)Preparing for first use$(COLOUR_NONE)"
@@ -90,27 +90,27 @@ logs: # View container logs
 	docker compose logs -f -t
 
 test: # Run tests
-	pytest fbr/tests --cov-report term
+	pytest app/tests --cov-report term
 
 bdd: # Run BDD tests
-	HEADLESS_MODE=false SLOW_MO_MS=500 behave ./fbr/tests/bdd/features/ --tags=LOCAL
+	HEADLESS_MODE=false SLOW_MO_MS=500 behave ./app/tests/bdd/features/ --tags=LOCAL
 
 django-shell: # Run a Django shell (on  container)
-	docker compose run web poetry run python fbr/manage.py shell
+	docker compose run web poetry run python manage.py shell
 
 django-shell-local: # Run a Django shell (local django instance)
 	DATABASE_URL=postgres://postgres:postgres@localhost:5432/fbr \
 		DEBUG=True \
 		DJANGO_ADMIN=False \
 		DJANGO_SECRET_KEY=walls-have-ears \
-		DJANGO_SETTINGS_MODULE=config.settings.local \
-		poetry run python fbr/manage.py shell
+		DJANGO_SETTINGS_MODULE=fbr.settings \
+		poetry run python manage.py shell
 
 migrate: # Run Django migrate
-	docker compose run --rm web poetry run python fbr/manage.py migrate --noinput
+	docker compose run --rm web poetry run python manage.py migrate --noinput
 
 migrations: # Run Django makemigrations
-	docker compose run --rm web poetry run python fbr/manage.py makemigrations --noinput
+	docker compose run --rm web poetry run python manage.py makemigrations --noinput
 
 lint: # Run all linting
 	make black
@@ -126,8 +126,8 @@ secrets-baseline: # Generate a new secrets baseline file
 	poetry run detect-secrets scan > .secrets.baseline
 
 rebuild_cache:
-	export PYTHONPATH=./fbr && \
-	export DJANGO_SETTINGS_MODULE='fbr.config.settings.local' && \
+	export PYTHONPATH=. && \
+	export DJANGO_SETTINGS_MODULE='fbr.settings' && \
 	export DATABASE_URL=postgres://postgres:postgres@localhost:5432/fbr && \
 	poetry install && \
 	poetry run rebuild-cache

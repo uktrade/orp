@@ -10,10 +10,10 @@ from typing import Optional
 
 import requests  # type: ignore
 
-from fbr.cache.construction_legislation import construction_legislation_dataframe
-from fbr.search.config import SearchDocumentConfig
-from fbr.search.utils.date import convert_date_string_to_obj
-from fbr.search.utils.documents import (  # noqa: E501
+from app.cache.construction_legislation import construction_legislation_dataframe
+from app.search.config import SearchDocumentConfig
+from app.search.utils.date import convert_date_string_to_obj
+from app.search.utils.documents import (  # noqa: E501
     generate_short_uuid,
     insert_or_update_document,
 )
