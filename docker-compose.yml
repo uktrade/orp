@@ -98,6 +98,7 @@ services:
       DEBUG: true
       DJANGO_SETTINGS_MODULE: fbr.settings
       RDS_POSTGRES_CREDENTIALS: '{"password":"postgres","dbname":"fbr","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"db","username":"postgres"}'
+      DATABASE_URL: postgres://postgres:postgres@host.docker.internal:5432/fbr  # pragma: allowlist secret
 
 networks:
   proxynet:

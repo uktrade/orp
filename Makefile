@@ -109,7 +109,7 @@ django-shell-local: # Run a Django shell (local django instance)
 
 migrate: # Run Django migrate
 	export DATABASE_URL=postgres://postgres:postgres@localhost:5432/fbr && \
-	python manage.py migrate
+	poetry run python manage.py migrate
 
 migrations: # Run Django makemigrations
 	export DATABASE_URL=postgres://postgres:postgres@localhost:5432/fbr && \
