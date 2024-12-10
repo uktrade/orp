@@ -60,6 +60,7 @@ DJANGO_APPS = [
     "app",
     "app.core",
     "app.search",
+    "app.cache",
     "celery_worker",
 ]
 
