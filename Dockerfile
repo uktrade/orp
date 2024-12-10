@@ -25,7 +25,7 @@ ENV PYTHONUNBUFFERED=1 \
   PYTHONDONTWRITEBYTECODE=1 \
   DEBUG=1 \
   DJANGO_ADMIN=1 \
-  DJANGO_SETTINGS_MODULE=config.settings.local
+  DJANGO_SETTINGS_MODULE=fbr.settings
 
 # Install nodejs
 RUN apt install -y curl && \
@@ -33,10 +33,17 @@ RUN apt install -y curl && \
   apt install -y nodejs
 
 WORKDIR /app
+
+RUN pip install poetry
+
+# Copy only the requirements.txt into the container
+COPY requirements.txt /app/
+
+# Install the dependencies specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY . /app
 
-# Install poetry and project dependencies
-RUN pip install poetry==1.8.3 && \
-  poetry install --without dev
-
-CMD ["local_deployment/entry.sh"]
+COPY entry.sh /entry.sh
+RUN chmod +x /entry.sh
+ENTRYPOINT ["/entry.sh"]

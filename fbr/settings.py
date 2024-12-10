@@ -25,8 +25,10 @@ from django_log_formatter_asim import ASIMFormatter
 # Define the root directory (i.e. <repo-root>)
 root = environ.Path(__file__) - 4  # i.e. Repository root
 SITE_ROOT = Path(root())
+
 # Define the project base directory (i.e. <repo-root>/fbr)
-BASE_DIR: Path = Path(root(), "fbr")
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 # Get environment variables
 env = environ.Env(
@@ -55,18 +57,17 @@ DJANGO_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-]
-
-LOCAL_APPS = [
-    "core",
-    "search",
+    "app",
+    "app.core",
+    "app.search",
+    "celery_worker",
 ]
 
 THIRD_PARTY_APPS: list = [
     "webpack_loader",
 ]
 
-INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -81,13 +82,14 @@ MIDDLEWARE = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
-ROOT_URLCONF = "config.urls"
+ROOT_URLCONF = "fbr.urls"
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            os.path.join(BASE_DIR, "templates"),
+            os.path.join(BASE_DIR, "app", "search", "templates"),
+            os.path.join(BASE_DIR, "app", "templates"),
         ],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -96,13 +98,13 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "config.context_processors.google_tag_manager",
+                "fbr.context_processors.google_tag_manager",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = "config.wsgi.application"
+WSGI_APPLICATION = "fbr.wsgi.application"
 
 DATABASES: dict = {}
 if DATABASE_URL := env("DATABASE_URL", default=None):
@@ -119,7 +121,7 @@ else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": SITE_ROOT / "db.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 
@@ -183,14 +185,14 @@ STORAGES = {
 # Webpack
 
 STATICFILES_DIRS = [
-    SITE_ROOT / "front_end/",
+    BASE_DIR / "front_end/",
 ]
 
 WEBPACK_LOADER = {
     "DEFAULT": {
         "CACHE": not DEBUG,
         "BUNDLE_DIR_NAME": "webpack_bundles/",  # must end with slash
-        "STATS_FILE": os.path.join(SITE_ROOT, "webpack-stats.json"),
+        "STATS_FILE": os.path.join(BASE_DIR, "webpack-stats.json"),
         "POLL_INTERVAL": 0.1,
         "TIMEOUT": None,
         "LOADER_CLASS": "webpack_loader.loader.WebpackLoader",

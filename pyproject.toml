@@ -53,7 +53,7 @@ playwright = "^1.45.0"
 behave = "^1.2.6"
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "config.settings.local"
+DJANGO_SETTINGS_MODULE = "fbr.settings"
 xfail_strict=true
 addopts = """
     -rsxXw
@@ -72,7 +72,7 @@ filterwarnings = [
 
 [tool.coverage.run]
 omit = [
-    "fbr/manage.py",
+    "manage.py",
     "fbr/config/*sgi.py",
     "fbr/config/urls.py",
     "fbr/config/settings/*.py",
@@ -105,4 +105,4 @@ max-line-length = 79
 max-complexity = 10
 
 [tool.poetry.scripts]
-rebuild-cache = "fbr.cache.manage_cache:rebuild_cache"
+rebuild-cache = "app.cache.manage_cache:rebuild_cache"

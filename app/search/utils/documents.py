@@ -6,7 +6,7 @@ from numpy.f2py.auxfuncs import throw_error
 
 from django.db.models import QuerySet
 
-from search.models import DataResponseModel, logger
+from app.search.models import DataResponseModel, logger
 
 
 def clear_all_documents():

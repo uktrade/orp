@@ -6,11 +6,11 @@ from django.contrib.postgres.search import SearchQuery, SearchVector
 from django.db.models import F, Func, Q, QuerySet
 from django.http import HttpRequest
 
-from search.config import SearchDocumentConfig
-from search.models import DataResponseModel
-from search.utils.documents import calculate_score
-from search.utils.paginate import paginate
-from search.utils.terms import sanitize_input
+from app.search.config import SearchDocumentConfig
+from app.search.models import DataResponseModel
+from app.search.utils.documents import calculate_score
+from app.search.utils.paginate import paginate
+from app.search.utils.terms import sanitize_input
 
 logger = logging.getLogger(__name__)
 
@@ -145,7 +145,9 @@ def search_database(
     return queryset
 
 
-def search(context: dict, request: HttpRequest) -> dict:
+def search(
+    context: dict, request: HttpRequest
+) -> dict | QuerySet[DataResponseModel]:
     logger.debug("received search request: %s", request)
     start_time = time.time()
 
@@ -173,6 +175,9 @@ def search(context: dict, request: HttpRequest) -> dict:
 
     # Search across specific fields
     results = search_database(config)
+
+    if config.limit == "*":
+        return results
 
     # convert search_results into json
     pag_start_time = time.time()

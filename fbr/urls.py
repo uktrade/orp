@@ -1,60 +1,25 @@
 """Find business regulations URL configuration."""
 
+import csv
 import logging
 
-from rest_framework import routers, serializers, status, viewsets
+import pandas as pd
+
+from rest_framework import routers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from django.conf import settings
 from django.contrib import admin
+from django.http import HttpResponse
 from django.urls import include, path
 
-import core.views as core_views
-import search.views as search_views
+import app.core.views as core_views
+import app.search.views as search_views
 
-from search.models import DataResponseModel
-from search.utils.search import get_publisher_names, search
+from app.search.utils.search import get_publisher_names, search
 
 urls_logger = logging.getLogger(__name__)
-
-
-# Serializers define the API representation.
-class DataResponseSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = DataResponseModel
-        fields = [
-            "id",
-            "title",
-            "link",
-            "publisher",
-            "language",
-            "format",
-            "description",
-            "date_issued",
-            "date_modified",
-            "date_valid",
-            "audience",
-            "coverage",
-            "subject",
-            "type",
-            "license",
-            "regulatory_topics",
-            "status",
-            "date_uploaded_to_orp",
-            "has_format",
-            "is_format_of",
-            "has_version",
-            "is_version_of",
-            "references",
-            "is_referenced_by",
-            "has_part",
-            "is_part_of",
-            "is_replaced_by",
-            "replaces",
-            "related_legislation",
-            "id",
-        ]
 
 
 class DataResponseViewSet(viewsets.ModelViewSet):
@@ -113,9 +78,65 @@ class PublishersViewSet(viewsets.ViewSet):
             )
 
 
+class DownloadDataResponseViewSet(viewsets.ModelViewSet):
+    @action(detail=False, methods=["get"], url_path="download_csv")
+    def download_csv(self, request, *args, **kwargs):
+        context = {
+            "service_name": settings.SERVICE_NAME_SEARCH,
+        }
+
+        urls_logger.debug(f"download_csv - request: {request}")
+
+        try:
+            # set the limit to '*' to get all results
+            request.GET = request.GET.copy()
+            request.GET["limit"] = "*"
+
+            response_data = search(context, request)
+            urls_logger.debug(f"response_data: {response_data}")
+
+            search_results = []
+            for result in response_data:
+                urls_logger.debug(f"result: {result}")
+
+                search_results.append(
+                    {
+                        "title": result["title"],
+                        "publisher": result["publisher"],
+                        "description": result["description"],
+                        "type": result["type"],
+                        "date": result["date_valid"],
+                    }
+                )
+
+            search_results_df = pd.DataFrame(search_results)
+
+            response = HttpResponse(content_type="text/csv")
+            response["Content-Disposition"] = (
+                'attachment; filename="search_results.csv"'
+            )
+
+            writer = csv.writer(response)
+
+            # Write the DataFrame to the response
+            writer.writerow(search_results_df.columns)  # Write the header
+            for _, row in search_results_df.iterrows():
+                writer.writerow(row)
+
+            return Response(response, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                data={"message": f"error building csv download response: {e}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
 router.register(r"v1", DataResponseViewSet, basename="search")
+router.register(
+    r"v1/download_csv", DownloadDataResponseViewSet, basename="download_csv"
+)
 router.register(r"v1/retrieve", PublishersViewSet, basename="publishers")
 
 urlpatterns = [
@@ -124,11 +145,6 @@ urlpatterns = [
     path("nojs/", search_views.search_django, name="search_django"),
     # If we choose to have a start page with green button, this is it:
     # path("", core_views.home, name="home"),
-    path(
-        "download_csv/",
-        search_views.download_search_csv,
-        name="download_csv",
-    ),
     path("document/<str:id>", search_views.document, name="document"),
     path("healthcheck/", core_views.health_check, name="healthcheck"),
     path(
