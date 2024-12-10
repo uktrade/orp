@@ -1,4 +1,14 @@
+# flake8: noqa
+
+import os
 import time
+
+import django
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "fbr.settings")
+
+# Initialize Django setup
+django.setup()
 
 from celery import shared_task
 
