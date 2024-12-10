@@ -34,7 +34,7 @@ drop-database: # Delete project's postgres database
 		fi
 
 build: # Build docker containers for local execution
-	docker build --no-cache -f local_deployment/Dockerfile -t local_deployment .
+	docker build --no-cache -f Dockerfile -t local_deployment .
 	docker compose build
 
 collectstatic: # Run Django collectstatic
@@ -136,6 +136,6 @@ setup_local: # Set up the local environment
 	@echo "$(COLOUR_GREEN)Running initial setup for local environment...$(COLOUR_NONE)"
 	$(MAKE) first-use
 	$(MAKE) start
-	$(MAKE) migrate
-	$(MAKE) rebuild_cache
+	#$(MAKE) migrate
+	#$(MAKE) rebuild_cache
 	@echo "$(COLOUR_GREEN)Local setup complete.$(COLOUR_NONE)"

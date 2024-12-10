@@ -6,9 +6,6 @@ npm install
 echo "Bundling WebPack"
 npm run build
 
-# Activate the Poetry virtual environment
-. "$(poetry env info --path)/bin/activate"
-
 echo "Collecting Static Files"
 python manage.py collectstatic --noinput
 

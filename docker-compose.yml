@@ -27,7 +27,9 @@ services:
   web:
     build:
       context: .
-      dockerfile: local_deployment/Dockerfile
+      cache_from:
+        - fbr/application:latest
+    image: fbr/application:latest
     env_file:
       - local.env
     ports:
@@ -49,7 +51,9 @@ services:
   celery-worker:
     build:
       context: .
-      dockerfile: local_deployment/Dockerfile
+      cache_from:
+        - fbr/application:latest
+    image: fbr/application:latest
     command: celery --app fbr.celery_app worker --task-events --loglevel INFO
     entrypoint: ''
     volumes:
@@ -72,7 +76,9 @@ services:
   celery-beats:
     build:
       context: .
-      dockerfile: local_deployment/Dockerfile
+      cache_from:
+        - fbr/application:latest
+    image: fbr/application:latest
     command: celery --app fbr.celery_app beat --loglevel INFO
     entrypoint: ''
     volumes:
