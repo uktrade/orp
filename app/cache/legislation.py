@@ -4,6 +4,7 @@
 
 import logging
 import re
+import time
 import xml.etree.ElementTree as ET  # nosec BXXX
 
 from typing import Optional
@@ -123,6 +124,8 @@ class Legislation:
         logger.info("building legislation cache...")
         dataset = construction_legislation_dataframe()
 
+        failed_url_fetches = []
+
         # For each row, get the URL from the column named
         # 'URI to Extract XML Data'
         # and store the XML data in a list
@@ -185,10 +188,15 @@ class Legislation:
 
                     # Insert or update the document
                     insert_or_update_document(document_json)
+
+                # # Sleep for a short time to avoid rate limiting
+                # time.sleep(0.5)
             except Exception as e:
                 logger.error(f"error fetching data from {url}: {e}")
-                raise e
+                failed_url_fetches.append(url)
 
+        if failed_url_fetches:
+            logger.warning(f"failed to fetch data {len(failed_url_fetches)} legislation sources: {failed_url_fetches}")
     def _to_json(
         self,
         description,
