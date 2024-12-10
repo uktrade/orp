@@ -4,7 +4,6 @@
 
 import logging
 import re
-import time
 import xml.etree.ElementTree as ET  # nosec BXXX
 
 from typing import Optional

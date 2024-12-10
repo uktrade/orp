@@ -3,14 +3,9 @@
 import os
 import time
 
-import django
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "fbr.settings")
-
-# Initialize Django setup
-django.setup()
-
 from celery import shared_task
+
+import django
 
 from app.cache.legislation import Legislation
 from app.cache.public_gateway import PublicGateway
@@ -32,9 +27,14 @@ def rebuild_cache():
         detailing the exception that was raised.
     """
     try:
+        os.environ.setdefault(
+            "DJANGO_SETTINGS_MODULE", "celery_worker.settings"
+        )
+        django.setup()
+
         start = time.time()
         clear_all_documents()
-        config = SearchDocumentConfig(search_query="", timeout=20)
+        config = SearchDocumentConfig(search_query="", timeout=2)
         Legislation().build_cache(config)
         PublicGateway().build_cache(config)
         end = time.time()
