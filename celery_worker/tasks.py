@@ -1,11 +1,8 @@
 # flake8: noqa
 
-import os
 import time
 
 from celery import shared_task
-
-import django
 
 from app.cache.legislation import Legislation
 from app.cache.public_gateway import PublicGateway
@@ -27,9 +24,6 @@ def rebuild_cache():
         detailing the exception that was raised.
     """
     try:
-        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "app.fbr.settings")
-        django.setup()
-
         start = time.time()
         clear_all_documents()
         config = SearchDocumentConfig(search_query="", timeout=2)
