@@ -1,8 +1,14 @@
 # flake8: noqa
 
+import os
 import time
 
 from celery import shared_task
+
+import django
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "fbr.settings")
+django.setup()
 
 from app.cache.legislation import Legislation
 from app.cache.public_gateway import PublicGateway
