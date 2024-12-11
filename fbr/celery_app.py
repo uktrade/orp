@@ -2,6 +2,10 @@
 # flake8: noqa
 
 import os
+import sys
+
+# Add the project root to sys.path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from celery import Celery
 from celery.schedules import crontab
@@ -18,6 +22,6 @@ celery_app = healthcheck.setup(celery_app)
 celery_app.conf.beat_schedule = {
     "schedule-fbr-cache-task": {
         "task": "celery_worker.tasks.rebuild_cache",
-        "schedule": crontab(hour="1", minute="0"),  # Runs daily at 1:00 AM
+        "schedule": crontab(hour="20", minute="53"),  # Runs daily at 1:00 AM
     },
 }
