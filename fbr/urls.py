@@ -1,9 +1,6 @@
 """Find business regulations URL configuration."""
 
-import csv
 import logging
-
-import pandas as pd
 
 from rest_framework import routers, status, viewsets
 from rest_framework.decorators import action
@@ -11,7 +8,6 @@ from rest_framework.response import Response
 
 from django.conf import settings
 from django.contrib import admin
-from django.http import HttpResponse
 from django.urls import include, path
 
 import app.core.views as core_views
@@ -78,71 +74,18 @@ class PublishersViewSet(viewsets.ViewSet):
             )
 
 
-class DownloadDataResponseViewSet(viewsets.ModelViewSet):
-    @action(detail=False, methods=["get"], url_path="download_csv")
-    def download_csv(self, request, *args, **kwargs):
-        context = {
-            "service_name": settings.SERVICE_NAME_SEARCH,
-        }
-
-        urls_logger.debug(f"download_csv - request: {request}")
-
-        try:
-            # set the limit to '*' to get all results
-            request.GET = request.GET.copy()
-            request.GET["limit"] = "*"
-
-            response_data = search(context, request)
-            urls_logger.debug(f"response_data: {response_data}")
-
-            search_results = []
-            for result in response_data:
-                urls_logger.debug(f"result: {result}")
-
-                search_results.append(
-                    {
-                        "title": result["title"],
-                        "publisher": result["publisher"],
-                        "description": result["description"],
-                        "type": result["type"],
-                        "date": result["date_valid"],
-                    }
-                )
-
-            search_results_df = pd.DataFrame(search_results)
-
-            response = HttpResponse(content_type="text/csv")
-            response["Content-Disposition"] = (
-                'attachment; filename="search_results.csv"'
-            )
-
-            writer = csv.writer(response)
-
-            # Write the DataFrame to the response
-            writer.writerow(search_results_df.columns)  # Write the header
-            for _, row in search_results_df.iterrows():
-                writer.writerow(row)
-
-            return Response(response, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response(
-                data={"message": f"error building csv download response: {e}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
+
 router.register(r"v1", DataResponseViewSet, basename="search")
-router.register(
-    r"v1/download_csv", DownloadDataResponseViewSet, basename="download_csv"
-)
 router.register(r"v1/retrieve", PublishersViewSet, basename="publishers")
+
 
 urlpatterns = [
     path("api/", include(router.urls)),
     path("", search_views.search_react, name="search_react"),
     path("nojs/", search_views.search_django, name="search_django"),
+    path("download_csv/", search_views.download_csv, name="csvdata"),
     # If we choose to have a start page with green button, this is it:
     # path("", core_views.home, name="home"),
     path("document/<str:id>", search_views.document, name="document"),

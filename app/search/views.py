@@ -1,3 +1,4 @@
+import csv
 import logging
 
 from django.conf import settings
@@ -78,3 +79,47 @@ def search_react(request: HttpRequest) -> HttpResponse:
     }
 
     return render(request, template_name="react-fbr.html", context=context)
+
+
+def download_csv(request):
+    """
+    Download CSV view.
+
+    Handles the GET request to download the search results in CSV format.
+    """
+    context = {
+        "service_name": settings.SERVICE_NAME_SEARCH,
+    }
+
+    try:
+        response_data = search(context, request, ignore_pagination=True)
+
+        logger.info(f"response_data length: {len(response_data)}")
+
+        search_results = []
+        for result in response_data:
+            search_results.append(
+                {
+                    "title": result.title,
+                    "publisher": result.publisher,
+                    "description": result.description,
+                    "type": result.type,
+                    "date_valid": result.date_valid,
+                }
+            )
+
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = (
+            'attachment; filename="search_results.csv"'
+        )
+
+        writer = csv.DictWriter(response, fieldnames=search_results[0].keys())
+        writer.writeheader()
+        writer.writerows(search_results)
+        return response
+    except Exception as e:
+        logger.error("error downloading CSV: %s", e)
+        return HttpResponse(
+            content="error downloading CSVs",
+            status=500,
+        )
