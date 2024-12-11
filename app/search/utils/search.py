@@ -146,7 +146,7 @@ def search_database(
 
 
 def search(
-    context: dict, request: HttpRequest
+    context: dict, request: HttpRequest, ignore_pagination=False
 ) -> dict | QuerySet[DataResponseModel]:
     logger.debug("received search request: %s", request)
     start_time = time.time()
@@ -176,7 +176,7 @@ def search(
     # Search across specific fields
     results = search_database(config)
 
-    if config.limit == "*":
+    if ignore_pagination:
         return results
 
     # convert search_results into json
