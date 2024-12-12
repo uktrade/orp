@@ -21,6 +21,7 @@ import dj_database_url
 import environ
 
 from dbt_copilot_python.database import database_url_from_env
+from dbt_copilot_python.network import setup_allowed_hosts
 from django_log_formatter_asim import ASIMFormatter
 
 # Define the root directory (i.e. <repo-root>)
@@ -43,7 +44,10 @@ SECRET_KEY = env(
 
 DEBUG = env("DEBUG", default=False)
 DJANGO_ADMIN = env("DJANGO_ADMIN", default=False)
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost"])
+ALLOWED_HOSTS = setup_allowed_hosts(
+    env.list("ALLOWED_HOSTS", default=["localhost"])
+)  # noqa
+
 ENVIRONMENT = env(
     "COPILOT_ENVIRONMENT_NAME", default="local"
 )  # TODO: Change to APP_ENV, updates required in deploy repo
