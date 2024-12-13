@@ -22,7 +22,7 @@ jobs:
           poetry install --only dev
 
       - name: Set DATABASE_CREDENTIALS
-        run: echo "DATABASE_CREDENTIALS=${{ secrets.DATABASE_CREDENTIALS }}" >> $GITHUB_ENV
+        run: echo "DATABASE_CREDENTIALS=${{ secrets.FBR_DATABASE_APPLICATION_USER }}" >> $GITHUB_ENV
 
       - name: black
         run: poetry run pre-commit run black --all-files
@@ -65,7 +65,7 @@ jobs:
           poetry install --without dev
 
       - name: Set DATABASE_CREDENTIALS
-        run: echo "DATABASE_CREDENTIALS=${{ secrets.DATABASE_CREDENTIALS }}" >> $GITHUB_ENV
+        run: echo "DATABASE_CREDENTIALS=${{ secrets.FBR_DATABASE_APPLICATION_USER }}" >> $GITHUB_ENV
 
       - name: Build bundle
         run: |
