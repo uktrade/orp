@@ -20,6 +20,7 @@ from typing import Any
 import dj_database_url
 import environ
 
+from dbt_copilot_python.database import database_url_from_env
 from django_log_formatter_asim import ASIMFormatter
 
 # Define the root directory (i.e. <repo-root>)
@@ -110,9 +111,6 @@ WSGI_APPLICATION = "fbr.wsgi.application"
 
 DATABASES: dict = {}
 
-# DATABASES["default"] = dj_database_url.config(  # noqa
-#     default=database_url_from_env("DATABASE_CREDENTIALS")
-# )
 
 if DATABASE_URL := env("DATABASE_URL", default=None):
     DATABASES = {
@@ -131,6 +129,10 @@ else:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+
+DATABASES["default"] = dj_database_url.config(  # noqa
+    default=database_url_from_env("DATABASE_CREDENTIALS")
+)
 
 AUTH_PASSWORD_VALIDATORS = [
     {
