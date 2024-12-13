@@ -1,3 +1,5 @@
+# flake8: noqa
+
 """Django base settings for Find business regulations project.
 
 Environment:
@@ -128,16 +130,27 @@ DATABASES: dict = {}
 #         }
 #     }
 
-if DATABASE_URL := env("DATABASE_CREDENTIALS", default=None):
+if DATABASE_CREDENTIALS := env("DATABASE_CREDENTIALS", default=None):
+    print(f"Using DATABASE_CREDENTIALS: {DATABASE_CREDENTIALS}")
     DATABASES["default"] = {
         "NAME": database_url_from_env("DATABASE_CREDENTIALS"),
         "ENGINE": "django.db.backends.postgresql",
     }
 else:
+    print("Using default sqlite3 database")
     DATABASES["default"] = {
-        "NAME": "{}",
-        "ENGINE": "django.db.backends.postgresql",
+        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.sqlite3",
     }
+
+# if DATABASE_URL := env("DATABASE_URL", default=None):
+#     DATABASES["default"] = {
+#         **dj_database_url.parse(
+#             DATABASE_URL,
+#             engine="postgresql",
+#         ),
+#         "ENGINE": "django.db.backends.postgresql",
+#     }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
