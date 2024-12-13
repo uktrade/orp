@@ -76,6 +76,7 @@ class PublishersViewSet(viewsets.ViewSet):
             )
 
 
+# This viewset is used to insert data from CACHETEMPDATA into the database
 class TempCacheDataResponseViewSet(viewsets.ViewSet):
     @action(detail=False, methods=["get"], url_path="cache")
     def read_cachetempdata(self, request, *args, **kwargs):
@@ -103,6 +104,8 @@ router = routers.DefaultRouter()
 
 router.register(r"v1", DataResponseViewSet, basename="search")
 router.register(r"v1/retrieve", PublishersViewSet, basename="publishers")
+
+# This router is used to insert data from CACHETEMPDATA into the database
 router.register(r"v1/temp", TempCacheDataResponseViewSet, basename="cache")
 
 
