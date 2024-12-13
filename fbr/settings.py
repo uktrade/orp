@@ -20,6 +20,7 @@ from typing import Any
 import dj_database_url
 import environ
 
+from dbt_copilot_python.database import database_url_from_env
 from django_log_formatter_asim import ASIMFormatter
 
 # Define the root directory (i.e. <repo-root>)
@@ -108,6 +109,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "fbr.wsgi.application"
 
+DATABASES: dict = {}
+
 # if DATABASE_URL := env("DATABASE_URL", default=None):
 #     DATABASES = {
 #         "default": {
@@ -126,18 +129,17 @@ WSGI_APPLICATION = "fbr.wsgi.application"
 #         }
 #     }
 
-# Print to console DATABASE_CREDENTIALS
-print(f"DATABASE_CREDENTIALS: {os.environ.get('DATABASE_CREDENTIALS')}")
-
-DATABASES = {
-    "default": {
-        **dj_database_url.parse(
-            os.environ.get("DATABASE_CREDENTIALS"),
-            engine="postgresql",
-        ),
-        "ENGINE": "django.db.backends.postgresql",
-    }
-}
+if DATABASE_URL := env("DATABASE_CREDENTIALS", default=None):
+    DATABASES["default"] = dj_database_url.config(  # noqa
+        default=database_url_from_env("DATABASE_CREDENTIALS")
+    )
+else:
+    DATABASES["default"] = dj_database_url.parse(
+        '{"pw":"postgres","dbname":"fbr","engine":"postgres",'
+        '"port":5432,"dbInstanceIdentifier":"xxx","host":"db",'
+        '"username":"postgres"}',
+        engine="postgresql",
+    )
 
 AUTH_PASSWORD_VALIDATORS = [
     {
