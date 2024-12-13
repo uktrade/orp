@@ -20,7 +20,6 @@ from typing import Any
 import dj_database_url
 import environ
 
-from dbt_copilot_python.database import database_url_from_env
 from django_log_formatter_asim import ASIMFormatter
 
 # Define the root directory (i.e. <repo-root>)
@@ -109,30 +108,36 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "fbr.wsgi.application"
 
-DATABASES: dict = {}
+# if DATABASE_URL := env("DATABASE_URL", default=None):
+#     DATABASES = {
+#         "default": {
+#             **dj_database_url.parse(
+#                 DATABASE_URL,
+#                 engine="postgresql",
+#             ),
+#             "ENGINE": "django.db.backends.postgresql",
+#         }
+#     }
+# else:
+#     DATABASES = {
+#         "default": {
+#             "ENGINE": "django.db.backends.sqlite3",
+#             "NAME": BASE_DIR / "db.sqlite3",
+#         }
+#     }
 
+# Print to console DATABASE_CREDENTIALS
+print(f"DATABASE_CREDENTIALS: {os.environ.get('DATABASE_CREDENTIALS')}")
 
-if DATABASE_URL := env("DATABASE_URL", default=None):
-    DATABASES = {
-        "default": {
-            **dj_database_url.parse(
-                DATABASE_URL,
-                engine="postgresql",
-            ),
-            "ENGINE": "django.db.backends.postgresql",
-        }
+DATABASES = {
+    "default": {
+        **dj_database_url.parse(
+            os.environ.get("DATABASE_CREDENTIALS"),
+            engine="postgresql",
+        ),
+        "ENGINE": "django.db.backends.postgresql",
     }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
-
-DATABASES["default"] = dj_database_url.config(  # noqa
-    default=database_url_from_env("DATABASE_CREDENTIALS")
-)
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
