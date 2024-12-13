@@ -131,13 +131,12 @@ DATABASES: dict = {}
 
 if DATABASE_URL := env("DATABASE_CREDENTIALS", default=None):
     DATABASES["default"] = dj_database_url.config(  # noqa
-        default=database_url_from_env("DATABASE_CREDENTIALS")
+        default=database_url_from_env("DATABASE_CREDENTIALS"),
+        engine="postgresql",
     )
 else:
     DATABASES["default"] = dj_database_url.parse(
-        '{"pw":"postgres","dbname":"fbr","engine":"postgres",'
-        '"port":5432,"dbInstanceIdentifier":"xxx","host":"db",'
-        '"username":"postgres"}',
+        "{}",
         engine="postgresql",
     )
 
