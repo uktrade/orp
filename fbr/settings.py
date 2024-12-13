@@ -19,6 +19,7 @@ import os
 from pathlib import Path
 from typing import Any
 
+import dj_database_url
 import environ
 
 from dbt_copilot_python.database import database_url_from_env
@@ -112,45 +113,30 @@ WSGI_APPLICATION = "fbr.wsgi.application"
 
 DATABASES: dict = {}
 
-# if DATABASE_URL := env("DATABASE_URL", default=None):
-#     DATABASES = {
-#         "default": {
-#             **dj_database_url.parse(
-#                 DATABASE_URL,
-#                 engine="postgresql",
-#             ),
-#             "ENGINE": "django.db.backends.postgresql",
-#         }
-#     }
-# else:
-#     DATABASES = {
-#         "default": {
-#             "ENGINE": "django.db.backends.sqlite3",
-#             "NAME": BASE_DIR / "db.sqlite3",
-#         }
-#     }
 
-if DATABASE_CREDENTIALS := env("DATABASE_CREDENTIALS", default=None):
-    print(f"Using DATABASE_CREDENTIALS: {DATABASE_CREDENTIALS}")
-    DATABASES["default"] = {
-        "NAME": database_url_from_env("DATABASE_CREDENTIALS"),
-        "ENGINE": "django.db.backends.postgresql",
+# Use DATABASE_URL if it exists, otherwise use sqlite ?
+# DATABASES["default"] = dj_database_url.config(  # noqa
+#     default=database_url_from_env("DATABASE_CREDENTIALS")
+# )
+
+if DATABASE_URL := env("DATABASE_URL", default=None):
+    DATABASES = {
+        "default": {
+            **dj_database_url.parse(
+                DATABASE_URL,
+                engine="postgresql",
+            ),
+            "ENGINE": "django.db.backends.postgresql",
+        }
     }
 else:
-    print("Using default sqlite3 database")
-    DATABASES["default"] = {
-        "NAME": BASE_DIR / "db.sqlite3",
-        "ENGINE": "django.db.backends.sqlite3",
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
 
-# if DATABASE_URL := env("DATABASE_URL", default=None):
-#     DATABASES["default"] = {
-#         **dj_database_url.parse(
-#             DATABASE_URL,
-#             engine="postgresql",
-#         ),
-#         "ENGINE": "django.db.backends.postgresql",
-#     }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
