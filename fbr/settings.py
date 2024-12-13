@@ -110,6 +110,7 @@ WSGI_APPLICATION = "fbr.wsgi.application"
 
 DATABASES: dict = {}
 
+# Use DATABASE_URL if it exists, otherwise use sqlite ?
 # DATABASES["default"] = dj_database_url.config(  # noqa
 #     default=database_url_from_env("DATABASE_CREDENTIALS")
 # )
