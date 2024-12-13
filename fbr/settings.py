@@ -17,7 +17,6 @@ import os
 from pathlib import Path
 from typing import Any
 
-import dj_database_url
 import environ
 
 from dbt_copilot_python.database import database_url_from_env
@@ -130,15 +129,15 @@ DATABASES: dict = {}
 #     }
 
 if DATABASE_URL := env("DATABASE_CREDENTIALS", default=None):
-    DATABASES["default"] = dj_database_url.config(  # noqa
-        default=database_url_from_env("DATABASE_CREDENTIALS"),
-        engine="postgresql",
-    )
+    DATABASES["default"] = {
+        "NAME": database_url_from_env("DATABASE_CREDENTIALS"),
+        "ENGINE": "django.db.backends.postgresql",
+    }
 else:
-    DATABASES["default"] = dj_database_url.parse(
-        "{}",
-        engine="postgresql",
-    )
+    DATABASES["default"] = {
+        "NAME": "{}",
+        "ENGINE": "django.db.backends.postgresql",
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
