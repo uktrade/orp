@@ -1,3 +1,5 @@
+# flake8: noqa
+
 """Django base settings for Find business regulations project.
 
 Environment:
@@ -17,9 +19,9 @@ import os
 from pathlib import Path
 from typing import Any
 
-import dj_database_url
 import environ
 
+from dbt_copilot_python.database import database_url_from_env
 from django_log_formatter_asim import ASIMFormatter
 
 # Define the root directory (i.e. <repo-root>)
@@ -110,6 +112,7 @@ WSGI_APPLICATION = "fbr.wsgi.application"
 
 DATABASES: dict = {}
 
+
 # Use DATABASE_URL if it exists, otherwise use sqlite ?
 # DATABASES["default"] = dj_database_url.config(  # noqa
 #     default=database_url_from_env("DATABASE_CREDENTIALS")
@@ -132,6 +135,8 @@ else:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
