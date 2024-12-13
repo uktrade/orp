@@ -131,11 +131,13 @@ DATABASES: dict = {}
 #     }
 
 if DATABASE_CREDENTIALS := env("DATABASE_CREDENTIALS", default=None):
+    print(f"Using DATABASE_CREDENTIALS: {DATABASE_CREDENTIALS}")
     DATABASES["default"] = {
         "NAME": database_url_from_env("DATABASE_CREDENTIALS"),
         "ENGINE": "django.db.backends.postgresql",
     }
 else:
+    print("Using default sqlite3 database")
     DATABASES["default"] = {
         "NAME": BASE_DIR / "db.sqlite3",
         "ENGINE": "django.db.backends.sqlite3",
