@@ -19,6 +19,7 @@ import os
 from pathlib import Path
 from typing import Any
 
+import dj_database_url
 import environ
 
 from dbt_copilot_python.database import database_url_from_env
@@ -135,7 +136,6 @@ else:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
-
 
 
 AUTH_PASSWORD_VALIDATORS = [
