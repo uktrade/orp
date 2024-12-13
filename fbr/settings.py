@@ -115,7 +115,7 @@ WSGI_APPLICATION = "fbr.wsgi.application"
 DATABASES: dict = {}
 
 DATABASES["default"] = dj_database_url.config(  # noqa
-    default=database_url_from_env("FBR_DATABASE_APPLICATION_USER")
+    default=database_url_from_env("DATABASE_CREDENTIALS")
 )
 
 # if DATABASE_URL := env("DATABASE_URL", default=None):
