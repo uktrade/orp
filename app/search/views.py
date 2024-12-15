@@ -29,10 +29,12 @@ def document(request: HttpRequest, id) -> HttpResponse:
 
     # Create a search configuration object with the provided id
     config = SearchDocumentConfig(search_query="", id=id)
+    config.sanitize_all_if_needed()
+    config.print_to_log()
 
     try:
         queryset = search_database(config)
-        context["result"] = queryset
+        context["result"] = queryset.first()
         context["result"].regulatory_topics = context[
             "result"
         ].regulatory_topics.split("\n")
