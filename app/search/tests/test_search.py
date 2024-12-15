@@ -23,7 +23,7 @@ class TestCreateSearchQuery(unittest.TestCase):
         )
         config = SearchDocumentConfig(search_query=malicious_input)
 
-        config.sanitize_all()
+        config.sanitize_all_if_needed()
 
         # Need to sanitize the input before passing it to the function
         sanitized_query = config.search_query

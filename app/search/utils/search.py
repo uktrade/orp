@@ -15,8 +15,8 @@ from django.http import HttpRequest
 
 from app.search.config import SearchDocumentConfig
 from app.search.models import DataResponseModel
+from app.search.utils.documents import calculate_score
 from app.search.utils.paginate import paginate
-from app.search.utils.terms import sanitize_input
 
 logger = logging.getLogger(__name__)
 
@@ -74,60 +74,96 @@ def search_database(
     config: SearchDocumentConfig,
 ):
     """
-    Search the database for documents based on the search query.
+    Search the database for documents based on the search query
 
     :param config: The search configuration object
     :return: A QuerySet of DataResponseModel objects
     """
-    queryset = DataResponseModel.objects.all()
 
-    # Filter by ID if provided
+    # If an id is provided, return the document with that id
     if config.id:
+        logger.debug(f"searching for document with id: {config.id}")
         try:
             return DataResponseModel.objects.get(id=config.id)
         except DataResponseModel.DoesNotExist:
             return DataResponseModel.objects.none()
 
-    # Sanitize and process the search query
-    query_str = sanitize_input(config.search_query)
-    if not query_str:
-        return DataResponseModel.objects.none()
+    # Sanatize the query string
+    config.sanitize_all_if_needed()
+    query_str = config.search_query
+    logger.debug(f"sanitized search query: {query_str}")
 
-    # Generate the search query using the updated create_search_query function
-    search_query = create_search_query(query_str)
-    if not search_query:
-        return DataResponseModel.objects.none()
+    # Generate query object
+    query_objs = create_search_query(query_str)
+    logger.debug(f"search query objects: {query_objs}")
 
-    # Annotate with SearchVector for ranking
+    # Search across specific fields
     vector = SearchVector("title", "description", "regulatory_topics")
-    queryset = queryset.annotate(rank=SearchRank(vector, search_query))
 
-    # Combine full-text search and partial matches
-    partial_matches = (
-        Q(title__icontains=query_str)
-        | Q(description__icontains=query_str)
-        | Q(regulatory_topics__icontains=query_str)
-    )
-    queryset = queryset.filter(Q(search=search_query) | partial_matches)
+    queryset = DataResponseModel.objects.all()
 
-    # Filter by document types if provided
+    if query_objs:
+        # Treat the query for partial and full-text search
+        query_chunks = query_str.split()
+        search_vector = SearchVector(
+            "title", "description", "regulatory_topics"
+        )
+        queryset = queryset.annotate(search=search_vector)
+
+        # Creating a combined SearchQuery object from chunks
+        search_queries = [
+            SearchQuery(chunk, search_type="plain") for chunk in query_chunks
+        ]
+        combined_query = search_queries[0]
+        for sq in search_queries[1:]:
+            combined_query |= sq
+
+        partial_matches = Q()
+        for chunk in query_chunks:
+            partial_matches |= (
+                Q(title__icontains=chunk)
+                | Q(description__icontains=chunk)
+                | Q(regulatory_topics__icontains=chunk)
+            )
+
+        queryset = queryset.filter(partial_matches | Q(search=combined_query))
+    else:
+        queryset = DataResponseModel.objects.annotate(search=vector)
+
+    # Filter by document types
     if config.document_types:
-        queryset = queryset.filter(type__in=config.document_types)
+        query = Q()
 
-    # Filter by publishers if provided
+        # Loop through the document types and add a Q object for each one
+        for doc_type in config.document_types:
+            query |= Q(type__icontains=doc_type)
+        queryset = queryset.filter(query)
+
+    # Filter by publisher
     if config.publisher_names:
-        queryset = queryset.filter(publisher_id__in=config.publisher_names)
+        query = Q()
 
-    # Sort results based on the sort_by parameter
-    if config.sort_by == "relevance":
-        return queryset.order_by("-rank")
-    return queryset.order_by("-sort_date")
+        # Loop through the document types and add a Q object for each one
+        for publisher in config.publisher_names:
+            query |= Q(publisher_id__icontains=publisher)
+        queryset = queryset.filter(query)
+
+    # Sort results based on the sort_by parameter (default)
+    if config.sort_by is None or config.sort_by == "recent":
+        return queryset.order_by("-sort_date")
+
+    if config.sort_by is not None and config.sort_by == "relevance":
+        # Calculate the score for each document
+        calculate_score(config, queryset)
+        return queryset.order_by("score")
+
+    return queryset
 
 
 def search(
     context: dict, request: HttpRequest, ignore_pagination=False
 ) -> dict | QuerySet[DataResponseModel]:
-    logger.debug("received search request: %s", request)
+    logger.info("received search request: %s", request)
     start_time = time.time()
 
     search_query = request.GET.get("query", "")
@@ -149,13 +185,18 @@ def search(
         sort_by=sort_by,
     )
 
+    config.sanitize_all_if_needed()
+
     # Display the search query in the log
     config.print_to_log()
 
     # Search across specific fields
     results = search_database(config)
 
+    logger.info("search results from database: %s", results)
+
     if ignore_pagination:
+        logger.info("ignoring pagination")
         return results
 
     # convert search_results into json
@@ -174,6 +215,7 @@ def search(
         f"{round(end_time - start_time, 2)} seconds"
     )
 
+    logger.info("search results from context: %s", context)
     return context
 
 

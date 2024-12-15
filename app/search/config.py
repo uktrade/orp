@@ -74,7 +74,12 @@ class SearchDocumentConfig:
         logger.info(f"document_types from request: {self.document_types}")
         logger.info(f"publisher_names from request: {self.publisher_names}")
 
-    def sanitize_all(self):
+        self._has_been_sanitized = False
+
+    def sanitize_all_if_needed(self):
+        if self._has_been_sanitized:
+            return
+
         # Sanitize document types
         self.search_query = sanitize_input(self.search_query)
 
@@ -97,6 +102,8 @@ class SearchDocumentConfig:
         # Sanitize id
         if self.id:
             self.id = sanitize_input(self.id)
+
+        self._has_been_sanitized = True
 
     def validate(self):
         """
@@ -145,11 +152,15 @@ class SearchDocumentConfig:
         - id: The unique identifier for the search query.
 
         """
-        logger.info(f"search_query: {self.search_query}")
-        logger.info(f"document_types: {self.document_types}")
-        logger.info(f"timeout: {self.timeout}")
-        logger.info(f"limit: {self.limit}")
-        logger.info(f"offset: {self.offset}")
-        logger.info(f"publisher_names: {self.publisher_names}")
-        logger.info(f"sort_by: {self.sort_by}")
-        logger.info(f"id: {self.id}")
+        # Print config as a json object
+        json_output = {
+            "search_query": self.search_query,
+            "document_types": self.document_types,
+            "timeout": self.timeout,
+            "limit": self.limit,
+            "offset": self.offset,
+            "publisher_names": self.publisher_names,
+            "sort_by": self.sort_by,
+            "id": self,
+        }
+        logger.info(f"configuration from request: {json_output}")
