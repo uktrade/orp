@@ -1,5 +1,7 @@
 import logging
 
+from app.search.utils.terms import sanitize_input
+
 logger = logging.getLogger(__name__)
 
 
@@ -71,6 +73,30 @@ class SearchDocumentConfig:
 
         logger.info(f"document_types from request: {self.document_types}")
         logger.info(f"publisher_names from request: {self.publisher_names}")
+
+    def sanitize_all(self):
+        # Sanitize document types
+        self.search_query = sanitize_input(self.search_query)
+
+        # Sanitize document types
+        if self.document_types:
+            self.document_types = [
+                sanitize_input(doc_type) for doc_type in self.document_types
+            ]
+
+        # Sanitize publisher names
+        if self.publisher_names:
+            self.publisher_names = [
+                sanitize_input(pub_name) for pub_name in self.publisher_names
+            ]
+
+        # Sanitize sort_by
+        if self.sort_by:
+            self.sort_by = sanitize_input(self.sort_by)
+
+        # Sanitize id
+        if self.id:
+            self.id = sanitize_input(self.id)
 
     def validate(self):
         """

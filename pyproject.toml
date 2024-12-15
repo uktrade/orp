@@ -33,6 +33,7 @@ boto3 = "^1.35.71"
 django-celery-beat = "^2.7.0"
 django-environ = "^0.11.2"
 redis = "^5.2.1"
+bleach = "^6.2.0"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.7.1"
@@ -43,6 +44,7 @@ mypy = "1.10.0"
 detect-secrets = "^1.5.0"
 pandas = "^2.2.2"
 types-requests = "^2.32.0.20240914"
+types-bleach = "^6.2.0.20241123"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.2.1"

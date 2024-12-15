@@ -1,14 +1,20 @@
+# flake8: noqa
+# isort: skip_file
+
 import logging
 import re
 import time
 
-from django.contrib.postgres.search import SearchQuery, SearchVector
+from django.contrib.postgres.search import (
+    SearchQuery,
+    SearchRank,
+    SearchVector,
+)  # noqa
 from django.db.models import F, Func, Q, QuerySet
 from django.http import HttpRequest
 
 from app.search.config import SearchDocumentConfig
 from app.search.models import DataResponseModel
-from app.search.utils.documents import calculate_score
 from app.search.utils.paginate import paginate
 from app.search.utils.terms import sanitize_input
 
@@ -17,132 +23,105 @@ logger = logging.getLogger(__name__)
 
 def create_search_query(search_string):
     """
-    Create a search query from a search string with AND/OR operators
+    Create a search query from a search string with
+    implicit AND for space-separated words
+    and explicit AND/OR operators.
 
     :param search_string: The search string to parse
-    :return: A SearchQuery object
+    :return: A combined SearchQuery object
     """
-    # Split the string into words and phrases using a regex that
-    # captures quoted text and words
-    tokens = re.findall(r'"[^"]+"|\bAND\b|\bOR\b|\b\w+\b', search_string)
+    # Split the string into tokens, handling quoted phrases and operators
+    tokens = re.findall(r'"[^"]+"|\bAND\b|\bOR\b|\w+', search_string)
 
-    # Initialize an empty query
-    preprocess_query = None
-    current_operator = "&"  # Default to AND
+    # Validate tokens to avoid issues with syntax
+    if not tokens:
+        return None  # Return None for empty or invalid input
 
-    # Iterate over tokens to build the query
+    # Initialize variables
+    query = None
+    current_operator = "&"  # Default to implicit AND for space-separated words
+
+    # Process tokens
     for token in tokens:
-        if token == "AND":  # nosec BXXX
-            current_operator = "&"  # nosec BXXX
-        elif token == "OR":  # nosec BXXX
-            current_operator = "|"  # nosec BXXX
+        if token.upper() == "AND":
+            current_operator = "&"
+        elif token.upper() == "OR":
+            current_operator = "|"
         else:
-            # Remove quotes if it's a phrase
+            # Handle phrases and plain text
             is_phrase = token.startswith('"') and token.endswith('"')
-            clean_token = token.strip('"') if is_phrase else token
-            search_query = SearchQuery(
+            clean_token = token.strip('"')
+            new_query = SearchQuery(
                 clean_token, search_type="phrase" if is_phrase else "plain"
             )
 
-            # Combine the query based on the current operator
-            if preprocess_query is None:
-                preprocess_query = search_query
+            # Combine queries based on the current operator
+            if query is None:
+                query = new_query  # First token initializes the query
             else:
                 if current_operator == "&":
-                    preprocess_query.__and__(search_query)
+                    query = query & new_query
                 elif current_operator == "|":
-                    preprocess_query.__or__(search_query)
+                    query = query | new_query
 
-    return preprocess_query
+            # Reset the operator to implicit AND for the next token
+            current_operator = "&"
+
+    return query
 
 
 def search_database(
     config: SearchDocumentConfig,
 ):
     """
-    Search the database for documents based on the search query
+    Search the database for documents based on the search query.
 
     :param config: The search configuration object
     :return: A QuerySet of DataResponseModel objects
     """
+    queryset = DataResponseModel.objects.all()
 
-    # If an id is provided, return the document with that id
+    # Filter by ID if provided
     if config.id:
-        logger.debug(f"searching for document with id: {config.id}")
         try:
             return DataResponseModel.objects.get(id=config.id)
         except DataResponseModel.DoesNotExist:
             return DataResponseModel.objects.none()
 
-    # Sanatize the query string
+    # Sanitize and process the search query
     query_str = sanitize_input(config.search_query)
-    logger.debug(f"sanitized search query: {query_str}")
+    if not query_str:
+        return DataResponseModel.objects.none()
 
-    # Generate query object
-    query_objs = create_search_query(query_str)
-    logger.debug(f"search query objects: {query_objs}")
+    # Generate the search query using the updated create_search_query function
+    search_query = create_search_query(query_str)
+    if not search_query:
+        return DataResponseModel.objects.none()
 
-    # Search across specific fields
+    # Annotate with SearchVector for ranking
     vector = SearchVector("title", "description", "regulatory_topics")
+    queryset = queryset.annotate(rank=SearchRank(vector, search_query))
 
-    queryset = DataResponseModel.objects.all()
+    # Combine full-text search and partial matches
+    partial_matches = (
+        Q(title__icontains=query_str)
+        | Q(description__icontains=query_str)
+        | Q(regulatory_topics__icontains=query_str)
+    )
+    queryset = queryset.filter(Q(search=search_query) | partial_matches)
 
-    if query_objs:
-        # Treat the query for partial and full-text search
-        query_chunks = query_str.split()
-        search_vector = SearchVector(
-            "title", "description", "regulatory_topics"
-        )
-        queryset = queryset.annotate(search=search_vector)
-
-        # Creating a combined SearchQuery object from chunks
-        search_queries = [
-            SearchQuery(chunk, search_type="plain") for chunk in query_chunks
-        ]
-        combined_query = search_queries[0]
-        for sq in search_queries[1:]:
-            combined_query |= sq
-
-        partial_matches = Q()
-        for chunk in query_chunks:
-            partial_matches |= (
-                Q(title__icontains=chunk)
-                | Q(description__icontains=chunk)
-                | Q(regulatory_topics__icontains=chunk)
-            )
-
-        queryset = queryset.filter(partial_matches | Q(search=combined_query))
-    else:
-        queryset = DataResponseModel.objects.annotate(search=vector)
-
-    # Filter by document types
+    # Filter by document types if provided
     if config.document_types:
-        query = Q()
+        queryset = queryset.filter(type__in=config.document_types)
 
-        # Loop through the document types and add a Q object for each one
-        for doc_type in config.document_types:
-            query |= Q(type__icontains=doc_type)
-        queryset = queryset.filter(query)
-
-    # Filter by publisher
+    # Filter by publishers if provided
     if config.publisher_names:
-        query = Q()
+        queryset = queryset.filter(publisher_id__in=config.publisher_names)
 
-        # Loop through the document types and add a Q object for each one
-        for publisher in config.publisher_names:
-            query |= Q(publisher_id__icontains=publisher)
-        queryset = queryset.filter(query)
-
-    # Sort results based on the sort_by parameter (default)
-    if config.sort_by is None or config.sort_by == "recent":
-        return queryset.order_by("-sort_date")
-
-    if config.sort_by is not None and config.sort_by == "relevance":
-        # Calculate the score for each document
-        calculate_score(config, queryset)
-        return queryset.order_by("score")
-
-    return queryset
+    # Sort results based on the sort_by parameter
+    if config.sort_by == "relevance":
+        return queryset.order_by("-rank")
+    return queryset.order_by("-sort_date")
 
 
 def search(
