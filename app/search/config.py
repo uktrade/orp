@@ -83,7 +83,7 @@ class SearchDocumentConfig:
         # Sanitize document types
         self.search_query = sanitize_input(self.search_query)
 
-        # Sanitize document types
+        # Sanitize document_types
         if self.document_types:
             self.document_types = [
                 sanitize_input(doc_type) for doc_type in self.document_types
@@ -161,6 +161,6 @@ class SearchDocumentConfig:
             "offset": self.offset,
             "publisher_names": self.publisher_names,
             "sort_by": self.sort_by,
-            "id": self,
+            "id": self.id,
         }
         logger.info(f"configuration from request: {json_output}")
