@@ -40,6 +40,27 @@ files = [
 ]
 
 [[package]]
+name = "beautifulsoup4"
+version = "4.12.3"
+description = "Screen-scraping library"
+optional = false
+python-versions = ">=3.6.0"
+files = [
+    {file = "beautifulsoup4-4.12.3-py3-none-any.whl", hash = "sha256:b80878c9f40111313e55da8ba20bdba06d8fa3969fc68304167741bbf9e082ed"},
+    {file = "beautifulsoup4-4.12.3.tar.gz", hash = "sha256:74e3d1928edc070d21748185c46e3fb33490f22f52a3addee9aee0f4f7781051"},
+]
+
+[package.dependencies]
+soupsieve = ">1.2"
+
+[package.extras]
+cchardet = ["cchardet"]
+chardet = ["chardet"]
+charset-normalizer = ["charset-normalizer"]
+html5lib = ["html5lib"]
+lxml = ["lxml"]
+
+[[package]]
 name = "behave"
 version = "1.2.6"
 description = "behave is behaviour-driven development, Python style"
@@ -260,6 +281,20 @@ files = [
     {file = "Brotli-1.1.0-cp39-cp39-win_amd64.whl", hash = "sha256:cdad5b9014d83ca68c25d2e9444e28e967ef16e80f6b436918c700c117a85467"},
     {file = "Brotli-1.1.0.tar.gz", hash = "sha256:81de08ac11bcb85841e440c13611c00b67d3bf82698314928d0b676362546724"},
 ]
+
+[[package]]
+name = "bs4"
+version = "0.0.2"
+description = "Dummy package for Beautiful Soup (beautifulsoup4)"
+optional = false
+python-versions = "*"
+files = [
+    {file = "bs4-0.0.2-py2.py3-none-any.whl", hash = "sha256:abf8742c0805ef7f662dce4b51cca104cffe52b835238afc169142ab9b3fbccc"},
+    {file = "bs4-0.0.2.tar.gz", hash = "sha256:a48685c58f50fe127722417bae83fe6badf500d54b55f7e39ffe43b798653925"},
+]
+
+[package.dependencies]
+beautifulsoup4 = "*"
 
 [[package]]
 name = "celery"
@@ -2330,6 +2365,17 @@ files = [
 ]
 
 [[package]]
+name = "soupsieve"
+version = "2.6"
+description = "A modern CSS selector implementation for Beautiful Soup."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "soupsieve-2.6-py3-none-any.whl", hash = "sha256:e72c4ff06e4fb6e4b5a9f0f55fe6e81514581fca1515028625d0f299c602ccc9"},
+    {file = "soupsieve-2.6.tar.gz", hash = "sha256:e2e68417777af359ec65daac1057404a3c8a5455bb8abc36f1a9866ab1a51abb"},
+]
+
+[[package]]
 name = "sqlparse"
 version = "0.5.3"
 description = "A non-validating SQL parser."
@@ -2598,4 +2644,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "0808574e470da4913cbd72d525862e032523b0db6725edf18ea0fb2d143b6d0a"
+content-hash = "94927fda5707adc999aebed76d767e78a02ae893c86640c83c3b0513eb62a24b"

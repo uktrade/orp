@@ -34,6 +34,7 @@ django-celery-beat = "^2.7.0"
 django-environ = "^0.11.2"
 redis = "^5.2.1"
 bleach = "^6.2.0"
+bs4 = "^0.0.2"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.7.1"
