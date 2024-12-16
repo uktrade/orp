@@ -1,4 +1,5 @@
 import csv
+import json
 import logging
 
 from django.conf import settings
@@ -38,9 +39,21 @@ def document(request: HttpRequest, id) -> HttpResponse:
         context["result"].regulatory_topics = context[
             "result"
         ].regulatory_topics.split("\n")
-        context["result"].related_legislation = context[
-            "result"
-        ].related_legislation.split("\n")
+
+        # Parse the related_legislation field
+        related_legislation_str = context["result"].related_legislation
+        try:
+            related_legislation_double_quotes = (
+                related_legislation_str.replace("'", '"')
+            )
+            related_legislation_json = json.loads(
+                related_legislation_double_quotes
+            )
+            context["result"].related_legislation = related_legislation_json
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON decoding error: {e}")
+            context["result"].related_legislation = []
+
     except Exception as e:
         logger.error("error fetching details: %s", e)
         context["error"] = f"error fetching details: {e}"
