@@ -113,43 +113,23 @@ WSGI_APPLICATION = "fbr.wsgi.application"
 
 DATABASES: dict = {"default": {}}
 
-# We're going to restructure the below so that we don't end up with
-# a sqlite database in production.
-
-# Use DATABASE_URL if it exists, otherwise use sqlite ?
-# DATABASES["default"] = dj_database_url.config(  # noqa
-#     default=database_url_from_env("DATABASE_CREDENTIALS")
-# )
-
-# if DATABASE_URL := env("DATABASE_URL", default=None):
-#     DATABASES = {
-#         "default": {
-#             **dj_database_url.parse(
-#                 DATABASE_URL,
-#                 engine="postgresql",
-#             ),
-#             "ENGINE": "django.db.backends.postgresql",
-#         }
-#     }
-# else:
-#     DATABASES = {
-#         "default": {
-#             "ENGINE": "django.db.backends.sqlite3",
-#             "NAME": BASE_DIR / "db.sqlite3",
-#         }
-#     }
-
-if DATABASE_URL := env("DATABASE_CREDENTIALS", default=None):
-    DATABASES["default"] = dj_database_url.config(
-        default=database_url_from_env("DATABASE_CREDENTIALS")
-    )
-    DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
-else:
+if DATABASE_URL := env("DATABASE_URL", default=None):
+    # Use DATABASE_URL for local development if available in local.env
     DATABASES["default"] = dj_database_url.parse(
-        "",
+        DATABASE_URL,
         engine="postgresql",
     )
-    DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
+elif DATABASE_CREDENTIALS := env("DATABASE_CREDENTIALS", default=None):
+    # Use DATABASE_CREDENTIALS (server) for deployed environments
+    DATABASES["default"] = dj_database_url.config(
+        default=database_url_from_env(DATABASE_CREDENTIALS)
+    )
+else:
+    # Empty configuration to allow the codebuild to run without DB config
+    DATABASES["default"] = dj_database_url.parse("", engine="postgresql")
+
+# Ensure the ENGINE is set correctly
+DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
 
 
 AUTH_PASSWORD_VALIDATORS = [

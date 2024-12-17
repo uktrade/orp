@@ -241,7 +241,7 @@ class Legislation:
             "language": language if language is not None else "eng",
             "format": format if format is not None else "",
             "description": description if description is not None else "",
-            "date_issued": convert_date_string_to_obj(modified),
+            "date_issued": convert_date_string_to_obj(valid_sort_date),
             "date_modified": convert_date_string_to_obj(modified),
             "date_valid": valid_sort_date,
             "sort_date": valid_sort_date,
