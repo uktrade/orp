@@ -147,7 +147,7 @@ function App() {
         <div className="govuk-form-group ">
           <fieldset className="govuk-fieldset">
             <legend className="govuk-fieldset__legend govuk-fieldset__legend--m">
-              <h2 className="govuk-fieldset__heading">Document types</h2>
+              <h2 className="govuk-fieldset__heading">Document type</h2>
             </legend>
             <CheckboxFilter
               checkboxData={DOCUMENT_TYPES}

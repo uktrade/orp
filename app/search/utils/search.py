@@ -2,15 +2,15 @@ import logging
 import re
 import time
 
-from orp_search.config import SearchDocumentConfig
-from orp_search.models import DataResponseModel
-from orp_search.utils.documents import calculate_score
-from orp_search.utils.paginate import paginate
-from orp_search.utils.terms import sanitize_input
-
 from django.contrib.postgres.search import SearchQuery, SearchVector
 from django.db.models import F, Func, Q, QuerySet
 from django.http import HttpRequest
+
+from app.search.config import SearchDocumentConfig
+from app.search.models import DataResponseModel
+from app.search.utils.documents import calculate_score
+from app.search.utils.paginate import paginate
+from app.search.utils.terms import sanitize_input
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +68,11 @@ def search_database(
 
     # If an id is provided, return the document with that id
     if config.id:
-        return DataResponseModel.objects.filter(id=config.id)
+        logger.debug(f"searching for document with id: {config.id}")
+        try:
+            return DataResponseModel.objects.get(id=config.id)
+        except DataResponseModel.DoesNotExist:
+            return DataResponseModel.objects.none()
 
     # Sanatize the query string
     query_str = sanitize_input(config.search_query)
@@ -141,7 +145,9 @@ def search_database(
     return queryset
 
 
-def search(context: dict, request: HttpRequest) -> dict:
+def search(
+    context: dict, request: HttpRequest
+) -> dict | QuerySet[DataResponseModel]:
     logger.debug("received search request: %s", request)
     start_time = time.time()
 
@@ -169,6 +175,9 @@ def search(context: dict, request: HttpRequest) -> dict:
 
     # Search across specific fields
     results = search_database(config)
+
+    if config.limit == "*":
+        return results
 
     # convert search_results into json
     pag_start_time = time.time()

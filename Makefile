@@ -34,14 +34,14 @@ drop-database: # Delete project's postgres database
 		fi
 
 build: # Build docker containers for local execution
-	docker build --no-cache -f local_deployment/Dockerfile -t local_deployment .
+	docker build --no-cache -f Dockerfile -t local_deployment .
 	docker compose build
 
 collectstatic: # Run Django collectstatic
-	docker compose run --rm web poetry run python fbr/manage.py collectstatic --noinput
+	docker compose run --rm web poetry run python manage.py collectstatic --noinput
 
 admin: # Create a superuser
-	docker compose exec web poetry run python fbr/manage.py createsuperuser --username admin --email admin@localhost
+	docker compose exec web poetry run python manage.py createsuperuser --username admin --email admin@localhost
 
 first-use: # Initialise for local execution
 	@echo "$(COLOUR_GREEN)Preparing for first use$(COLOUR_NONE)"
@@ -62,6 +62,7 @@ first-use: # Initialise for local execution
 	@echo "$(COLOUR_GREEN)Destroy containers with 'make down'$(COLOUR_NONE)"
 
 up: # Build, (re)create and start containers
+	export DATABASE_URL=postgres://postgres:postgres@localhost:5432/fbr
 	docker compose up -d
 	@echo "$(COLOUR_GREEN)Services are up - use 'make logs' to view service logs$(COLOUR_NONE)"
 
@@ -90,27 +91,29 @@ logs: # View container logs
 	docker compose logs -f -t
 
 test: # Run tests
-	pytest fbr/tests --cov-report term
+	pytest app/tests --cov-report term
 
 bdd: # Run BDD tests
-	HEADLESS_MODE=false SLOW_MO_MS=500 behave ./fbr/tests/bdd/features/ --tags=LOCAL
+	HEADLESS_MODE=false SLOW_MO_MS=500 behave ./app/tests/bdd/features/ --tags=LOCAL
 
 django-shell: # Run a Django shell (on  container)
-	docker compose run web poetry run python fbr/manage.py shell
+	docker compose run web poetry run python manage.py shell
 
 django-shell-local: # Run a Django shell (local django instance)
 	DATABASE_URL=postgres://postgres:postgres@localhost:5432/fbr \
 		DEBUG=True \
 		DJANGO_ADMIN=False \
 		DJANGO_SECRET_KEY=walls-have-ears \
-		DJANGO_SETTINGS_MODULE=config.settings.local \
-		poetry run python fbr/manage.py shell
+		DJANGO_SETTINGS_MODULE=fbr.settings \
+		poetry run python manage.py shell
 
 migrate: # Run Django migrate
-	docker compose run --rm web poetry run python fbr/manage.py migrate --noinput
+	export DATABASE_URL=postgres://postgres:postgres@localhost:5432/fbr && \
+	python manage.py migrate
 
 migrations: # Run Django makemigrations
-	docker compose run --rm web poetry run python fbr/manage.py makemigrations --noinput
+	export DATABASE_URL=postgres://postgres:postgres@localhost:5432/fbr && \
+	python manage.py makemigrations
 
 lint: # Run all linting
 	make black
@@ -124,3 +127,24 @@ isort: # Run isort
 
 secrets-baseline: # Generate a new secrets baseline file
 	poetry run detect-secrets scan > .secrets.baseline
+
+rebuild_cache:
+	export PYTHONPATH=. && \
+	export DJANGO_SETTINGS_MODULE='fbr.settings' && \
+	export DATABASE_URL=postgres://postgres:postgres@localhost:5432/fbr && \
+	poetry install && \
+	poetry run rebuild-cache
+
+setup_local: # Set up the local environment
+	@echo "$(COLOUR_GREEN)Running initial setup for local environment...$(COLOUR_NONE)"
+	$(MAKE) first-use
+	$(MAKE) start
+	$(MAKE) migrate
+	@echo "$(COLOUR_GREEN)Local setup complete.$(COLOUR_NONE)"
+
+setup_local_force_rebuild:
+	@echo "$(COLOUR_GREEN)Will run initial setup, followed by cache rebuild for local environment...$(COLOUR_NONE)"
+	$(MAKE) setup_local
+	@echo "$(COLOUR_GREEN)Manual cache rebuild (not using Celery task)...$(COLOUR_NONE)"
+	$(MAKE) rebuild_cache
+	@echo "$(COLOUR_GREEN)Cache rebuilt complete.$(COLOUR_NONE)"

@@ -4,8 +4,8 @@ import re
 
 import requests  # type: ignore
 
-from orp_search.utils.date import convert_date_string_to_obj
-from orp_search.utils.documents import (  # noqa: E501
+from app.search.utils.date import convert_date_string_to_obj
+from app.search.utils.documents import (  # noqa: E501
     generate_short_uuid,
     insert_or_update_document,
 )
@@ -69,7 +69,7 @@ class PublicGateway:
             # Now you can use `data` as a usual Python dictionary
             # Convert each row into DataResponseModel object
             total_documents = len(data.get("uk_regulatory_documents"))
-            inserted_document_count = 0
+            inserted_document_count = 1
             for row in data.get("uk_regulatory_documents"):
                 logger.info(
                     f"inserting or updating document "
@@ -86,7 +86,7 @@ class PublicGateway:
                 row["date_valid"] = convert_date_string_to_obj(
                     row.get("date_valid")
                 )
-                row["id"] = (generate_short_uuid(),)
+                row["id"] = generate_short_uuid()
 
                 row["publisher_id"] = (
                     None

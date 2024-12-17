@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Find business regulations"
 authors = ["Greg Barnes <greg.barnes@digital.trade.gov.uk>"]
 readme = "README.md"
+packages = [{ include = "fbr" }]
 
 [tool.poetry.dependencies]
 python-environ = "^0.4.54"
@@ -24,6 +25,14 @@ pandas = "^2.2.3"
 djangorestframework = "^3.15"
 grpcio = "^1.67.1"
 psycopg-c = "3.2.3"
+config = "^0.5.1"
+utils = "^1.0.2"
+celery = {extras = ["redis"], version = "^5.4.0"}
+kombu = {extras = ["redis"], version = "^5.4.2"}
+boto3 = "^1.35.71"
+django-celery-beat = "^2.7.0"
+django-environ = "^0.11.2"
+redis = "^5.2.1"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.7.1"
@@ -44,7 +53,7 @@ playwright = "^1.45.0"
 behave = "^1.2.6"
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "config.settings.local"
+DJANGO_SETTINGS_MODULE = "fbr.settings"
 xfail_strict=true
 addopts = """
     -rsxXw
@@ -63,7 +72,7 @@ filterwarnings = [
 
 [tool.coverage.run]
 omit = [
-    "fbr/manage.py",
+    "manage.py",
     "fbr/config/*sgi.py",
     "fbr/config/urls.py",
     "fbr/config/settings/*.py",
@@ -94,3 +103,6 @@ ignore_errors = true
 [tool.flake8]
 max-line-length = 79
 max-complexity = 10
+
+[tool.poetry.scripts]
+rebuild-cache = "app.cache.manage_cache:rebuild_cache"

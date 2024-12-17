@@ -11,7 +11,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt update --fix-missing && \
 RUN apt install -y libffi-dev libssl-dev build-essential zlib1g-dev libpq-dev && \
   add-apt-repository ppa:deadsnakes/ppa && \
   apt update && \
-  apt install -y python3.12 python3.12-dev python3.12-distutils python3.12-venv && \
+  apt install -y python3.12 python3.12-dev python3.12-venv && \
   update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 && \
   update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1
 
@@ -25,7 +25,7 @@ ENV PYTHONUNBUFFERED=1 \
   PYTHONDONTWRITEBYTECODE=1 \
   DEBUG=1 \
   DJANGO_ADMIN=1 \
-  DJANGO_SETTINGS_MODULE=config.settings.local
+  DJANGO_SETTINGS_MODULE=fbr.settings
 
 # Install nodejs
 RUN apt install -y curl && \
@@ -33,10 +33,17 @@ RUN apt install -y curl && \
   apt install -y nodejs
 
 WORKDIR /app
+
+RUN pip install poetry
+
+# Copy only the requirements.txt into the container
+COPY requirements.txt /app/
+
+# Install the dependencies specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY . /app
 
-# Install poetry and project dependencies
-RUN pip install poetry==1.8.3 && \
-  poetry install --without dev
-
-CMD ["local_deployment/entry.sh"]
+COPY entry.sh /entry.sh
+RUN chmod +x /entry.sh
+ENTRYPOINT ["/entry.sh"]

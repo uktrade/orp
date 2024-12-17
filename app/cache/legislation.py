@@ -1,17 +1,20 @@
+# isort: skip_file
+# fmt: off
+# flake8: noqa
+
 import logging
 import re
+import time
 import xml.etree.ElementTree as ET  # nosec BXXX
 
 from typing import Optional
 
 import requests  # type: ignore
 
-from orp_search.config import SearchDocumentConfig
-from orp_search.construction_legislation import (  # noqa: E501
-    construction_legislation_dataframe,
-)
-from orp_search.utils.date import convert_date_string_to_obj
-from orp_search.utils.documents import (  # noqa: E501
+from app.cache.construction_legislation import construction_legislation_dataframe
+from app.search.config import SearchDocumentConfig
+from app.search.utils.date import convert_date_string_to_obj
+from app.search.utils.documents import (  # noqa: E501
     generate_short_uuid,
     insert_or_update_document,
 )
@@ -121,6 +124,8 @@ class Legislation:
         logger.info("building legislation cache...")
         dataset = construction_legislation_dataframe()
 
+        failed_url_fetches = []
+
         # For each row, get the URL from the column named
         # 'URI to Extract XML Data'
         # and store the XML data in a list
@@ -183,10 +188,15 @@ class Legislation:
 
                     # Insert or update the document
                     insert_or_update_document(document_json)
+
+                # # Sleep for a short time to avoid rate limiting
+                # time.sleep(0.5)
             except Exception as e:
                 logger.error(f"error fetching data from {url}: {e}")
-                raise e
+                failed_url_fetches.append(url)
 
+        if failed_url_fetches:
+            logger.warning(f"failed to fetch data {len(failed_url_fetches)} legislation sources: {failed_url_fetches}")
     def _to_json(
         self,
         description,
@@ -214,6 +224,9 @@ class Legislation:
         Returns:
         dict: A dictionary containing the item details in a structured format.
         """
+
+        valid_sort_date = modified if valid is None or valid == "" else valid
+
         return {
             "id": generate_short_uuid(),
             "title": title,
@@ -231,8 +244,8 @@ class Legislation:
             "description": description if description is not None else "",
             "date_issued": convert_date_string_to_obj(modified),
             "date_modified": convert_date_string_to_obj(modified),
-            "date_valid": valid,
-            "sort_date": convert_date_string_to_obj(valid),
+            "date_valid": valid_sort_date,
+            "sort_date": valid_sort_date,
             "type": "Legislation",
             "score": 0,
         }

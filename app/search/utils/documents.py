@@ -3,9 +3,10 @@ import re
 import uuid
 
 from numpy.f2py.auxfuncs import throw_error
-from orp_search.models import DataResponseModel, logger
 
 from django.db.models import QuerySet
+
+from app.search.models import DataResponseModel, logger
 
 
 def clear_all_documents():

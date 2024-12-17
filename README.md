@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The Find business regulations will provide a searchable and filterable list of UK regulations and legislation.
+Find business regulations will provide a searchable and filterable list of UK regulations and legislation.
 
 ## Getting Started
 
@@ -102,7 +102,12 @@ With your Poetry shell active:
 > Code quality checks are also performed when pushing your code to origin
 > but pre-commit hooks catch issues early and will improve Developer Experience.
 
-### Update database tables
+### Setup the service, database and cache locally
+
+    $ make setup_local
+
+
+### Update database tables (manually)...do not use unless you know what you are doing
 
 > To update local database tables, you need to set the `DATABASE_URL` environment variable. You can set it in the terminal or in the `.env` file.
 
