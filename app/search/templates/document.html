@@ -82,12 +82,21 @@
           </div>
         {% endif %}
 
-        <h2 class="govuk-heading-m">Regulatory topics</h2>
-        <ul class="govuk-list orp-topics-list">
-          {% for topic in result.regulatory_topics %}
-          <li class="govuk-body-s orp-secondary-text-colour">{{ topic }}</li>
-          {% endfor %}
-        </ul>
+        {% if result.regulatory_topics %}
+          <h2 class="govuk-heading-m">Regulatory topics</h2>
+          <ul class="govuk-list orp-topics-list govuk-!-margin-bottom-6">
+            {% for topic in result.regulatory_topics %}
+            <li class="govuk-body-s orp-secondary-text-colour">{{ topic }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+
+
+        <p class="govuk-body">
+          Email <a class="govuk-link" href="mailto:find-business-regulations@businessandtrade.gov.uk">
+            find-business-regulations@businessandtrade.gov.uk
+          </a> to report a problem with this result.
+        </p>
       </div>
     </div>
   </main>
