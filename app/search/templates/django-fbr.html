@@ -279,39 +279,32 @@
                   {% endif %}
                   {% else %}
                     {% if form.is_bound %}
-                      <h2 class="govuk-heading-l">There are no matching results</h2>
-                      <p class="govuk-body-m">
-                        Improve your search results by:
-                      </p>
-                      <ul class="govuk-list govuk-list--bullet">
-                        <li class="govuk-body-m">
-                          removing filters
-                        </li>
-                        <li class="govuk-body-m">
-                          double-checking your spelling
-                        </li>
-                        <li class="govuk-body-m">
-                          using fewer keywords
-                        </li>
-                        <li class="govuk-body-m">
-                          searching for something less specific
-                        </li>
-                      </ul>
-                      <h3 class="govuk-heading-m">Related searches</h3>
-                      <p class="govuk-body">
-                        Try these related search terms.
-                      </p>
-                      <ul class="govuk-list">
-                        <li class="govuk-body">
-                          <a class="govuk-link" href="/?search=construction+site+safety">construction site safety</a>
-                        </li>
-                        <li class="govuk-body">
-                          <a class="govuk-link" href="/?search=building+site+safety">building site safety</a>
-                        </li>
-                        <li class="govuk-body">
-                          <a class="govuk-link" href="/?search=aggregate+use">aggregate use</a>
-                        </li>
-                      </ul>
+                    <h2 class="govuk-heading-l">There are no matching results</h2>
+                    <p class="govuk-body-m">Improve your results by:</p>
+                    <ul class="govuk-list govuk-list--bullet">
+                      <li class="govuk-body-m">removing filters</li>
+                      <li class="govuk-body-m">double-checking your spelling</li>
+                      <li class="govuk-body-m">using fewer keywords</li>
+                      <li class="govuk-body-m">searching for something less specific</li>
+                    </ul>
+
+                    <details class="govuk-details">
+                      <summary class="govuk-details__summary">
+                        <span class="govuk-details__summary-text">Help with searching</span>
+                      </summary>
+                      <div class="govuk-details__text">
+                        <p class="govuk-body">You can use:</p>
+                        <ul class="govuk-list govuk-list--bullet">
+                          <li class="govuk-body-m">quotes for results that include a phrase. For example, "health and safety"</li>
+                          <li class="govuk-body-m">
+                            commas to see results that include any of your keywords. For example, lifting, equipment, machinery
+                          </li>
+                          <li class="govuk-body-m">
+                            + with no spaces to see results that include all your keywords. For example, asbestos+handling
+                          </li>
+                        </ul>
+                      </div>
+                    </details>
                     {% endif %}
                   {% endif %}
                 </div>

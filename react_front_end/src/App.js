@@ -23,7 +23,7 @@ function App() {
   const [sortQuery, setSortQuery] = useQueryParams("sort", ["recent"])
   const [pageQuery, setPageQuery] = useQueryParams("page", [1])
 
-  const [searchInput, setSearchInput] = useState(searchQuery[0]) // Set initial state to query parameter value
+  const [searchInput, setSearchInput] = useState(searchQuery[0] || "") // Set initial state to query parameter value
   const [data, setData] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSearchSubmitted, setIsSearchSubmitted] = useState(false)
