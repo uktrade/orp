@@ -1,3 +1,5 @@
+# flake8: noqa
+
 """Django base settings for Find business regulations project.
 
 Environment:
@@ -20,13 +22,16 @@ from typing import Any
 import dj_database_url
 import environ
 
+from dbt_copilot_python.database import database_url_from_env
 from django_log_formatter_asim import ASIMFormatter
 
 # Define the root directory (i.e. <repo-root>)
 root = environ.Path(__file__) - 4  # i.e. Repository root
 SITE_ROOT = Path(root())
+
 # Define the project base directory (i.e. <repo-root>/fbr)
-BASE_DIR: Path = Path(root(), "fbr")
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 # Get environment variables
 env = environ.Env(
@@ -41,6 +46,7 @@ SECRET_KEY = env(
 DEBUG = env("DEBUG", default=False)
 DJANGO_ADMIN = env("DJANGO_ADMIN", default=False)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost"])
+
 ENVIRONMENT = env(
     "COPILOT_ENVIRONMENT_NAME", default="local"
 )  # TODO: Change to APP_ENV, updates required in deploy repo
@@ -55,18 +61,18 @@ DJANGO_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-]
-
-LOCAL_APPS = [
-    "core",
-    "search",
+    "app",
+    "app.core",
+    "app.search",
+    "app.cache",
+    "celery_worker",
 ]
 
 THIRD_PARTY_APPS: list = [
     "webpack_loader",
 ]
 
-INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -81,13 +87,14 @@ MIDDLEWARE = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
-ROOT_URLCONF = "config.urls"
+ROOT_URLCONF = "fbr.urls"
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            os.path.join(BASE_DIR, "templates"),
+            os.path.join(BASE_DIR, "app", "search", "templates"),
+            os.path.join(BASE_DIR, "app", "templates"),
         ],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -96,32 +103,53 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "config.context_processors.google_tag_manager",
+                "fbr.context_processors.google_tag_manager",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = "config.wsgi.application"
+WSGI_APPLICATION = "fbr.wsgi.application"
 
-DATABASES: dict = {}
+DATABASES: dict = {"default": {}}
+
 if DATABASE_URL := env("DATABASE_URL", default=None):
-    DATABASES = {
-        "default": {
-            **dj_database_url.parse(
-                DATABASE_URL,
-                engine="postgresql",
-            ),
-            "ENGINE": "django.db.backends.postgresql",
-        }
-    }
+    # Use DATABASE_URL for local development if available in local.env
+    DATABASES["default"] = dj_database_url.parse(
+        DATABASE_URL,
+        engine="postgresql",
+    )
+    DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
+elif DATABASE_URL := env("DATABASE_CREDENTIALS", default=None):
+    DATABASES["default"] = dj_database_url.config(
+        default=database_url_from_env("DATABASE_CREDENTIALS")
+    )
+    DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
 else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": SITE_ROOT / "db.sqlite3",
-        }
-    }
+    DATABASES["default"] = dj_database_url.parse(
+        "",
+        engine="postgresql",
+    )
+    DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
+
+
+# if DATABASE_URL := env("DATABASE_URL", default=None):
+#     # Use DATABASE_URL for local development if available in local.env
+#     DATABASES["default"] = dj_database_url.parse(
+#         DATABASE_URL,
+#         engine="postgresql",
+#     )
+# elif DATABASE_CREDENTIALS := env("DATABASE_CREDENTIALS", default=None):
+#     # Use DATABASE_CREDENTIALS (server) for deployed environments
+#     DATABASES["default"] = dj_database_url.config(
+#         default=database_url_from_env(DATABASE_CREDENTIALS)
+#     )
+# else:
+#     # Empty configuration to allow the codebuild to run without DB config
+#     DATABASES["default"] = dj_database_url.parse("", engine="postgresql")
+
+# # Ensure the ENGINE is set correctly
+# DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -151,7 +179,7 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
 CELERY_RESULT_EXTENDED = True
 CELERY_TASK_TIME_LIMIT = (
-    450  # Maximum runtime for a task in seconds (e.g., 7.5 minutes)
+    900  # Maximum runtime for a task in seconds (e.g., 900/60 = 15 minutes)
 )
 CELERY_TASK_SOFT_TIME_LIMIT = (
     270  # Optional: Grace period before forced termination
@@ -183,14 +211,14 @@ STORAGES = {
 # Webpack
 
 STATICFILES_DIRS = [
-    SITE_ROOT / "front_end/",
+    BASE_DIR / "front_end/",
 ]
 
 WEBPACK_LOADER = {
     "DEFAULT": {
         "CACHE": not DEBUG,
         "BUNDLE_DIR_NAME": "webpack_bundles/",  # must end with slash
-        "STATS_FILE": os.path.join(SITE_ROOT, "webpack-stats.json"),
+        "STATS_FILE": os.path.join(BASE_DIR, "webpack-stats.json"),
         "POLL_INTERVAL": 0.1,
         "TIMEOUT": None,
         "LOADER_CLASS": "webpack_loader.loader.WebpackLoader",
@@ -199,11 +227,15 @@ WEBPACK_LOADER = {
 
 
 # TODO: Use redis for cache?
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-    }
-}
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": f"redis://127.0.0.1:6379/1",
+#         "OPTIONS": {
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#         },
+#     }
+# }
 
 # Logging
 LOGGING: dict[str, Any] = {
@@ -282,7 +314,7 @@ HOSTNAME = HOSTNAME_MAP.get(ENVIRONMENT.lower(), HOSTNAME_MAP["prod"])
 # Google Analytics (GA)
 # Note: please consult the performance team before changing these settings
 COOKIE_PREFERENCES_SET_NAME: str = "cookie_preferences_set"
-COOKIE_ACCEPTED_GA_NAME: str = "cookies_policy"
+COOKIE_ACCEPTED_GA_NAME: str = "accepted_ga_cookies"
 GOOGLE_ANALYTICS_TAG_MANAGER_ID = env(
     "GOOGLE_ANALYTICS_TAG_MANAGER_ID", default=None
 )

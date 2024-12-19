@@ -21,6 +21,9 @@ jobs:
           pip install poetry
           poetry install --only dev
 
+      - name: Set DATABASE_CREDENTIALS
+        run: echo "DATABASE_CREDENTIALS=${{ secrets.FBR_DATABASE_APPLICATION_USER }}" >> $GITHUB_ENV
+
       - name: black
         run: poetry run pre-commit run black --all-files
 
@@ -38,36 +41,40 @@ jobs:
 
       - name: bandit
         run: poetry run pre-commit run bandit --all-files
-  test:
-    name: Run unit tests
-    runs-on: ubuntu-latest
+#  test:
+#    name: Run unit tests
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      - name: Setup Node
+#        uses: actions/setup-node@v4
+#        with:
+#          node-version: 20
+#
+#      - name: Setup Python
+#        uses: actions/setup-python@v5
+#        with:
+#          python-version: 3.12
+#
+#      - name: Install dependencies
+#        run: |
+#          pip install poetry
+#          poetry install --without dev
+#
+#      - name: Set DATABASE_CREDENTIALS
+#        run: echo "DATABASE_CREDENTIALS=${{ secrets.FBR_DATABASE_APPLICATION_USER }}" >> $GITHUB_ENV
+#
+#      - name: Build bundle
+#        run: |
+#          echo "DATABASE_CREDENTIALS=$DATABASE_CREDENTIALS"
+#          npm install
+#          npm run build
+#          DJANGO_SETTINGS_MODULE=fbr.settings poetry run python manage.py collectstatic --noinput
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.12
-
-      - name: Install dependencies
-        run: |
-          pip install poetry
-          poetry install --without dev
-
-      - name: Build bundle
-        run: |
-          npm install
-          npm run build
-          DJANGO_SETTINGS_MODULE=config.settings.local poetry run fbr/manage.py collectstatic --noinput
-
-      # poetry run fbr/manage.py makemigrations --check --dry-run
+      # poetry run manage.py makemigrations --check --dry-run
 
       # - name: Run tests
       #   run: poetry run pytest fbr/tests

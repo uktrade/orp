@@ -57,6 +57,7 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 fbr/static
+static/
 
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
 __pypackages__/

@@ -32,6 +32,9 @@ kombu = {extras = ["redis"], version = "^5.4.2"}
 boto3 = "^1.35.71"
 django-celery-beat = "^2.7.0"
 django-environ = "^0.11.2"
+redis = "^5.2.1"
+bleach = "^6.2.0"
+bs4 = "^0.0.2"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.7.1"
@@ -42,6 +45,7 @@ mypy = "1.10.0"
 detect-secrets = "^1.5.0"
 pandas = "^2.2.2"
 types-requests = "^2.32.0.20240914"
+types-bleach = "^6.2.0.20241123"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.2.1"
@@ -52,7 +56,7 @@ playwright = "^1.45.0"
 behave = "^1.2.6"
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "config.settings.local"
+DJANGO_SETTINGS_MODULE = "fbr.settings"
 xfail_strict=true
 addopts = """
     -rsxXw
@@ -71,7 +75,7 @@ filterwarnings = [
 
 [tool.coverage.run]
 omit = [
-    "fbr/manage.py",
+    "manage.py",
     "fbr/config/*sgi.py",
     "fbr/config/urls.py",
     "fbr/config/settings/*.py",
@@ -104,4 +108,4 @@ max-line-length = 79
 max-complexity = 10
 
 [tool.poetry.scripts]
-rebuild-cache = "fbr.cache.manage_cache:rebuild_cache"
+rebuild-cache = "app.cache.manage_cache:rebuild_cache"

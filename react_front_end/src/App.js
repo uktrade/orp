@@ -23,7 +23,7 @@ function App() {
   const [sortQuery, setSortQuery] = useQueryParams("sort", ["recent"])
   const [pageQuery, setPageQuery] = useQueryParams("page", [1])
 
-  const [searchInput, setSearchInput] = useState(searchQuery[0]) // Set initial state to query parameter value
+  const [searchInput, setSearchInput] = useState(searchQuery[0] || "") // Set initial state to query parameter value
   const [data, setData] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSearchSubmitted, setIsSearchSubmitted] = useState(false)
@@ -147,7 +147,7 @@ function App() {
         <div className="govuk-form-group ">
           <fieldset className="govuk-fieldset">
             <legend className="govuk-fieldset__legend govuk-fieldset__legend--m">
-              <h2 className="govuk-fieldset__heading">Document types</h2>
+              <h2 className="govuk-fieldset__heading">Document type</h2>
             </legend>
             <CheckboxFilter
               checkboxData={DOCUMENT_TYPES}
