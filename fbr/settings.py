@@ -113,7 +113,14 @@ WSGI_APPLICATION = "fbr.wsgi.application"
 
 DATABASES: dict = {"default": {}}
 
-if DATABASE_URL := env("DATABASE_CREDENTIALS", default=None):
+if DATABASE_URL := env("DATABASE_URL", default=None):
+    # Use DATABASE_URL for local development if available in local.env
+    DATABASES["default"] = dj_database_url.parse(
+        DATABASE_URL,
+        engine="postgresql",
+    )
+    DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
+elif DATABASE_URL := env("DATABASE_CREDENTIALS", default=None):
     DATABASES["default"] = dj_database_url.config(
         default=database_url_from_env("DATABASE_CREDENTIALS")
     )
