@@ -24,7 +24,7 @@ def set_ga_cookie_policy(response: HttpResponse, preference: str) -> None:
     json_string_cookie_object = json.dumps(cookie_object)
 
     response.set_cookie(
-        key=settings.COOKIE_ACCEPTED_GA_NAME,
+        key=settings.COOKIES_POLICY_NAME,
         value=json_string_cookie_object,
         max_age=365 * 24 * 60 * 60,
     )
@@ -41,7 +41,7 @@ def get_ga_cookie_preference(request: HttpRequest) -> str:
     Returns value of the GA cookie preference if it exists, otherwise
     returns "false".
     """
-    cookie_object = request.COOKIES.get(settings.COOKIE_ACCEPTED_GA_NAME)
+    cookie_object = request.COOKIES.get(settings.COOKIES_POLICY_NAME)
     if cookie_object:
         try:
             cookie_value = json.loads(cookie_object)

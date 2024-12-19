@@ -93,7 +93,7 @@ def cookies(request: HttpRequest) -> HttpResponse:
     """
     context = {
         "service_name": settings.SERVICE_NAME,
-        "cookie_preference_name": settings.COOKIE_ACCEPTED_GA_NAME,
+        "cookie_preference_name": settings.COOKIES_POLICY_NAME,
     }
     if request.method == "POST":
         form = CookiePreferenceForm(request.POST)
@@ -103,7 +103,7 @@ def cookies(request: HttpRequest) -> HttpResponse:
             set_ga_cookie_policy(response, preference)
             response[
                 "Location"
-            ] += f"?{settings.COOKIE_ACCEPTED_GA_NAME}={preference}"
+            ] += f"?{settings.COOKIES_POLICY_NAME}={preference}"
             return response
     else:
         preferences_value = get_ga_cookie_preference(request)
@@ -124,7 +124,7 @@ def set_cookie_banner_preference(request) -> HttpResponseRedirect:
     banner.
     """
 
-    cookie_object = request.COOKIES.get(settings.COOKIE_ACCEPTED_GA_NAME)
+    cookie_object = request.COOKIES.get(settings.COOKIES_POLICY_NAME)
     preference = "false"
     if cookie_object:
         try:
@@ -133,7 +133,7 @@ def set_cookie_banner_preference(request) -> HttpResponseRedirect:
         except json.JSONDecodeError as e:
             logger.error(f"Error parsing GA cookie: {e}")
 
-    preference = request.GET.get(settings.COOKIE_ACCEPTED_GA_NAME, "false")
+    preference = request.GET.get(settings.COOKIES_POLICY_NAME, "false")
     current_page = request.GET.get("current_page")
     if not url_has_allowed_host_and_scheme(
         url=current_page,
@@ -144,7 +144,7 @@ def set_cookie_banner_preference(request) -> HttpResponseRedirect:
     separator = "?" if "?" not in current_page else "&"
     current_page = (
         f"{current_page}{separator}hide_banner=true"
-        f"&{settings.COOKIE_ACCEPTED_GA_NAME}={preference}"
+        f"&{settings.COOKIES_POLICY_NAME}={preference}"
     )
     response = redirect(current_page)
     set_ga_cookie_policy(response, preference)

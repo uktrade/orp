@@ -314,7 +314,7 @@ HOSTNAME = HOSTNAME_MAP.get(ENVIRONMENT.lower(), HOSTNAME_MAP["prod"])
 # Google Analytics (GA)
 # Note: please consult the performance team before changing these settings
 COOKIE_PREFERENCES_SET_NAME: str = "cookie_preferences_set"
-COOKIE_ACCEPTED_GA_NAME: str = "accepted_ga_cookies"
+COOKIES_POLICY_NAME: str = "cookies_policy"
 GOOGLE_ANALYTICS_TAG_MANAGER_ID = env(
     "GOOGLE_ANALYTICS_TAG_MANAGER_ID", default=None
 )
