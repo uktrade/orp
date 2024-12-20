@@ -1,6 +1,3 @@
-import json
-import logging
-
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
@@ -11,8 +8,6 @@ from django.views.decorators.http import require_http_methods, require_safe
 from .cookies import get_ga_cookie_preference, set_ga_cookie_policy
 from .forms import CookiePreferenceForm
 from .healthcheck import application_service_health
-
-logger = logging.getLogger(__name__)
 
 
 @require_http_methods(["GET"])
@@ -123,15 +118,6 @@ def set_cookie_banner_preference(request) -> HttpResponseRedirect:
     query parameter. This parameter is used to display a confirmation message
     banner.
     """
-
-    cookie_object = request.COOKIES.get(settings.COOKIE_ACCEPTED_GA_NAME)
-    preference = "false"
-    if cookie_object:
-        try:
-            cookie_value = json.loads(cookie_object)
-            preference = str(cookie_value.get("usage", False)).lower()
-        except json.JSONDecodeError as e:
-            logger.error(f"Error parsing GA cookie: {e}")
 
     preference = request.GET.get(settings.COOKIE_ACCEPTED_GA_NAME, "false")
     current_page = request.GET.get("current_page")
