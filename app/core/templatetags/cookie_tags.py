@@ -20,7 +20,7 @@ def render_cookie_banner(context) -> str:
             "cookie_banner.html",
             {
                 "service_name": settings.SERVICE_NAME,
-                "cookie_preference_name": settings.COOKIES_POLICY_NAME,
+                "cookie_preference_name": settings.COOKIE_ACCEPTED_GA_NAME,
                 "request": request,
                 "show_cookie_banner": True,
                 "show_confirmation_message": False,
@@ -32,7 +32,7 @@ def render_cookie_banner(context) -> str:
             {
                 "service_name": settings.SERVICE_NAME,
                 "cookie_preference": request.GET.get(
-                    settings.COOKIES_POLICY_NAME
+                    settings.COOKIE_ACCEPTED_GA_NAME
                 ),
                 "request": request,
                 "show_cookie_banner": False,
